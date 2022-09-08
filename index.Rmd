@@ -20,12 +20,14 @@ date: "Last update: `r Sys.time()`"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-1.  [Syllabus](Syllabus.html)
+1.  [Course outline](course-outline.html)
+
+2. [Introduction to Statistics](introduction-to-statistics.html)
 
 ------------------------------------------------------------------------
 
-`r fontawesome::fa("at")` [marcellgranat/big_data2022](https://github.com/MarcellGranat/multiple_sites)
+`r fontawesome::fa("at")` [marcellgranat/big_data2022](https://github.com/MarcellGranat/big_data2022)
 
-`r fontawesome::fa("github")` [marcellgranat/big_data2022](https://github.com/MarcellGranat/multiple_sites)
+`r fontawesome::fa("github")` [marcellgranat/big_data2022](https://github.com/MarcellGranat/big_data2022)
 
 <div class="logos"><img src="mnb_intezet.png" width="120px" align="right"></div>
