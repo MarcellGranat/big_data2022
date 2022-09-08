@@ -1,0 +1,116 @@
+---
+title: "Introduction to Statistics"
+subtitle: "![](mnb_intezet.png){ width=30% } \n Big Data and Data Visualisation"
+author: "Marcell Granát"
+institute: "Central Bank of Hungary & .blue[John von Neumann University]"
+date: "2022"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      titleSlideClass: [center, middle]
+  seal: false
+editor_options: 
+  chunk_output_type: console
+---
+
+class: inverse, center, middle
+
+# “Statistics is the grammar of Science” 
+
+### Karl Pearson
+
+```{css, echo=FALSE}
+.red { color: red; }
+.blue { color: #378C95; }
+strong { color: red; }
+a { color: #378C95; font-weight: bold; }
+.remark-inline-code { font-weight: 900; background-color: #a7d5e7; }
+
+```
+
+```{r xaringan-themer, include=FALSE, warning=FALSE}
+library(xaringanthemer)
+library(tidyverse)
+library(emo)
+style_mono_accent(
+  base_color = "#DC322F",               # bright red
+  inverse_background_color = "#002B36", # dark dark blue
+  inverse_header_color = "#378C95",     # light aqua green
+  inverse_text_color = "#FFFFFF",       # white
+  title_slide_background_color = "var(--base)",
+  text_font_google = google_font("Kelly Slab"),
+  header_font_google = google_font("Oleo Script")
+)
+
+xaringanExtra::use_panelset()
+xaringanExtra::html_dependency_clipboard()
+xaringanExtra::html_dependency_scribble(pen_color = "#378C95", 3, 4)
+xaringanExtra::use_tile_view()
+```
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+```
+
+
+---
+class: left
+
+# Today's .blue[Agenda]
+
+### Session 1 - Introduction to Statistics
+
+1. Basic concepts of **statistical analysis** `r ji("hatching")`
+
+2. Introduction and recommendations of **databases** for your future projects
+
+3. Descriptive statistics `r ji("bar_chart")`
+
+### Session 2 - Introduction to R
+
+1. Why R? Setup `r ji("plug")`
+
+2. Data types, basic manipulations `r ji("floppy")`
+
+3. Conditional statements, loops `r ji("infinity")`
+
+4. **Fun**ctions `r ji("hugging")` , apply
+
+---
+
+# References
+
+```{r, print_refs, results='asis', echo=FALSE, warning=FALSE, message=FALSE}
+library(RefManageR)
+bib <- ReadBib("./introduction-to-statistics.bib", check = FALSE)
+
+ref_page <- 2
+for (bib_item in seq_along(bib)) {
+  
+  if (bib_item %% 5 == 0) {
+    cat("\n")
+    cat("---")
+    cat("\n")
+    cat("# References ", ref_page)
+    ref_page <- ref_page + 1
+    cat("\n")
+  }
+
+print(bib[bib_item], 
+  .opts = list(check.entries = FALSE, 
+               style = "html", 
+               bib.style = "authoryear"))
+}
+```
+
+---
+
+class: center, middle
+
+# Thank you for your attention!
+
+Slides are available at [www.marcellgranat.com](https://www.marcellgranat.com)
