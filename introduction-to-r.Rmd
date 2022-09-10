@@ -127,16 +127,45 @@ include_graphics("introduction-to-r_files/meme_free.jpg")
 
 ## Why R? - Some examples
 
-A COVID tracker **written in R** (shiny, leaflet)
+[A COVID tracker **written in R** (shiny, leaflet)](https://vac-lshtm.shinyapps.io/ncov_tracker/?_ga=2.146567862.383333130.1662737117-60780019.1662551588)
 
 
-```{r echo = FALSE}
+```{r echo = FALSE, out.height="1200px"}
 include_app("https://vac-lshtm.shinyapps.io/ncov_tracker/?_ga=2.146567862.383333130.1662737117-60780019.1662551588", height = "400px")
 ```
 
 ???
 
 source: https://shiny.rstudio.com/gallery/covid19-tracker.html
+
+---
+
+## Why R? - Some examples
+
+[Real-time epidemiology of the Hungarian coronavirus epidemic (Tamás Ferenci)](https://research.physcon.uni-obuda.hu/COVID19MagyarEpi/)
+
+```{r echo = FALSE, out.height="1200px"}
+include_app("https://research.physcon.uni-obuda.hu/COVID19MagyarEpi/", height = "400px")
+```
+
+---
+
+## Why R? - Some examples
+
+.blue[Data import & complex visualization in 10 minutes]
+
+.pull-left[
+
+```{r}
+include_graphics("introduction-to-r_files/demograph-behind.gif")
+```
+]
+
+.pull-right[
+```{r}
+include_graphics("introduction-to-r_files/demography.gif")
+```
+]
 
 
 ---
@@ -146,7 +175,10 @@ source: https://shiny.rstudio.com/gallery/covid19-tracker.html
 You can download R and RStudio from the official site of [RStudio](https://www.rstudio.com/products/rstudio/download/#download).
 Please install the appropriate version based on your OS, and do not forget that you also have to install R as well.
 
-![Install R: step 1.](introduction-to-r_files/installr.jpg)
+```{r}
+knitr::include_graphics("introduction-to-r_files/installr.png")
+```
+
 
 ---
 
@@ -278,67 +310,79 @@ class: middle, center, inverse
 
 ## Data types
 
+## Numeric
+
 Lets see first, what kind of datatypes exist in R. Lets assign a variable called `x`.
 
-```{r}
+```{r echo = TRUE}
 x <- 4
 ```
 
 So, what is the type of `x`? We can use the `class` command to answer this.
 
-```{r}
+```{r echo = TRUE}
 class(x)
 ```
 
-Its numeric^[Integer and double also exist in R, but these are not the default, and variables will be always coerced automatically]. This means that you can use `+`, `-`, `*` operators on it.
+Its numeric. This means that you can use `+`, `-`, `*` operators on it. (Integer and double also exist in R, but these are not the default, and variables will be always coerced automatically.)
 
-Lets see other types.
+---
 
-```{r}
+## Character
+
+```{r echo = TRUE}
 y <- "blue"
 class(y)
 ```
 
 Its a character, basically can contain any kind of letter, digits, or white space.
 
-```{r}
+## Logical
+
+```{r echo = TRUE}
 does_it_rain <- TRUE
 class(does_it_rain)
 ```
 
 Its a logical value. It can be `TRUE` or `FALSE`
 
-### vectors
+---
+
+# Vectors
 
 We can create a vector with the `c` function. (combine)
 
-```{r}
+```{r echo = TRUE}
 x <- c(11, 201, 301)
 x
 ```
 
 We can asses a given element of it by:
 
-```{r}
+```{r echo = TRUE}
 x[2]
 ```
 
-Or we can use functions on it:
+Or you can use functions on it:
 
-```{r}
+```{r echo = TRUE}
 sum(x)
 ```
 
-We can also easily create sequence with the syntax `start:stop`
+You can also easily create sequence with the syntax `start:stop`
 
-```{r}
+```{r echo = TRUE}
 1:10
 ```
 
-If we combine characters, I mentiont that we can convert this vector to **factor** type. This is useful if we can enclose an order to the vector or we want to control for the possible values.
-Lets see a minimal example
+---
 
-```{r}
+# Factors
+
+If you combine characters, you can convert this vector to **factor** type. This is useful if we can enclose an order to the vector or we want to control for the possible values.
+Lets see a minimal example:
+
+```{r echo = TRUE}
 my_vector <- c("First", "Second", "Third", "Fourth")
 sort(my_vector)
 ```
