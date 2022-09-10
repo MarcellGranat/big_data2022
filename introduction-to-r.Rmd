@@ -1,0 +1,561 @@
+---
+title: "Introduction to R"
+subtitle: "![](mnb_intezet.png){ width=30% } \n Big Data and Data Visualisation"
+author: "Marcell Granát"
+institute: "Central Bank of Hungary & .blue[John von Neumann University]"
+date: "2022"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      titleSlideClass: [center, middle]
+  seal: false
+editor_options: 
+  chunk_output_type: console
+---
+
+class: inverse, center, middle
+
+# “The only way to write good code is to write tons of shitty code first. Feeling shame about bad code stops you from getting to good code” 
+
+### Hadley Wickham
+
+```{css, echo=FALSE}
+.red { color: red; }
+.blue { color: #378C95; }
+strong { color: red; }
+a { color: #378C95; font-weight: bold; }
+.remark-inline-code { font-weight: 900; background-color: #a7d5e7; }
+.caption { color: #378C95; font-style: italic; text-align: center; }
+
+.content-box { 
+    box-sizing: content-box;
+    	background-color: #378C95;
+  /* Total width: 160px + (2 * 20px) + (2 * 8px) = 216px
+     Total height: 80px + (2 * 20px) + (2 * 8px) = 136px
+     Content box width: 160px
+     Content box height: 80px */
+}
+
+.content-box-green {
+	background-color: #d9edc2;
+}
+
+.content-box-red {
+	background-color: #f9dbdb;
+}
+
+```
+
+
+```{r xaringan-themer, include=FALSE, warning=FALSE}
+library(xaringanthemer)
+library(tidyverse)
+library(knitr)
+library(emo)
+
+style_mono_accent(
+  base_color = "#DC322F",               # bright red
+  inverse_background_color = "#002B36", # dark dark blue
+  inverse_header_color = "#378C95",     # light aqua green
+  inverse_text_color = "#FFFFFF",       # white
+  title_slide_background_color = "var(--base)",
+  text_font_google = google_font("Kelly Slab"),
+  header_font_google = google_font("Oleo Script")
+)
+
+xaringanExtra::use_panelset()
+xaringanExtra::html_dependency_clipboard()
+xaringanExtra::html_dependency_scribble(pen_color = "#378C95", 3, 4)
+xaringanExtra::use_tile_view()
+```
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+---
+class: left
+
+# Today's .blue[Agenda]
+
+### Session 1 - Introduction to Statistics
+
+1. Basic concepts of **statistical analysis** `r ji("hatching")`
+
+2. Introduction and recommendations of **databases** for your future projects
+
+3. Descriptive statistics `r ji("bar_chart")`
+
+### Session 2 - Introduction to R
+
+1. Why R? Setup `r ji("plug")`
+
+2. Data types, basic manipulations `r ji("floppy")`
+
+3. Conditional statements, loops `r ji("infinity")`
+
+4. **Fun**ctions `r ji("hugging")` , apply
+
+---
+
+# Why R?
+
+.pull-left[
+R is a **free** software, used by millions in the field of statistics, data science, economics and many others.
+
+The R programming language is an important tool for data related tasks, but it is much more.
+Just like other programming languages, R has many additional **packages** (18,584 in the CRAN), which can extend its basic functionality.
+R has far the best **graphical tools** to create your charts, and with **shiny**, you can easily build your minimalist web applications, or dashboards.
+
+.blue[We will learn about data manipulation, analysis and visualization methods.]
+
+]
+
+.pull-right[
+```{r echo = FALSE}
+include_graphics("introduction-to-r_files/meme_free.jpg")
+```
+]
+
+---
+
+## Why R? - Some examples
+
+A COVID tracker **written in R** (shiny, leaflet)
+
+
+```{r echo = FALSE}
+include_app("https://vac-lshtm.shinyapps.io/ncov_tracker/?_ga=2.146567862.383333130.1662737117-60780019.1662551588", height = "400px")
+```
+
+???
+
+source: https://shiny.rstudio.com/gallery/covid19-tracker.html
+
+
+---
+
+# Setup
+
+You can download R and RStudio from the official site of [RStudio](https://www.rstudio.com/products/rstudio/download/#download).
+Please install the appropriate version based on your OS, and do not forget that you also have to install R as well.
+
+![Install R: step 1.](introduction-to-r_files/installr.jpg)
+
+---
+
+# What is RStudio?
+
+RStudio is dedicated IDE (Integrated Development Environment) for R. It is not necessary to have RStudio on your PC in order to run **R code**, and you can also create codes on `notepad`. After all, it's just a **text file**.
+
+.pull-left[
+```{r echo=FALSE, fig.cap="Using R on the terminal", out.height="200px", out.width="400px"}
+include_graphics("introduction-to-r_files/terminal.png")
+```
+]
+
+.pull-right[
+```{r echo=FALSE, out.width="250px"}
+include_graphics("introduction-to-r_files/meme_helloworld.jpg")
+```
+]
+
+
+If you like it better, you can use anything else instead (VScode for example), but I personally don't recommend it. RStudio is developed specially for R (and Python recently), therefore it will help us more than other IDEs (e.g. code snippets, code completions, rendering).
+
+---
+
+# At first glance
+
+```{r echo=FALSE}
+include_graphics("introduction-to-r_files/rstudio-empty.png")
+```
+
+---
+
+# At first glance
+
+```{r echo=FALSE} 
+include_graphics("introduction-to-r_files/rstudio-numbered.png")
+```
+
+---
+
+# At first glance
+
+## Source
+
+We will write here our codes, which we would like to save. The default extension of our codes are `.R`, but this is not the only possibility (we will cover this later). Once you save your code for later use, you can open your script also with a simple text editor (like `Notepad`), since this is only plain text. If you hit `enter` your code wont be executed, you will just simply start a new line. If you want to run your code hit `ctrl + enter` to execute a single line, and `ctrl+shift+enter` to execute your full script.
+
+
+---
+
+# At first glance
+
+
+.pull-left[
+## Console
+
+Here you find the executed codes, and the response to that. For example, if you type `2 + 2` and hit `enter`, R will execute the expression, and response that it is 4.
+
+```{r echo = TRUE}
+2 + 2
+```
+]
+
+.pull-right[
+```{r out.height="400px"}
+include_graphics("introduction-to-r_files/meme-brave.jpg")
+```
+
+]
+
+
+---
+
+# At first glance
+
+## Environment
+
+Here you can see the list of the variables you have already created. For example you can type `x = 3` on the console. Now and x variable will appear in the environment pane, and you can check its value if you type `x` on the console. You can also save these variables into an `.RData` data format if you wish.
+
+--
+
+.content-box-green[
+Hint: Go to preferences (General -> Advanced) and enable the "Show **.Last.value** in environment listing" option. 
+]
+
+---
+
+# At first glance
+
+## Help
+
+.pull-left[
+You can use this pane if you are not familier with a function. For example, you want to know what input you can specify while using `mean`, you can type `?mean` on the console, or use the search field on this pane. The description of the function will be presented on this pane. (This pane is super useful on the exam)
+]
+
+.pull-right[
+```{r}
+include_graphics("introduction-to-r_files/meme-help.jpg")
+```
+
+]
+
+---
+# At first glance
+
+##  Files
+
+You can see the list of your files which are in the current working directory. Working directory is the folder, from where R want currently read the files. If you want to import a dataset, just click on a file on this pane.
+
+I highly recommend you to set a project folder for the class and any later job. This means that, R creates a folder and puts an `.Rproj` file into it. You can always click on this  `.Rproj` file to return your unfinished work. You can customise if R should put the variables into your environtent as you left them last time, you have a history about the used codes, and you see all the data you copy + paste into this folder.
+
+---
+
+## Packages
+
+You can install packages from this pane. If you need a given package, click on install, and start typing its name. After that, you have to activate packages each time you open R again with the `library(eurostat)` command. You can also use a function from a package if you just simply type `eurostat::get_eurostat()`.
+
+
+.content-box-green[
+Hint: Never leave an install.packages(...) line in your code! This is the worst habit you can have in R programming, yet many people do it. If you think it's useful so that others can run it, it's not worth it either, since RStudio automatically detects packages that haven't been installed yet and recommends installing them.
+]
+
+---
+
+class: middle, center, inverse
+
+# Data types
+
+---
+
+## Data types
+
+Lets see first, what kind of datatypes exist in R. Lets assign a variable called `x`.
+
+```{r}
+x <- 4
+```
+
+So, what is the type of `x`? We can use the `class` command to answer this.
+
+```{r}
+class(x)
+```
+
+Its numeric^[Integer and double also exist in R, but these are not the default, and variables will be always coerced automatically]. This means that you can use `+`, `-`, `*` operators on it.
+
+Lets see other types.
+
+```{r}
+y <- "blue"
+class(y)
+```
+
+Its a character, basically can contain any kind of letter, digits, or white space.
+
+```{r}
+does_it_rain <- TRUE
+class(does_it_rain)
+```
+
+Its a logical value. It can be `TRUE` or `FALSE`
+
+### vectors
+
+We can create a vector with the `c` function. (combine)
+
+```{r}
+x <- c(11, 201, 301)
+x
+```
+
+We can asses a given element of it by:
+
+```{r}
+x[2]
+```
+
+Or we can use functions on it:
+
+```{r}
+sum(x)
+```
+
+We can also easily create sequence with the syntax `start:stop`
+
+```{r}
+1:10
+```
+
+If we combine characters, I mentiont that we can convert this vector to **factor** type. This is useful if we can enclose an order to the vector or we want to control for the possible values.
+Lets see a minimal example
+
+```{r}
+my_vector <- c("First", "Second", "Third", "Fourth")
+sort(my_vector)
+```
+
+If we want to sort the vector, we see that *Fourth* comes right after *First*. It is because character vectors are sorted in alphabetical order. We can solve it with `factor`
+
+```{r}
+my_vector2 <- factor(my_vector, ordered = TRUE, levels = c("First", "Second", "Third", "Fourth"))
+sort(my_vector2)
+```
+
+We can merge these vectors into a data.frame, which is basically like an excel table. Each column is a variable (with a header), and each row is an observation.
+
+```{r}
+avengers_df <- data.frame(name = c("Captain America", "Hulk", "Dr. Strange"), 
+           color = c("blue", "green", NA))
+
+avengers_df
+```
+
+NA stands for "not applicable", so these values are missing. Most of the times we will work with data.frames (similarly like pandas in python), so it is the most important data type we learn.
+
+Storing more complex data, you can use the `list`. To use `data.frame` you need vectors with equal length. If this does not hold, or a more frequent case, you want to store a collection of data.frames, then `list` is a perfect solution! It is not a rare issue, big panel dataset are usually stored in separated files (a different file to each year, like: `cis_survey2016.csv`, `cis_survey2017.csv`). In this situations its suggested to store your data in a list.
+
+```{r}
+mylist <- list(avengers_df, my_vector, x)
+```
+
+Now `mylist` stores a data.frame and two vector. You can access the components with a `[[ ]]`. For example, the first element:
+
+```{r}
+mylist[[1]]
+```
+
+## Data manipulation
+
+### Import data into R {#data-import}
+
+We mentioned formely that the easiest way to import your data is to click on it in the files pane. However, this manual step is useful if you have to import and analyse the data once, but probably you want to use your data next time as well. That is way it is a good idea to copy and paste the code for importing the data into your script.
+
+```{r echo = F, fig.cap="Import csv data into R", eval=knitr::is_html_output()}
+knitr::include_graphics("introduction-to-r_files/importcsv.gif")
+```
+
+In fact, if the data is in your working directory, you can refer to it with "**relative referencing**". This means that you have to type only the name of the file, not the full path, because R will automatically start to look for the file in the working directory^[you can download this example dataset from the GitHub page of this bookdown].
+
+
+Now we have imported a tidy dataset. Each column is variable, and each row is an observation. Lets see how to select specific data from that. If you want to analyse only one column of it, you can use `$` operator.
+
+
+
+The output `pizza` is a character vector currently, because some of the answers contain letters. We have to options here:
+
+1. Using `as.numeric` function to force R using the values as numerical data.
+
+
+We got a warning message. Where letters appear R cannot convert the values to numbers, so this values became NA (Not Available) values.
+
+2. Remove the letters from the answers and convert the vector to the correct datatype.
+
+To manage this, we have to use the syntax called **regular expressions**. I want to show you 4 expressions now and a function. The function `gsub` will detect a given letter in a character and replace it with something. Lets see how!
+
+```{r}
+gsub(x = "Awesome 12", pattern = "\\w", replacement = "B") # every non-white space
+gsub(x = "Awesome 12", pattern = "\\s", replacement = "B") # every white space
+gsub(x = "Awesome 12", pattern = "\\d", replacement = "B") # every digit
+gsub(x = "Awesome 12", pattern = "\\D", replacement = "B") # every non-digit value
+```
+
+So we can use the last example to solve our problem. 
+
+
+## Conditional statements
+
+We offen use conditional statement in programming. It has a clean concept: **If the condition is TRUE, then evaluate the following task.**
+
+```{r eval = knitr::is_html_output(), echo = F, results='asis'}
+cat(
+  '<iframe width="560" height="315" src="https://www.youtube.com/embed/m2Ux2PnJe6E" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'
+)
+```
+
+If you want to write an if else statement in R, I highly recomment you to use the snippet for that. Snippet means, that when you type `if` and press `shift + tab`, then R will automaticly write the framework you have to use:
+
+```{r eval = F}
+if (condition) {
+  
+}
+```
+
+As a condition you have to use a logical value as input, or a condition. You can use conditions with the following operators: `<`, `>`, `<=`, `>=`, `==`, `!=`, `is.na`, `%in%`, `stringr::str_detect()`.
+
+```{r}
+4 < 5
+5 <= 5
+4 > 5
+5 >=4
+2 == 3 # equal?
+(2 + 2) == 4
+(2 + 2) != 4 # not equal?
+3 != 3
+is.na(4)
+is.na(NA)
+3 %in% c(1, 2, 3)
+stringr::str_detect(string = "this function is awesome!", pattern = "some")
+stringr::str_detect(string = "this function is awesome!", pattern = "none")
+```
+
+You can also specify the task R has to do, if the statement is false.
+
+```{r}
+if (2>3) {
+  print("Print this")
+} else {
+  print("Print that")
+}
+```
+
+## Loops
+
+### While
+
+You can also use while loop to specify a task R has to do until a condition is TRUE.
+
+```{r}
+x <- 1
+
+while (x < 15) {
+  cat(paste0(x, "^2=")) # cat = print, just into the same line
+  cat(x^2)
+  cat("\n") # force R to create a new line
+  x <- x + 1 # if you miss this step then R will repeat the task infinit times
+}
+```
+
+### For
+
+With this framewrok you can specify a task, that R has to do x times. For example, print a message 10 times.
+
+```{r}
+for (i in 1:10) {
+  print("You R amazing!")
+}
+```
+
+And you can use `i` inside the `{` parenthesis.
+
+```{r}
+for (i in 1:5) {
+  print(i)
+}
+```
+
+## Functions
+
+We offen work with functions in R, but you can also write your own. You have to use the `function` word and specify the input variables.
+
+```{r}
+my_first_function <- function(x) {
+  # removed all non-digit characters from x, and take the squared of it.
+  as.numeric(gsub(x, pattern = "\\D", replacement = ""))^2
+}
+
+my_first_function("Depends on, maybe 5 slices")
+```
+
+## Apply family
+
+This family contains 3 functions, which I want to show you (There are more complex ones, those are not covered in this bookdown). 
+
+The function `apply` tells R to use a function on each row or column of a data.frame. So the its frist argument is the `data.frame`, the third is the function which shoul use and the second is the margin:
+    - margin = 2: apply the given function on each of the COLUMNS
+    - margin = 1: apply the given function on each of the ROWS
+
+```{r}
+non_na <- function(x) {
+  # how many numeric observation are in the vector
+  sum(!is.na(as.numeric(x)))
+}
+```
+
+Number of numeric answers by quetions:
+
+```{r}
+# apply(df, 2, non_na)
+```
+
+Number of numeric answers by participant:
+
+```{r}
+# apply(df, 1, non_na)
+```
+
+`Lapply` is similar but with list objects. 
+
+```{r}
+mylist <- list(
+  first_vector = c(1, 2, 3),
+  second_vector = letters # built in character vector, contains all the letters
+)
+
+mylist
+```
+
+We are interested in the number of observation (the `length`) of each vector:
+
+```{r}
+out <- lapply(mylist, length)
+
+out
+
+class(out)
+```
+
+But the output is still a list. `sapply` is the solution if we want to convert it into vector.
+
+```{r}
+sapply(mylist, length)
+```
+
