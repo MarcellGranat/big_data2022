@@ -20,11 +20,15 @@ date: "Last update: `r Sys.time()`"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-1.  [Course outline](course-outline.html)
+1. [Course outline](course-outline.html)
 
 2. [Introduction to Statistics](introduction-to-statistics.html)
 
+2. [Introduction to R](introduction-to-r.html)
+
 ------------------------------------------------------------------------
+
+ `r fontawesome::fa("internet-explorer")` [https://www.marcellgranat.com](https://www.marcellgranat.com/big_data)
 
 `r fontawesome::fa("at")` [granat.marcell@uni-neumann.hu](mailto:granat.marcell@uni-neumann.hu)
 
