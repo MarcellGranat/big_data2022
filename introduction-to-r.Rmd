@@ -32,20 +32,20 @@ a { color: #378C95; font-weight: bold; }
 .caption { color: #378C95; font-style: italic; text-align: center; }
 
 .content-box { 
-    box-sizing: content-box;
-    	background-color: #378C95;
-  /* Total width: 160px + (2 * 20px) + (2 * 8px) = 216px
-     Total height: 80px + (2 * 20px) + (2 * 8px) = 136px
-     Content box width: 160px
-     Content box height: 80px */
+box-sizing: content-box;
+background-color: #378C95;
+/* Total width: 160px + (2 * 20px) + (2 * 8px) = 216px
+Total height: 80px + (2 * 20px) + (2 * 8px) = 136px
+Content box width: 160px
+Content box height: 80px */
 }
 
 .content-box-green {
-	background-color: #d9edc2;
+background-color: #d9edc2;
 }
 
 .content-box-red {
-	background-color: #f9dbdb;
+background-color: #f9dbdb;
 }
 
 ```
@@ -154,18 +154,10 @@ include_app("https://research.physcon.uni-obuda.hu/COVID19MagyarEpi/", height = 
 
 .blue[Data import & complex visualization in 10 minutes]
 
-.pull-left[
-
 ```{r}
 include_graphics("introduction-to-r_files/demograph-behind.gif")
 ```
-]
 
-.pull-right[
-```{r}
-include_graphics("introduction-to-r_files/demography.gif")
-```
-]
 
 
 ---
@@ -365,9 +357,21 @@ x[2]
 
 Or you can use functions on it:
 
+.pull-left[
 ```{r echo = TRUE}
 sum(x)
 ```
+]
+
+.pull-right[
+```{r echo = TRUE}
+x + 2
+```
+]
+
+---
+
+## Creating vectors (sequences)
 
 You can also easily create sequence with the syntax `start:stop`
 
@@ -375,115 +379,206 @@ You can also easily create sequence with the syntax `start:stop`
 1:10
 ```
 
+--
+
+Or with the `seq` function
+
+```{r echo = TRUE}
+seq(from = 2, to = 10, by = 2)
+```
+
+```{r echo = TRUE}
+seq(from = 3, to = 53, length.out = 11)
+```
+
+.pull-left[
+```{r echo = TRUE}
+x
+```
+]
+
+.pull-right[
+```{r echo = TRUE}
+seq_along(x)
+```
+]
+
+
 ---
 
 # Factors
 
-If you combine characters, you can convert this vector to **factor** type. This is useful if we can enclose an order to the vector or we want to control for the possible values.
+If you combine characters, you can convert this vector to factor type. This is useful if you want to sort the possible values into a given order, or specify which values should be accepted and which should be omitted.
+
 Lets see a minimal example:
 
 ```{r echo = TRUE}
-my_vector <- c("First", "Second", "Third", "Fourth")
+my_vector <- c("XL", "M", "L", "S", "L", "other")
 sort(my_vector)
 ```
 
-If we want to sort the vector, we see that *Fourth* comes right after *First*. It is because character vectors are sorted in alphabetical order. We can solve it with `factor`
+```{r echo = TRUE}
+my_vector2 <- factor(my_vector, 
+                     ordered = TRUE, 
+                     levels = c("XS", "S", "M", "L", "XL")
+)
 
-```{r}
-my_vector2 <- factor(my_vector, ordered = TRUE, levels = c("First", "Second", "Third", "Fourth"))
 sort(my_vector2)
 ```
 
-We can merge these vectors into a data.frame, which is basically like an excel table. Each column is a variable (with a header), and each row is an observation.
+---
+
+# Data Frame
+
+You can merge the vectors into a `data.frame`, which is simple a **table**. Each column is a *variable* (with a header), and each row is an *observation*.
 
 ```{r}
-avengers_df <- data.frame(name = c("Captain America", "Hulk", "Dr. Strange"), 
-           color = c("blue", "green", NA))
+avengers_df <- data.frame(
+  id = 1:4,
+  name = c("Captain America", "Hulk", "Groot","Strange"), 
+  species = c("human", NA, "Flora colossus", "human")
+)
 
 avengers_df
 ```
 
-NA stands for "not applicable", so these values are missing. Most of the times we will work with data.frames (similarly like pandas in python), so it is the most important data type we learn.
+`NA` stands for "not applicable", so these values are missing. Most of the times you will work with data.frame, so it is the most important type.
 
-Storing more complex data, you can use the `list`. To use `data.frame` you need vectors with equal length. If this does not hold, or a more frequent case, you want to store a collection of data.frames, then `list` is a perfect solution! It is not a rare issue, big panel dataset are usually stored in separated files (a different file to each year, like: `cis_survey2016.csv`, `cis_survey2017.csv`). In this situations its suggested to store your data in a list.
+---
 
-```{r}
+# List
+
+Storing more complex data, you can use the `list`. To use `data.frame` you need vectors with equal length. If this does not hold, or a more frequent case, you want to store a collection of data.frames, then `list` is a perfect solution! It is not a rare issue*, big panel dataset are usually stored in separated files (a different file to each year, like: `cis_survey2016.csv`, `cis_survey2017.csv`). In this situations its suggested to store your data in a list.
+
+```{r echo = TRUE}
 mylist <- list(avengers_df, my_vector, x)
 ```
 
-Now `mylist` stores a data.frame and two vector. You can access the components with a `[[ ]]`. For example, the first element:
+Now `mylist` stores a data.frame and two vectors. You can access the elements by `[[ ]]`. For example, the 2nd element:
 
-```{r}
-mylist[[1]]
+```{r echo = TRUE}
+mylist[[2]]
 ```
 
-## Data manipulation
+.footnote[\*: *In the case of multiple models, we will also store them in a list, but more on that later*]
 
-### Import data into R {#data-import}
+---
 
-We mentioned formely that the easiest way to import your data is to click on it in the files pane. However, this manual step is useful if you have to import and analyse the data once, but probably you want to use your data next time as well. That is way it is a good idea to copy and paste the code for importing the data into your script.
+# Import data into R
 
-```{r echo = F, fig.cap="Import csv data into R", eval=knitr::is_html_output()}
+The easiest way to import your data is to click on it in the files pane. This simple solution works if you have to import and analyse the data once, but probably you want to use your data next time as well. That is way it is a good idea to copy and paste the code for importing the data into your script (delete the `View()` command after that).
+
+```{r echo = F, out.height="400px"}
 knitr::include_graphics("introduction-to-r_files/importcsv.gif")
 ```
 
-In fact, if the data is in your working directory, you can refer to it with "**relative referencing**". This means that you have to type only the name of the file, not the full path, because R will automatically start to look for the file in the working directory^[you can download this example dataset from the GitHub page of this bookdown].
+---
+
+## Path to your files
+
+If the data is in your working directory, you can refer to it with "**relative referencing**". This means that you have to type only the name of the file, not the full path, because R will automatically start to look for the file in the working directory.
+
+--
+
+.content-box-green[
+That is the reason why you should always set a `project`* to your work.
+]
+
+.footnote[\* *A git `r fontawesome::fa("github")` repo is more recommended, but it is not part of the current course.*]
+
+--
+
+.content-box-green[
+HINT: You can type `""` anywhere in the source/console pane and hit `TAB` to completions to the files.
+]
+
+--
+
+.content-box-green[
+HINT: `list.files()` returns the name and path of the files in your current working directory.
+]
 
 
-Now we have imported a tidy dataset. Each column is variable, and each row is an observation. Lets see how to select specific data from that. If you want to analyse only one column of it, you can use `$` operator.
+#### Online data?
+
+If the file you want to import was previously downloaded from a website, you can simply refer to the download **link** and **read it into R directly**. For this you have to only modify the path of the file to the download link what is available at the `download` folder in your browser.
+
+---
+
+# Conditional statements
+
+We offen use conditional statement in programming. It has a clean concept: *If the condition is TRUE, then evaluate the following task.*
 
 
+<p align="center"><iframe width="711" height="400" src="https://www.youtube.com/embed/m2Ux2PnJe6E" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></p>
 
-The output `pizza` is a character vector currently, because some of the answers contain letters. We have to options here:
+---
 
-1. Using `as.numeric` function to force R using the values as numerical data.
+# Snippets
 
-
-We got a warning message. Where letters appear R cannot convert the values to numbers, so this values became NA (Not Available) values.
-
-2. Remove the letters from the answers and convert the vector to the correct datatype.
-
-To manage this, we have to use the syntax called **regular expressions**. I want to show you 4 expressions now and a function. The function `gsub` will detect a given letter in a character and replace it with something. Lets see how!
+.content-box-green[
+If you want to write an if else statement in R, I highly recommend you to use a **snippet** for that. Snippet means, that when you type `if` and press `shift + tab`, then R will automatically write the framework you have to use:
+]
 
 ```{r}
-gsub(x = "Awesome 12", pattern = "\\w", replacement = "B") # every non-white space
-gsub(x = "Awesome 12", pattern = "\\s", replacement = "B") # every white space
-gsub(x = "Awesome 12", pattern = "\\d", replacement = "B") # every digit
-gsub(x = "Awesome 12", pattern = "\\D", replacement = "B") # every non-digit value
+include_graphics("introduction-to-r_files/snippet.gif")
 ```
 
-So we can use the last example to solve our problem. 
+---
 
+# Logical Operators in R
 
-## Conditional statements
+.pull-left[
 
-We offen use conditional statement in programming. It has a clean concept: **If the condition is TRUE, then evaluate the following task.**
-
-```{r eval = knitr::is_html_output(), echo = F, results='asis'}
-cat(
-  '<iframe width="560" height="315" src="https://www.youtube.com/embed/m2Ux2PnJe6E" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'
-)
-```
-
-If you want to write an if else statement in R, I highly recomment you to use the snippet for that. Snippet means, that when you type `if` and press `shift + tab`, then R will automaticly write the framework you have to use:
-
-```{r eval = F}
-if (condition) {
-  
-}
-```
-
-As a condition you have to use a logical value as input, or a condition. You can use conditions with the following operators: `<`, `>`, `<=`, `>=`, `==`, `!=`, `is.na`, `%in%`, `stringr::str_detect()`.
-
-```{r}
+```{r echo=TRUE}
 4 < 5
 5 <= 5
 4 > 5
+```
+]
+
+.pull-right[
+
+```{r echo=TRUE}
 5 >=4
 2 == 3 # equal?
+3 != 3 # not equal?
+```
+]
+
+```{r out.height="200px", out.width="300px", fig.align='center'}
+knitr::include_graphics("introduction-to-r_files/meme_false.png")
+```
+
+
+???
+
+source: https://www.instagram.com/p/CiEXTeRodhj/
+
+---
+
+# Logical Operators in R
+
+.pull-left[
+
+```{r echo=TRUE}
+4 < 5
+5 <= 5
+4 > 5
+```
+]
+
+.pull-right[
+
+```{r echo=TRUE}
+5 >=4
+2 == 3 # equal?
+3 != 3 # not equal?
+```
+]
+
+```{r echo=TRUE}
 (2 + 2) == 4
-(2 + 2) != 4 # not equal?
-3 != 3
 is.na(4)
 is.na(NA)
 3 %in% c(1, 2, 3)
@@ -554,8 +649,8 @@ my_first_function("Depends on, maybe 5 slices")
 This family contains 3 functions, which I want to show you (There are more complex ones, those are not covered in this bookdown). 
 
 The function `apply` tells R to use a function on each row or column of a data.frame. So the its frist argument is the `data.frame`, the third is the function which shoul use and the second is the margin:
-    - margin = 2: apply the given function on each of the COLUMNS
-    - margin = 1: apply the given function on each of the ROWS
+- margin = 2: apply the given function on each of the COLUMNS
+- margin = 1: apply the given function on each of the ROWS
 
 ```{r}
 non_na <- function(x) {
