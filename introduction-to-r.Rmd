@@ -283,6 +283,8 @@ I highly recommend you to set a project folder for the class and any later job. 
 
 ---
 
+# At first glance
+
 ## Packages
 
 You can install packages from this pane. If you need a given package, click on install, and start typing its name. After that, you have to activate packages each time you open R again with the `library(eurostat)` command. You can also use a function from a package if you just simply type `eurostat::get_eurostat()`.
@@ -566,6 +568,11 @@ source: https://www.instagram.com/p/CiEXTeRodhj/
 5 <= 5
 4 > 5
 ```
+
+```{r echo=TRUE}
+(2 + 2) == 4
+is.na(4)
+```
 ]
 
 .pull-right[
@@ -575,126 +582,421 @@ source: https://www.instagram.com/p/CiEXTeRodhj/
 2 == 3 # equal?
 3 != 3 # not equal?
 ```
-]
 
 ```{r echo=TRUE}
-(2 + 2) == 4
-is.na(4)
 is.na(NA)
 3 %in% c(1, 2, 3)
-stringr::str_detect(string = "this function is awesome!", pattern = "some")
-stringr::str_detect(string = "this function is awesome!", pattern = "none")
+```
+]
+
+---
+
+#### Division
+
+.pull-left[
+```{r echo=TRUE}
+13 %% 5 # remainder
+```
+]
+
+.pull-right[
+```{r echo=TRUE}
+13 %/% 5
+```
+]
+
+#### Combining conditions
+
+.pull-left[
+```{r echo=TRUE}
+2 == 2 & 2 == 3 # and
+```
+]
+
+.pull-right[
+```{r echo=TRUE}
+2 == 2 | 2 == 3 # or
+```
+]
+
+#### Working with vectors
+
+```{r echo = TRUE}
+x <- 1:10
+x %% 3 == 0
+which(x %% 3 == 0)
 ```
 
-You can also specify the task R has to do, if the statement is false.
+---
 
-```{r}
-if (2>3) {
-  print("Print this")
-} else {
-  print("Print that")
+
+### IF
+
+```{r eval = FALSE, echo = TRUE}
+if ((exam_p + assignment_p) >= 90 & assignment_p >= 30) {
+  grade <- 5
+} else if ((exam_p + assignment_p) >= 80 & assignment_p >= 30) {
+  grade <- 4
+} else if ((exam_p + assignment_p) >= 66 & assignment_p >= 30) {
+  grade <- 3
+} else if ((exam_p + assignment_p) >= 50 & assignment_p >= 30) {
+  grade <- 2
+} else { # if none are TRUE
+  grade <- 1
 }
 ```
 
-## Loops
+--
 
-### While
+*Of course, there are simpler solutions to handle so many possible outputs, but this is just an illustrative example.*
 
-You can also use while loop to specify a task R has to do until a condition is TRUE.
+---
 
-```{r}
-x <- 1
+class: center, middle, inverse
 
-while (x < 15) {
-  cat(paste0(x, "^2=")) # cat = print, just into the same line
-  cat(x^2)
-  cat("\n") # force R to create a new line
-  x <- x + 1 # if you miss this step then R will repeat the task infinit times
-}
-```
+# Loops `r ji("infinity")`
 
-### For
+---
 
-With this framewrok you can specify a task, that R has to do x times. For example, print a message 10 times.
+# For loop
 
-```{r}
+With this framework you can specify a task, that R has to do x times. For example, print a message 10 times.
+
+```{r echo = TRUE}
 for (i in 1:10) {
   print("You R amazing!")
 }
 ```
 
+---
+
+.pull-left[
+
+
 And you can use `i` inside the `{` parenthesis.
 
-```{r}
+```{r echo = TRUE}
 for (i in 1:5) {
   print(i)
 }
 ```
+]
 
-## Functions
+--
 
-We offen work with functions in R, but you can also write your own. You have to use the `function` word and specify the input variables.
+.pull-right[
+.content-box-green[
+HINT: You have to learn how to use the for loop, because you will definitely face with it in other programming languages and in specific cases. However, we will see later that it is definitely worth avoiding their use in R, because **easier to read and faster codes can be written in other ways**. But it is worth using them, when you need to refer to the result of the **previous evaluation**.
+]
+]
 
-```{r}
-my_first_function <- function(x) {
-  # removed all non-digit characters from x, and take the squared of it.
-  as.numeric(gsub(x, pattern = "\\D", replacement = ""))^2
-}
 
-my_first_function("Depends on, maybe 5 slices")
+```{r out.height="300px", out.width="358px", fig.align='center'}
+include_graphics("introduction-to-r_files/meme_fibonacci.png")
 ```
 
-## Apply family
+???
 
-This family contains 3 functions, which I want to show you (There are more complex ones, those are not covered in this bookdown). 
+source of photo: https://www.reddit.com/r/memes/comments/conmyc/why_is_fibonacci/
 
-The function `apply` tells R to use a function on each row or column of a data.frame. So the its frist argument is the `data.frame`, the third is the function which shoul use and the second is the margin:
+---
+
+### Fibonacci with for loop - first 10 elements
+
+.pull-left[
+```{r out.height="200px", out.width="250px"}
+include_graphics("introduction-to-r_files/fibonacci.png")
+```
+]
+
+.pull-right[
+`head(x, n)`: first n elements of x
+`tail(x, n)`: last n elements of x
+]
+
+```{r echo= TRUE}
+fibonacci_seq <- c(0, 1) # initial = 2 elements
+
+for (i in 1:8) { # 8 + 2 = 10
+  new_elem <- sum(tail(fibonacci_seq, 2))
+  
+  fibonacci_seq <- c(fibonacci_seq, new_elem)
+}
+
+fibonacci_seq
+```
+
+---
+
+# While
+
+You can also use `while` loop to specify a task R has to do until a condition is TRUE.
+
+```{r echo = TRUE}
+x <- 1
+
+while (x < 7) {
+  cat(paste0(x, "^2=")) # cat = print, just into the same line
+  cat(x^2)
+  cat("\n") # force R to create a new line
+  x <- x + 1 # what happens if you miss this?
+}
+
+
+```
+
+---
+
+### Fibonacci with while loop - until reaches a limit (25)
+
+```{r echo= TRUE}
+fibonacci_seq <- c(0, 1) # initial = 2 elements
+new_elem <- tail(fibonacci_seq, 1)
+
+while (new_elem <  25) {
+  new_elem <- sum(tail(fibonacci_seq, 2))
+  if (new_elem < 25) { # do not add the one higher
+    fibonacci_seq <- c(fibonacci_seq, new_elem)
+  }
+}
+
+fibonacci_seq
+```
+
+---
+class: center, middle, inverse
+
+# Functions
+
+####"You should consider writing a function whenever you’ve copied and pasted a block of code more than twice [...]"
+
+Hadley Wickham
+
+
+???
+
+Source: https://r4ds.hadley.nz/functions.html
+
+---
+
+# Functions
+
+We often work with functions in R, and you can also write your own. You have to use the `function` word and specify the input variables.
+
+.content-box-green[
+HINT: Use the FUN `r ji("hugging")` snippet for that.
+]
+
+```{r echo=TRUE}
+fibonacci <- function(n) {
+  fibonacci_seq <- c(0, 1) # initial = 2 elements
+  
+  for (i in 1:(max(n) - 2)) { # n can be a vector
+    new_elem <- sum(tail(fibonacci_seq, 2))
+    
+    fibonacci_seq <- c(fibonacci_seq, new_elem)
+  }
+  
+  fibonacci_seq[n]
+}
+```
+
+.pull-left[
+```{r echo = TRUE}
+fibonacci(1:5)
+```
+]
+
+.pull-right[
+```{r echo = TRUE}
+fibonacci(5)
+```
+]
+
+---
+
+## Funcions - default inputs
+
+```{r echo=TRUE}
+fibonacci <- function(n = 1:6) {
+  fibonacci_seq <- c(0, 1) # initial = 2 elements
+  
+  for (i in 1:(max(n) - 2)) { # n can be a vector
+    new_elem <- sum(tail(fibonacci_seq, 2))
+    
+    fibonacci_seq <- c(fibonacci_seq, new_elem)
+  }
+  
+  fibonacci_seq[n]
+}
+```
+
+.pull-left[
+```{r echo = TRUE}
+fibonacci()
+```
+]
+
+.pull-right[
+```{r echo = TRUE}
+fibonacci(5)
+```
+]
+
+---
+
+class: center, middle, inverse
+
+# Apply, Lapply, Sapply
+
+---
+
+# Apply
+
+The function `apply` calls a function on each row or column of a data.frame (or matrix). So its first argument is the `data.frame`, the third is the function which should use and the second is the margin:
 - margin = 2: apply the given function on each of the COLUMNS
 - margin = 1: apply the given function on each of the ROWS
 
-```{r}
-non_na <- function(x) {
-  # how many numeric observation are in the vector
-  sum(!is.na(as.numeric(x)))
+---
+
+## Example - Fertility rates by country / by year
+
+.blue[Replacement Fertility Rate]: Assuming there are no migration flows and that mortality rates remain unchanged, a total fertility rate of 2.1 children per woman generates broad stability of population.
+
+--
+
+```{r echo=TRUE}
+above_replacement_prop <- function(x) {
+  # proportion of observation above the replacement rate
+  # exclude NAs
+  sum(x >= 2.1, na.rm = TRUE) / sum(!is.na(x))
 }
 ```
 
-Number of numeric answers by quetions:
+--
 
-```{r}
-# apply(df, 2, non_na)
+```{r echo = TRUE}
+x <- c(1.3, 4, 2, NA)
+above_replacement_prop(x)
 ```
 
-Number of numeric answers by participant:
+---
 
-```{r}
-# apply(df, 1, non_na)
+## Example - Fertility rates by country / by year
+
+### Data from OECD
+
+```{r echo=TRUE, results='hide', message =FALSE}
+fertility_df <- read_csv("https://stats.oecd.org/sdmx-json/data/DP_LIVE/.FERTILITY.../OECD?contentType=csv&detail=code&separator=comma&csv-lang=en")
+fertility_df <- fertility_df[, c("LOCATION", "TIME", "Value")]  
+
+fertility_df
 ```
 
-`Lapply` is similar but with list objects. 
-
 ```{r}
-mylist <- list(
-  first_vector = c(1, 2, 3),
-  second_vector = letters # built in character vector, contains all the letters
-)
+fertility_df %>% 
+  head() %>% 
+  mutate_all(
+    ~ c(head(., -1), "...")
+  ) %>% 
+  granatlib::kable_output()
+```
 
+---
+
+# Data manipulation
+
+(This step is necessary, later we will understand what is actually happening here.)
+
+```{r echo=TRUE, results='hide'}
+fertility_df <- tidyr::pivot_wider(fertility_df, names_from = "LOCATION", 
+                   values_from = "Value")
+
+fertility_df <- tibble::column_to_rownames(fertility_df, "TIME")
+fertility_df <- fertility_df[, - 51] # OECD average
+
+fertility_df
+```
+  
+```{r}
+fertility_df %>% 
+  head(4) %>% 
+  mutate_all(
+    ~ c(head(., -1), "...")
+  ) %>% 
+  select(1:4) %>% 
+  mutate(`...` = "...") %>% 
+  granatlib::kable_output()
+```
+
+At the end of these steps, we have a table, each column of which shows the time series of the fertility rate of a country.
+
+---
+
+### Apply - MARGIN = 1
+
+```{r echo=TRUE}
+apply(fertility_df, MARGIN = 1, above_replacement_prop)
+```
+
+If MARGIN == 1, the apply calculates the proportion of observation above 2.1 in each **row**. The returned value is a named vector, which means that you can refer to its values by index, or by name.
+
+---
+
+### Apply - MARGIN = 1
+
+```{r echo=TRUE}
+apply(fertility_df, MARGIN = 1, above_replacement_prop)[1]
+apply(fertility_df, MARGIN = 1, above_replacement_prop)["2020"]
+```
+
+---
+
+### Apply - MARGIN = 2
+
+```{r echo=TRUE}
+apply(fertility_df, MARGIN = 2, above_replacement_prop)
+```
+
+If MARGIN == 2, the apply calculates the proportion of observation above 2.1 in each **column**.
+
+---
+
+# Lapply
+
+`lapply` should be used for same purposes, but it can be used for lists or vectors. 
+
+```{r echo=TRUE}
 mylist
 ```
 
-We are interested in the number of observation (the `length`) of each vector:
+---
 
-```{r}
-out <- lapply(mylist, length)
+# Lapply
 
-out
+`lapply` should be used for same purposes, but it can be used for lists or vectors. 
 
-class(out)
+Length of each element:
+
+```{r echo=TRUE}
+lapply(mylist, length)
 ```
 
-But the output is still a list. `sapply` is the solution if we want to convert it into vector.
+---
 
-```{r}
+# Sapply
+
+`sapply` is fully identical, but returns a vector (*s* stand for SIMPLIFY)
+
+```{r echo=TRUE}
 sapply(mylist, length)
 ```
+
+---
+
+class: center, middle
+
+# Thank you for your attention!
+
+Slides are available at [https://www.marcellgranat.com](https://www.marcellgranat.com)
 

@@ -266,6 +266,8 @@ I highly recommend you to set a project folder for the class and any later job. 
 
 ---
 
+# At first glance
+
 ## Packages
 
 You can install packages from this pane. If you need a given package, click on install, and start typing its name. After that, you have to activate packages each time you open R again with the `library(eurostat)` command. You can also use a function from a package if you just simply type `eurostat::get_eurostat()`.
@@ -574,7 +576,9 @@ We offen use conditional statement in programming. It has a clean concept: *If t
 
 # Snippets
 
-If you want to write an if else statement in R, I highly recommend you to use the **snippet** for that. Snippet means, that when you type `if` and press `shift + tab`, then R will automatically write the framework you have to use:
+.content-box-green[
+If you want to write an if else statement in R, I highly recommend you to use a **snippet** for that. Snippet means, that when you type `if` and press `shift + tab`, then R will automatically write the framework you have to use:
+]
 
 ![](introduction-to-r_files/snippet.gif)&lt;!-- --&gt;
 
@@ -647,6 +651,35 @@ source: https://www.instagram.com/p/CiEXTeRodhj/
 
 ---
 
+# Logical Operators in R
+
+.pull-left[
+
+
+```r
+4 &lt; 5
+```
+
+```
+## [1] TRUE
+```
+
+```r
+5 &lt;= 5
+```
+
+```
+## [1] TRUE
+```
+
+```r
+4 &gt; 5
+```
+
+```
+## [1] FALSE
+```
+
 
 ```r
 (2 + 2) == 4
@@ -663,6 +696,35 @@ is.na(4)
 ```
 ## [1] FALSE
 ```
+]
+
+.pull-right[
+
+
+```r
+5 &gt;=4
+```
+
+```
+## [1] TRUE
+```
+
+```r
+2 == 3 # equal?
+```
+
+```
+## [1] FALSE
+```
+
+```r
+3 != 3 # not equal?
+```
+
+```
+## [1] FALSE
+```
+
 
 ```r
 is.na(NA)
@@ -679,58 +741,120 @@ is.na(NA)
 ```
 ## [1] TRUE
 ```
+]
+
+---
+
+#### Division
+
+.pull-left[
 
 ```r
-stringr::str_detect(string = "this function is awesome!", pattern = "some")
+13 %% 5 # remainder
 ```
 
 ```
-## [1] TRUE
+## [1] 3
 ```
+]
+
+.pull-right[
 
 ```r
-stringr::str_detect(string = "this function is awesome!", pattern = "none")
+13 %/% 5
+```
+
+```
+## [1] 2
+```
+]
+
+#### Combining conditions
+
+.pull-left[
+
+```r
+2 == 2 &amp; 2 == 3 # and
 ```
 
 ```
 ## [1] FALSE
 ```
+]
 
-You can also specify the task R has to do, if the statement is false.
+.pull-right[
 
-
-```
-## [1] "Print that"
-```
-
-## Loops
-
-### While
-
-You can also use while loop to specify a task R has to do until a condition is TRUE.
-
-
-```
-## 1^2=1
-## 2^2=4
-## 3^2=9
-## 4^2=16
-## 5^2=25
-## 6^2=36
-## 7^2=49
-## 8^2=64
-## 9^2=81
-## 10^2=100
-## 11^2=121
-## 12^2=144
-## 13^2=169
-## 14^2=196
+```r
+2 == 2 | 2 == 3 # or
 ```
 
-### For
+```
+## [1] TRUE
+```
+]
 
-With this framewrok you can specify a task, that R has to do x times. For example, print a message 10 times.
+#### Working with vectors
 
+
+```r
+x &lt;- 1:10
+x %% 3 == 0
+```
+
+```
+##  [1] FALSE FALSE  TRUE FALSE FALSE  TRUE FALSE FALSE  TRUE FALSE
+```
+
+```r
+which(x %% 3 == 0)
+```
+
+```
+## [1] 3 6 9
+```
+
+---
+
+
+### IF
+
+
+```r
+if ((exam_p + assignment_p) &gt;= 90 &amp; assignment_p &gt;= 30) {
+  grade &lt;- 5
+} else if ((exam_p + assignment_p) &gt;= 80 &amp; assignment_p &gt;= 30) {
+  grade &lt;- 4
+} else if ((exam_p + assignment_p) &gt;= 66 &amp; assignment_p &gt;= 30) {
+  grade &lt;- 3
+} else if ((exam_p + assignment_p) &gt;= 50 &amp; assignment_p &gt;= 30) {
+  grade &lt;- 2
+} else { # if none are TRUE
+  grade &lt;- 1
+}
+```
+
+--
+
+*Of course, there are simpler solutions to handle so many possible outputs, but this is just an illustrative example.*
+
+---
+
+class: center, middle, inverse
+
+# Loops ♾️
+
+---
+
+# For loop
+
+With this framework you can specify a task, that R has to do x times. For example, print a message 10 times.
+
+
+```r
+for (i in 1:10) {
+  print("You R amazing!")
+}
+```
 
 ```
 ## [1] "You R amazing!"
@@ -744,9 +868,20 @@ With this framewrok you can specify a task, that R has to do x times. For exampl
 ## [1] "You R amazing!"
 ## [1] "You R amazing!"
 ```
+
+---
+
+.pull-left[
+
 
 And you can use `i` inside the `{` parenthesis.
 
+
+```r
+for (i in 1:5) {
+  print(i)
+}
+```
 
 ```
 ## [1] 1
@@ -755,68 +890,454 @@ And you can use `i` inside the `{` parenthesis.
 ## [1] 4
 ## [1] 5
 ```
+]
 
-## Functions
+--
 
-We offen work with functions in R, but you can also write your own. You have to use the `function` word and specify the input variables.
+.pull-right[
+.content-box-green[
+HINT: You have to learn how to use the for loop, because you will definitely face with it in other programming languages and in specific cases. However, we will see later that it is definitely worth avoiding their use in R, because **easier to read and faster codes can be written in other ways**. But it is worth using them, when you need to refer to the result of the **previous evaluation**.
+]
+]
 
+
+&lt;img src="introduction-to-r_files/meme_fibonacci.png" width="358px" height="300px" style="display: block; margin: auto;" /&gt;
+
+???
+
+source of photo: https://www.reddit.com/r/memes/comments/conmyc/why_is_fibonacci/
+
+---
+
+### Fibonacci with for loop - first 10 elements
+
+.pull-left[
+&lt;img src="introduction-to-r_files/fibonacci.png" width="250px" height="200px" /&gt;
+]
+
+.pull-right[
+`head(x, n)`: first n elements of x
+`tail(x, n)`: last n elements of x
+]
+
+
+```r
+fibonacci_seq &lt;- c(0, 1) # initial = 2 elements
+
+for (i in 1:8) { # 8 + 2 = 10
+  new_elem &lt;- sum(tail(fibonacci_seq, 2))
+  
+  fibonacci_seq &lt;- c(fibonacci_seq, new_elem)
+}
+
+fibonacci_seq
+```
 
 ```
-## [1] 25
+##  [1]  0  1  1  2  3  5  8 13 21 34
 ```
 
-## Apply family
+---
 
-This family contains 3 functions, which I want to show you (There are more complex ones, those are not covered in this bookdown). 
+# While
 
-The function `apply` tells R to use a function on each row or column of a data.frame. So the its frist argument is the `data.frame`, the third is the function which shoul use and the second is the margin:
+You can also use `while` loop to specify a task R has to do until a condition is TRUE.
+
+
+```r
+x &lt;- 1
+
+while (x &lt; 7) {
+  cat(paste0(x, "^2=")) # cat = print, just into the same line
+  cat(x^2)
+  cat("\n") # force R to create a new line
+  x &lt;- x + 1 # what happens if you miss this?
+}
+```
+
+```
+## 1^2=1
+## 2^2=4
+## 3^2=9
+## 4^2=16
+## 5^2=25
+## 6^2=36
+```
+
+---
+
+### Fibonacci with while loop - until reaches a limit (25)
+
+
+```r
+fibonacci_seq &lt;- c(0, 1) # initial = 2 elements
+new_elem &lt;- tail(fibonacci_seq, 1)
+
+while (new_elem &lt;  25) {
+  new_elem &lt;- sum(tail(fibonacci_seq, 2))
+  if (new_elem &lt; 25) { # do not add the one higher
+    fibonacci_seq &lt;- c(fibonacci_seq, new_elem)
+  }
+}
+
+fibonacci_seq
+```
+
+```
+## [1]  0  1  1  2  3  5  8 13 21
+```
+
+---
+class: center, middle, inverse
+
+# Functions
+
+####"You should consider writing a function whenever you’ve copied and pasted a block of code more than twice [...]"
+
+Hadley Wickham
+
+
+???
+
+Source: https://r4ds.hadley.nz/functions.html
+
+---
+
+# Functions
+
+We often work with functions in R, and you can also write your own. You have to use the `function` word and specify the input variables.
+
+.content-box-green[
+HINT: Use the FUN 🤗 snippet for that.
+]
+
+
+```r
+fibonacci &lt;- function(n) {
+  fibonacci_seq &lt;- c(0, 1) # initial = 2 elements
+  
+  for (i in 1:(max(n) - 2)) { # n can be a vector
+    new_elem &lt;- sum(tail(fibonacci_seq, 2))
+    
+    fibonacci_seq &lt;- c(fibonacci_seq, new_elem)
+  }
+  
+  fibonacci_seq[n]
+}
+```
+
+.pull-left[
+
+```r
+fibonacci(1:5)
+```
+
+```
+## [1] 0 1 1 2 3
+```
+]
+
+.pull-right[
+
+```r
+fibonacci(5)
+```
+
+```
+## [1] 3
+```
+]
+
+---
+
+## Funcions - default inputs
+
+
+```r
+fibonacci &lt;- function(n = 1:6) {
+  fibonacci_seq &lt;- c(0, 1) # initial = 2 elements
+  
+  for (i in 1:(max(n) - 2)) { # n can be a vector
+    new_elem &lt;- sum(tail(fibonacci_seq, 2))
+    
+    fibonacci_seq &lt;- c(fibonacci_seq, new_elem)
+  }
+  
+  fibonacci_seq[n]
+}
+```
+
+.pull-left[
+
+```r
+fibonacci()
+```
+
+```
+## [1] 0 1 1 2 3 5
+```
+]
+
+.pull-right[
+
+```r
+fibonacci(5)
+```
+
+```
+## [1] 3
+```
+]
+
+---
+
+class: center, middle, inverse
+
+# Apply, Lapply, Sapply
+
+---
+
+# Apply
+
+The function `apply` calls a function on each row or column of a data.frame (or matrix). So its first argument is the `data.frame`, the third is the function which should use and the second is the margin:
 - margin = 2: apply the given function on each of the COLUMNS
 - margin = 1: apply the given function on each of the ROWS
 
+---
+
+## Example - Fertility rates by country / by year
+
+.blue[Replacement Fertility Rate]: Assuming there are no migration flows and that mortality rates remain unchanged, a total fertility rate of 2.1 children per woman generates broad stability of population.
+
+--
 
 
-Number of numeric answers by quetions:
+```r
+above_replacement_prop &lt;- function(x) {
+  # proportion of observation above the replacement rate
+  # exclude NAs
+  sum(x &gt;= 2.1, na.rm = TRUE) / sum(!is.na(x))
+}
+```
+
+--
 
 
-
-Number of numeric answers by participant:
-
-
-
-`Lapply` is similar but with list objects. 
-
+```r
+x &lt;- c(1.3, 4, 2, NA)
+above_replacement_prop(x)
+```
 
 ```
-## $first_vector
-## [1] 1 2 3
+## [1] 0.3333333
+```
+
+---
+
+## Example - Fertility rates by country / by year
+
+### Data from OECD
+
+
+```r
+fertility_df &lt;- read_csv("https://stats.oecd.org/sdmx-json/data/DP_LIVE/.FERTILITY.../OECD?contentType=csv&amp;detail=code&amp;separator=comma&amp;csv-lang=en")
+fertility_df &lt;- fertility_df[, c("LOCATION", "TIME", "Value")]  
+
+fertility_df
+```
+
+
+|LOCATION | TIME | Value |
+|:--------|:----:|:-----:|
+|AUS      | 1960 | 3.45  |
+|AUS      | 1961 | 3.55  |
+|AUS      | 1962 | 3.43  |
+|AUS      | 1963 | 3.34  |
+|AUS      | 1964 | 3.15  |
+|...      | ...  |  ...  |
+
+---
+
+# Data manipulation
+
+(This step is necessary, later we will understand what is actually happening here.)
+
+
+```r
+fertility_df &lt;- tidyr::pivot_wider(fertility_df, names_from = "LOCATION", 
+                   values_from = "Value")
+
+fertility_df &lt;- tibble::column_to_rownames(fertility_df, "TIME")
+fertility_df &lt;- fertility_df[, - 51] # OECD average
+
+fertility_df
+```
+  
+
+|     |AUS  | AUT  | BEL  | CAN  | ... |
+|:----|:----|:----:|:----:|:----:|:---:|
+|1960 |3.45 | 2.69 | 2.54 | 3.9  | ... |
+|1961 |3.55 | 2.78 | 2.63 | 3.84 | ... |
+|1962 |3.43 | 2.8  | 2.59 | 3.76 | ... |
+|1963 |...  | ...  | ...  | ...  | ... |
+
+At the end of these steps, we have a table, each column of which shows the time series of the fertility rate of a country.
+
+---
+
+### Apply - MARGIN = 1
+
+
+```r
+apply(fertility_df, MARGIN = 1, above_replacement_prop)
+```
+
+```
+##      1960      1961      1962      1963      1964      1965      1966      1967 
+## 0.9200000 0.9200000 0.9200000 0.9200000 0.9200000 0.9200000 0.8800000 0.8600000 
+##      1968      1969      1970      1971      1972      1973      1974      1975 
+## 0.8600000 0.8200000 0.8000000 0.7800000 0.6800000 0.6600000 0.6600000 0.6274510 
+##      1976      1977      1978      1979      1980      1981      1982      1983 
+## 0.6078431 0.5686275 0.5098039 0.5294118 0.4807692 0.4230769 0.3962264 0.4339623 
+##      1984      1985      1986      1987      1988      1989      1990      1991 
+## 0.3962264 0.3773585 0.4339623 0.4339623 0.4716981 0.3773585 0.3584906 0.3396226 
+##      1992      1993      1994      1995      1996      1997      1998      1999 
+## 0.3018868 0.2830189 0.2830189 0.2452830 0.2641509 0.2452830 0.2452830 0.2452830 
+##      2000      2001      2002      2003      2004      2005      2006      2007 
+## 0.2264151 0.2264151 0.2264151 0.2075472 0.1886792 0.1886792 0.2075472 0.2264151 
+##      2008      2009      2010      2011      2012      2013      2014      2015 
+## 0.2075472 0.2075472 0.1886792 0.1509434 0.1886792 0.1698113 0.1698113 0.1698113 
+##      2016      2017      2018      2019      2020      2021 
+## 0.1698113 0.1509434 0.1509434 0.1538462 0.1346154 0.0000000
+```
+
+If MARGIN == 1, the apply calculates the proportion of observation above 2.1 in each **row**. The returned value is a named vector, which means that you can refer to its values by index, or by name.
+
+---
+
+### Apply - MARGIN = 1
+
+
+```r
+apply(fertility_df, MARGIN = 1, above_replacement_prop)[1]
+```
+
+```
+## 1960 
+## 0.92
+```
+
+```r
+apply(fertility_df, MARGIN = 1, above_replacement_prop)["2020"]
+```
+
+```
+##      2020 
+## 0.1346154
+```
+
+---
+
+### Apply - MARGIN = 2
+
+
+```r
+apply(fertility_df, MARGIN = 2, above_replacement_prop)
+```
+
+```
+##        AUS        AUT        BEL        CAN        CZE        DNK        FIN 
+## 0.26229508 0.19672131 0.19672131 0.19672131 0.22950820 0.14754098 0.14754098 
+##        FRA        DEU        GRC        HUN        ISL        IRL        ITA 
+## 0.24193548 0.16393443 0.36065574 0.06557377 0.57377049 0.49180328 0.27868852 
+##        JPN        KOR        LUX        MEX        NLD        NZL        NOR 
+## 0.13114754 0.37096774 0.14754098 0.98360656 0.21311475 0.44262295 0.24590164 
+##        POL        PRT        SVK        ESP        SWE        CHE        TUR 
+## 0.47540984 0.36065574 0.47540984 0.34426230 0.16129032 0.17741935 0.88524590 
+##        GBR        USA        BRA        CHL        CHN        EST        IND 
+## 0.21311475 0.22950820 0.72131148 0.65573770 0.52459016 0.18032787 1.00000000 
+##        IDN        ISR        RUS        SVN        ZAF        COL        LVA 
+## 1.00000000 1.00000000 0.18032787 0.34426230 1.00000000 0.78688525 0.08196721 
+##        LTU        ARG        BGR        HRV        CYP        MLT        ROU 
+## 0.34426230 1.00000000 0.26229508 0.11475410 0.33333333 0.09756098 0.30434783 
+##        SAU        PER        CRI         EU 
+## 1.00000000 1.00000000 0.72131148 0.28813559
+```
+
+If MARGIN == 2, the apply calculates the proportion of observation above 2.1 in each **column**.
+
+---
+
+# Lapply
+
+`lapply` should be used for same purposes, but it can be used for lists or vectors. 
+
+
+```r
+mylist
+```
+
+```
+## [[1]]
+##   id            name        species
+## 1  1 Captain America          human
+## 2  2            Hulk           &lt;NA&gt;
+## 3  3           Groot Flora colossus
+## 4  4         Strange          human
 ## 
-## $second_vector
-##  [1] "a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m" "n" "o" "p" "q" "r" "s"
-## [20] "t" "u" "v" "w" "x" "y" "z"
+## [[2]]
+## [1] "XL"    "M"     "L"     "S"     "L"     "other"
+## 
+## [[3]]
+## [1]  11 201 301
 ```
 
-We are interested in the number of observation (the `length`) of each vector:
+---
 
+# Lapply
+
+`lapply` should be used for same purposes, but it can be used for lists or vectors. 
+
+Length of each element:
+
+
+```r
+lapply(mylist, length)
+```
 
 ```
-## $first_vector
+## [[1]]
 ## [1] 3
 ## 
-## $second_vector
-## [1] 26
+## [[2]]
+## [1] 6
+## 
+## [[3]]
+## [1] 3
+```
+
+---
+
+# Sapply
+
+`sapply` is fully identical, but returns a vector (*s* stand for SIMPLIFY)
+
+
+```r
+sapply(mylist, length)
 ```
 
 ```
-## [1] "list"
+## [1] 3 6 3
 ```
 
-But the output is still a list. `sapply` is the solution if we want to convert it into vector.
+---
 
+class: center, middle
 
-```
-##  first_vector second_vector 
-##             3            26
-```
+# Thank you for your attention!
+
+Slides are available at [https://www.marcellgranat.com](https://www.marcellgranat.com)
 
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
