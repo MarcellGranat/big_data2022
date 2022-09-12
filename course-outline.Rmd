@@ -80,6 +80,61 @@ The main materials are **lecture slides** that are uploaded at the latest a day 
 
 ---
 
+class: middle, center
+
+# Agenda
+
+```{r echo=FALSE}
+knitr::include_graphics("course-outline_files/tidy-workflow/Dia1.png")
+```
+
+
+---
+
+class: middle, center
+
+# Agenda
+
+```{r echo=FALSE}
+knitr::include_graphics("course-outline_files/tidy-workflow/Dia2.png")
+```
+
+
+---
+
+class: middle, center
+
+# Agenda
+
+```{r echo=FALSE}
+knitr::include_graphics("course-outline_files/tidy-workflow/Dia3.png")
+```
+
+
+---
+
+class: middle, center
+
+# Agenda
+
+```{r echo=FALSE}
+knitr::include_graphics("course-outline_files/tidy-workflow/Dia4.png")
+```
+
+
+---
+
+class: middle, center
+
+# Agenda
+
+```{r echo=FALSE}
+knitr::include_graphics("course-outline_files/tidy-workflow/Dia5.png")
+```
+
+---
+
+
 # About your teacher
 
 - Marcell Granát, [granat.marcell@uni-neumann.hu](mailto:granat.marcell@uni-neumann.hu)

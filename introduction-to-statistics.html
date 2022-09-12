@@ -66,9 +66,7 @@ class: left
 
 1. Basic concepts of **statistical analysis** 🐣
 
-2. Introduction and recommendations of **databases** for your future projects
-
-3. Descriptive statistics 📊
+2. Descriptive statistics 📊
 
 ### Session 2 - Introduction to R
 
@@ -82,9 +80,250 @@ class: left
 
 ---
 
+class: middle, center, inverse
+
+# The type of data
+
+---
+
+# Classification based on the structure
+
+1. Unstructured
+
+2. Structured
+
+--
+
+- The data are stored in a tabular format.
+
+- Cross-sectional / Time-series / Longitudinal / Spatial / Network
+
+--
+
+&lt;img src="introduction-to-statistics_files/attributes_observations.png" width="530px" height="250px" style="display: block; margin: auto;" /&gt;
+
+
+
+**Type of data determines which tools and techniques can be used to analyze the data!**
+
+--
+
+
+
+
+---
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; Attribute type &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Description &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Examples &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Operations &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Nominal &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Nominal values provide only enough information to distinguish one object from another. (=, ≠) &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Zip codes, employee ID numbers, eye color, gender &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Mode, entropy, contingency correlation, `\(\chi^2\)` test &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+---
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; Attribute type &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Description &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Examples &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Operations &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Nominal &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Nominal values provide only enough information to distinguish one object from another. (=, ≠) &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Zip codes, employee ID numbers, eye color, gender &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Mode, entropy, contingency correlation, `\(\chi^2\)` test &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Ordinal &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; The values of an ordinal attribute provide enough information to order objects. (&lt;, &gt;) &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Hardness of minerals, {good, better, best}, grades, street numbers &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Quantiles, rank correlation &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+---
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; Attribute type &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Description &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Examples &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Operations &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Nominal &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Nominal values provide only enough information to distinguish one object from another. (=, ≠) &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Zip codes, employee ID numbers, eye color, gender &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Mode, entropy, contingency correlation, `\(\chi^2\)` test &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Ordinal &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; The values of an ordinal attribute provide enough information to order objects. (&lt;, &gt;) &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Hardness of minerals, {good, better, best}, grades, street numbers &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Quantiles, rank correlation &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Interval &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Differences between values are meaningful, i.e., a unit of measurement exists. (+, -) &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Calendar dates, temperature in Celsius or Fahrenheit &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; mean, standard deviation, Pearson's correlation &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+---
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; Attribute type &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Description &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Examples &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Operations &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Nominal &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Nominal values provide only enough information to distinguish one object from another. (=, ≠) &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Zip codes, employee ID numbers, eye color, gender &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Mode, entropy, contingency correlation, `\(\chi^2\)` test &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Ordinal &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; The values of an ordinal attribute provide enough information to order objects. (&lt;, &gt;) &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Hardness of minerals, {good, better, best}, grades, street numbers &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Quantiles, rank correlation &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Interval &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Differences between values are meaningful, i.e., a unit of measurement exists. (+, -) &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Calendar dates, temperature in Celsius or Fahrenheit &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; mean, standard deviation, Pearson's correlation &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Ratio &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; For ratio variables, both differences and ratios are meaningful. (*, /) &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Temperature in Kelvin, monetary quantities, counts, age, mass, length, electrical current &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Geometric mean, harmonic mean, percent variation &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+???
+
+ref: Introduction to Data Mining
+
+---
+
+class: inverse, middle, center
+
+# Quality of data
+
+---
+
+background-image: url("introduction-to-statistics_files/meme_clean_data.jpg")
+
+???
+
+source: Statsystem
+
+---
+
+# The quality of data
+
+Data is often far from perfect.
+
+Frequently arising issues:
+
+--
+
+- missing data
+
+--
+
+
+- outliers
+
+--
+
+- duplication
+
+--
+
+- inconsistent data
+
+---
+
+## An illlustrative story of data-related issues
+
+.blue[Statistician:] So, you got the data for all the patients?
+
+.blue[Data Miner:] Yes. I haven't had much time for analysis, but I do have a few interesting results.
+
+.blue[Statistician:] Amazing. There were so many data issues with this set of patients that I couldn't do much.
+
+.blue[Data Miner:] Oh? I didn't hear about any possible problems. 
+
+.blue[Statistician:] Well, first there is field 5, the variable we want to predict. It's common knowledge among people who analyze this type of data that results are better if you work with the log of the values, but I didn't discover this until later. Was it mentioned to you?
+
+.blue[Data Miner:] No.
+
+.footnote[*Introduction to Data Mining, page 21-22*]
+
+---
+
+## An illlustrative story of data-related issues
+
+.blue[Statistician:] But surely you heard about what happened to field 4? It's supposed to be measured on a scale from 1 to 10, with 0 indicating a missing value, but because of a data entry error, all 10's were changed into 0's. Unfortunately, since some of the patients have missing values for this field, it's impossible to say whether a 0 in this field is a real 0 or a 10. Quite a few of the records have that problem.
+
+.blue[Data Miner:] Interesting. Were there any other problems? .blue[Statistician:] Yes, fields 2 and 3 are basically the same, but I assume that you probably noticed that.
+
+.blue[Data Miner:] Yes, but these fields were only weak predictors of field 5.
+
+.blue[Statistician:] Anyway, given all those problems, I'm surprised you were able to accomplish anything.
+
+.blue[Data Miner:] True, but my results are really quite good. Field 1 is a very strong predictor of field 5. I'm surprised that this wasn't noticed before.
+
+.footnote[*Introduction to Data Mining, page 21-22*]
+
+---
+
+.blue[Statistician:] What? Field 1 is just an identification number. 
+
+.blue[Data Miner:] Nonetheless, my results speak for themselves.
+
+## An illlustrative story of data-related issues
+
+.blue[Data Miner:] Nonetheless, my results speak for themselves. 
+
+.blue[Statistician:] Oh, no! I just remembered. We assigned ID numbers after we sorted the records based on field 5. There is a strong connection, but it's meaningless. Sorry.
+
+.footnote[*Introduction to Data Mining, page 21-22*]
+
+---
+
 # References
 
-
+&lt;p&gt;&lt;cite&gt;Tan, P., M. Steinbach, and V. Kumar
+(2006).
+&amp;ldquo;Introduction to Data Mining&amp;rdquo;.
+&lt;/p&gt;&lt;/cite&gt;&lt;/p&gt;
 
 ---
 
