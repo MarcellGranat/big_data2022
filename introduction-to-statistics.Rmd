@@ -384,11 +384,11 @@ Yeah. We will come back to this soon...
 
 class: inverse, middle, center
 
-## Quartile
+## Quantile
 
 ---
 
-# Quartile
+# Quantile
 
 Values that divide the observations into equal groups.
 
@@ -409,7 +409,7 @@ tibble::tribble(
 
 ---
 
-# Quartile
+# Quantile
 
 ### Lets take the following sequence:
 
