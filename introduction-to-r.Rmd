@@ -88,9 +88,7 @@ class: left
 
 1. Basic concepts of **statistical analysis** `r ji("hatching")`
 
-2. Introduction and recommendations of **databases** for your future projects
-
-3. Descriptive statistics `r ji("bar_chart")`
+2. Descriptive statistics `r ji("bar_chart")`
 
 ### Session 2 - Introduction to R
 
@@ -215,7 +213,7 @@ include_graphics("introduction-to-r_files/rstudio-numbered.png")
 
 ## Source
 
-We will write here our codes, which we would like to save. The default extension of our codes are `.R`, but this is not the only possibility (we will cover this later). Once you save your code for later use, you can open your script also with a simple text editor (like `Notepad`), since this is only plain text. If you hit `enter` your code wont be executed, you will just simply start a new line. If you want to run your code hit `ctrl + enter` to execute a single line, and `ctrl+shift+enter` to execute your full script.
+We will write here our codes, which we would like to save. The default extension of our codes is`.R`, but this is not the only possibility (we will cover this later). Once you save your code for later use, you can open your script also with a simple text editor (like `Notepad`), since this is only plain text. If you hit `enter` your code won't be executed, you will just simply start a new line. If you want to run your code hit `ctrl + enter` to execute a single line, and `ctrl+shift+enter` to execute your full script.
 
 
 ---
@@ -226,7 +224,7 @@ We will write here our codes, which we would like to save. The default extension
 .pull-left[
 ## Console
 
-Here you find the executed codes, and the response to that. For example, if you type `2 + 2` and hit `enter`, R will execute the expression, and response that it is 4.
+Here you find the executed codes and the response to them. For example, if you type `2 + 2` and hit `enter`, R will execute the expression, and respond that it is 4.
 
 ```{r echo = TRUE}
 2 + 2
@@ -768,7 +766,7 @@ class: center, middle, inverse
 
 # Functions
 
-####"You should consider writing a function whenever you’ve copied and pasted a block of code more than twice [...]"
+#### "You should consider writing a function whenever you’ve copied and pasted a block of code more than twice [...]"
 
 Hadley Wickham
 
@@ -917,7 +915,7 @@ fertility_df <- fertility_df[, - 51] # OECD average
 
 fertility_df
 ```
-  
+
 ```{r}
 fertility_df %>% 
   head(4) %>% 
@@ -974,7 +972,7 @@ mylist
 
 # Lapply
 
-`lapply` should be used for same purposes, but it can be used for lists or vectors. 
+`lapply` should be used for the same purposes, but it can be used for lists or vectors. 
 
 Length of each element:
 
@@ -986,7 +984,7 @@ lapply(mylist, length)
 
 # Sapply
 
-`sapply` is fully identical, but returns a vector (*s* stand for SIMPLIFY)
+`sapply` is fully identical but returns a vector (*s* stand for SIMPLIFY)
 
 ```{r echo=TRUE}
 sapply(mylist, length)

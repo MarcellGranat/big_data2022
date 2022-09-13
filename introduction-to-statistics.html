@@ -49,6 +49,24 @@ class: inverse, center, middle
 strong { color: red; }
 a { color: #378C95; font-weight: bold; }
 .remark-inline-code { font-weight: 900; background-color: #a7d5e7; }
+.caption { color: #378C95; font-style: italic; text-align: center; }
+
+.content-box { 
+box-sizing: content-box;
+background-color: #378C95;
+/* Total width: 160px + (2 * 20px) + (2 * 8px) = 216px
+Total height: 80px + (2 * 20px) + (2 * 8px) = 136px
+Content box width: 160px
+Content box height: 80px */
+}
+
+.content-box-green {
+background-color: #d9edc2;
+}
+
+.content-box-red {
+background-color: #f9dbdb;
+}
 
 &lt;/style&gt;
 
@@ -77,6 +95,26 @@ class: left
 3. Conditional statements, loops ♾️
 
 4. **Fun**ctions 🤗 , apply
+
+---
+
+# Aim of statistical analysis
+
+--
+
+&gt; As we will see, the entire statistical methodology runs through an information-compressing approach.
+
+--
+
+1. Predictive tasks
+
+2. Descriptive tasks
+
+--
+
+- Exploratory
+
+- Confirmatory
 
 ---
 
@@ -229,6 +267,8 @@ class: middle, center, inverse
 
 ref: Introduction to Data Mining
 
+
+
 ---
 
 class: inverse, middle, center
@@ -304,17 +344,241 @@ Frequently arising issues:
 
 ---
 
+## An illlustrative story of data-related issues
+
 .blue[Statistician:] What? Field 1 is just an identification number. 
 
 .blue[Data Miner:] Nonetheless, my results speak for themselves.
 
-## An illlustrative story of data-related issues
 
 .blue[Data Miner:] Nonetheless, my results speak for themselves. 
 
 .blue[Statistician:] Oh, no! I just remembered. We assigned ID numbers after we sorted the records based on field 5. There is a strong connection, but it's meaningless. Sorry.
 
 .footnote[*Introduction to Data Mining, page 21-22*]
+
+
+---
+
+class: inverse, center, middle
+
+# Central Tendency
+
+## Descriptive statistics
+
+---
+
+# Different mean calculations
+
+#### 1. Arithmetic mean
+
+`$$\bar{Y}=\frac{Y_1+Y_2+\ldots+Y_N}{N}=\frac{\sum_{i=1}^N Y_i}{N}$$`
+
+#### 2. Geometric mean
+
+`$$\bar{Y}_g=\sqrt[N]{\prod_{i=1}^N Y_i}$$`
+
+#### 3. Harmonic mean
+`$$\bar{Y}_h=\frac{N}{\sum_{i=1}^N \frac{1}{Y_i}}$$`
+
+#### 4. Squared mean
+
+
+---
+
+## Arithmetic mean
+
+`$$\bar{Y}=\frac{Y_1+Y_2+\ldots+Y_N}{N}=\frac{\sum_{i=1}^N Y_i}{N}$$`
+
+Total sum of differences among the mean and the observations is zero
+
+`$$\sum\left(Y_i-\bar{Y}\right)=0$$`
+
+The total squared sum of differences among a given value and the observations reaches its minimum, if this number is mean
+
+`$$\sum\left(Y_i-A\right)^2=\text{min if }A=\bar{Y}$$`
+
+And if `\(L_i=A+BY_i\)` and `\(B\neq0\)`, then
+
+`$$\bar{L}=A+B\bar{Y}$$`
+
+---
+
+## Geometric mean
+
+`$$\bar{Y}=\sqrt[N]{\prod_{i=1}^N Y_i}$$`
+
+The average can also be interpreted as meaning that if all elements were replaced by this value, the sum of the elements would remain the same.
+
+Lets see the case of indexes:
+
+The GDP growth in one year was 5 percent and 5 percent in the following and 10 percent in the 3rd. 
+
+What was the total growth in the 3 years? 
+
+`$$1.05 \times 1.05 \times 1.10 = 1.21$$`
+However, arithmetic mean equals 20/3.
+
+**Use geometric mean if you are working with indexes!**
+
+---
+
+## Harmonic mean
+
+Consider two car owners who seek to reduce their costs:
+
+- Adam switches from a gas-guzzler of **12 mpg to** a slightly less voracious guzzler that runs at **14 mpg**.
+
+- The environmentally virtuous Beth switches from a Bon ss es **from 30 mpg car to** one that runs at **40 mpg**.
+
+Suppose both drivers travel **equal distances** over a year. .blue[Who will save more gas by switching?]
+
+--
+
+#### Adam
+
+
+$$
+10,000 / 12 - 10,000 / 14 = 119.05
+$$
+#### Beth
+
+$$
+10,000/30 - 10,000 / 40 = 83.33
+$$
+
+.footnote[Source: *Thinking fast and slow*]
+
+---
+
+## Harmonic mean
+
+It would be necessary to use the harmonic mean if we were to calculate the mean consumption in mpg. 
+
+
+And in all other cases where the weight we can use is in the **numerator of the fraction.**
+
+`$$\bar{Y}_h=\frac{N}{\sum_{i=1}^N \frac{1}{Y_i}}$$`
+---
+
+## Squared mean
+
+`$$\bar{Y}=\sqrt{\frac{\sum_{i=1}^N Y_i^2}{N}}$$`
+--
+
+Yeah. We will come back to this soon...
+
+---
+
+class: inverse, middle, center
+
+## Quartile
+
+---
+
+# Quartile
+
+Values that divide the observations into equal groups.
+
+
+| # groups |    Name     |
+|:--------:|:-----------:|
+|    2     |   Median    |
+|    3     |  Tertiles   |
+|    4     |  Quartiles  |
+|    5     |  Quintiles  |
+|    10    |   Deciles   |
+|    20    |  Ventiles   |
+|   100    | Percentiles |
+
+---
+
+# Quartile
+
+### Lets take the following sequence:
+
+3, 21, 34, 2, 54, 67, 87, 21, 35, 44, 98, 13, 14
+
+--
+
+### Step 1. Sort the values.
+
+2, 3, 13, 14, 21, 21, 34, 35, 44, 54, 67, 87, 98
+
+--
+
+### Step 2. Find the values. 😆
+
+--
+
+#### Median
+
+2, 3, 13, 14, 21, 21, **34**, 35, 44, 54, 67, 87, 98
+
+#### Quartiles
+
+2, 3, 13, **14**, 21, 21, **34**, 35, 44, **54**, 67, 87, 98
+
+---
+
+class: inverse, middle, center
+
+# Standard deviation, Variance, Range
+
+---
+
+## Standard deviation
+
+The average difference among the observations and the mean (?)
+
+--
+
+It was already mentioned that the sum of the deviations from the average is zero. If we divide zero by the number of observations it is still zero...
+
+--
+
+Here comes the squared mean!
+
+`$$\sigma=\sqrt{\frac{\sum_{i=1}^N\left(Y_i-\bar{Y}\right)^2}{N}}$$`
+
+--
+
+.content-box-green[
+HINT: Most of the time, when we see squaring and rooting at the same time, the purpose is to eliminate the balancing effect of the signs.
+]
+
+--
+
+## Variance
+
+Variance is simple the square of standard deviation.
+
+`$$\sigma^2=\frac{\sum_{i=1}^N\left(Y_i-\bar{Y}\right)^2}{N}$$`
+
+---
+
+## Range
+
+The spread of your data from the lowest to the highest value.
+
+### Interquartile range (IQR)
+
+`$$\text{IQR}=Q_3-Q1$$`
+
+### Interdecile range (IDR)
+
+`$$\text{IDR}=D_9-D1$$`
+
+---
+
+# Box plot
+
+&lt;img src="introduction-to-statistics_files/cropped-box-plot.png" width="1600" style="display: block; margin: auto;" /&gt;
+
+???
+
+source: https://dsanalyst.wordpress.com/2018/06/27/box-plot-and-its-uses/
+
 
 ---
 
@@ -324,6 +588,10 @@ Frequently arising issues:
 (2006).
 &amp;ldquo;Introduction to Data Mining&amp;rdquo;.
 &lt;/p&gt;&lt;/cite&gt;&lt;/p&gt;
+&lt;p&gt;&lt;cite&gt;Kahneman, D.
+(2011).
+&lt;em&gt;Thinking, fast and slow&lt;/em&gt;.
+Macmillan.&lt;/cite&gt;&lt;/p&gt;
 
 ---
 
