@@ -22,9 +22,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 1. [Course outline](course-outline.html)
 
-2. [Introduction to Statistics](introduction-to-statistics.html)
+1. [Introduction to Statistics](introduction-to-statistics.html)
 
-2. [Introduction to R](introduction-to-r.html)
+1. [Introduction to R](introduction-to-r.html)
+
+1. [Tidyverse](tidyverse.html)
 
 ------------------------------------------------------------------------
 
