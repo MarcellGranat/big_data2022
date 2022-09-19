@@ -74,7 +74,7 @@ background-color: #f9dbdb;
 }
 
 .fullprice {
-    text-decoration: line-through;
+text-decoration: line-through;
 }
 &lt;/style&gt;
 
@@ -186,6 +186,8 @@ fertility_df &lt;- read_csv("https://stats.oecd.org/sdmx-json/data/DP_LIVE/.FERT
 ```
 
 
+
+
 ```r
 fertility_df
 ```
@@ -272,9 +274,9 @@ fertility_df %&gt;%
 
 # The pipe - an example
 
-Without the `%&gt;%` 2 possiblities exist to use the result of the `filter` in the `count` function
+Without the `%&gt;%` 2 possibilities exist to use the result of the `filter` in the `count` function
 
-#### `#1 Assigning a new data frame
+#### 1 Assigning a new data frame
 
 
 ```r
@@ -282,7 +284,7 @@ fertility_df2 &lt;- filter(fertility_df, Value &gt;= 2.1)
 count(fertility_df2, TIME)
 ```
 
-#### `#2 Unreadable nesting
+#### 2 Unreadable nesting
 
 
 ```r
@@ -319,6 +321,8 @@ fertility_df %&gt;%
   count(TIME)
 ```
 
+.pull-left[
+
 ```
 ## # A tibble: 61 × 2
 ##     TIME     n
@@ -335,10 +339,15 @@ fertility_df %&gt;%
 ## 10  1969    42
 ## # … with 51 more rows
 ```
+]
+
+.pull-right[
+&lt;img src="tidyverse_files/meme_absolute_win.png" width="907" style="display: block; margin: auto;" /&gt;
+]
 
 --
 
-**There is no additional unnecessary object in the env, and readable**
+**No additional unnecessary object in the env, and the code readable**
 
 ---
 
@@ -358,8 +367,1416 @@ background-size: contain
 
 &lt;img src="tidyverse_files/data-transformation - 02.jpg" width="6013" style="display: block; margin: auto;" /&gt;
 
+---
+
+# Manipulate - select
 
 
+--
+
+`select()`  Extract the specified columns as a table.
+
+
+```r
+select(.data = fertility_df, LOCATION, TIME, Value)
+```
+
+.pull-left[
+
+```
+## # A tibble: 3,239 × 3
+##    LOCATION  TIME Value
+##    &lt;chr&gt;    &lt;dbl&gt; &lt;dbl&gt;
+##  1 AUS       1960  3.45
+##  2 AUS       1961  3.55
+##  3 AUS       1962  3.43
+##  4 AUS       1963  3.34
+##  5 AUS       1964  3.15
+##  6 AUS       1965  2.97
+##  7 AUS       1966  2.89
+##  8 AUS       1967  2.85
+##  9 AUS       1968  2.89
+## 10 AUS       1969  2.89
+## # … with 3,229 more rows
+```
+]
+
+.pull-right[
+
+#### Identical outcome
+
+
+```r
+fertility_df %&gt;% 
+  select(LOCATION, TIME, Value)
+```
+
+
+```r
+fertility_df %&gt;% 
+  select(1, 6:7)
+```
+
+
+```r
+fertility_df %&gt;% 
+  select(- (2:5), -`Flag Codes`)
+```
+]
+
+---
+
+# Manipulate - rename
+
+`rename()` Rename columns.
+
+
+```r
+fertility_df %&gt;% 
+  select(LOCATION, TIME, Value) %&gt;% 
+  rename(geo = LOCATION, fertility = Value)
+```
+
+.pull-left[
+
+```
+## # A tibble: 3,239 × 3
+##    geo    TIME fertility
+##    &lt;chr&gt; &lt;dbl&gt;     &lt;dbl&gt;
+##  1 AUS    1960      3.45
+##  2 AUS    1961      3.55
+##  3 AUS    1962      3.43
+##  4 AUS    1963      3.34
+##  5 AUS    1964      3.15
+##  6 AUS    1965      2.97
+##  7 AUS    1966      2.89
+##  8 AUS    1967      2.85
+##  9 AUS    1968      2.89
+## 10 AUS    1969      2.89
+## # … with 3,229 more rows
+```
+]
+
+--
+
+.pull-right[
+
+.content-box-green[
+HINT: You can do it in 1 single step.
+]
+
+
+```r
+fertility_df %&gt;% 
+  select(
+    geo = LOCATION, 
+    TIME,
+    fertility = Value
+  )
+```
+]
+
+---
+
+# Manipulate - mutate
+
+`mutate()` Compute new column(s).
+
+`countrycode::countrycode()`  Translates from one contry name scheme to another. 
+
+
+```r
+library(countrycode)
+
+fertility_df %&gt;% 
+  select(LOCATION, TIME, Value) %&gt;% 
+* mutate(
+    country_name = countrycode(LOCATION, "iso3c", "country.name"),
+    continent = countrycode(LOCATION, "iso3c", "continent")
+  )
+```
+
+
+```
+## # A tibble: 3,239 × 5
+##    LOCATION  TIME Value country_name continent
+##    &lt;chr&gt;    &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;        &lt;chr&gt;    
+##  1 AU        1960  3.45 Australia    Oceania  
+##  2 AU        1961  3.55 Australia    Oceania  
+##  3 AU        1962  3.43 Australia    Oceania  
+##  4 AU        1963  3.34 Australia    Oceania  
+##  5 AU        1964  3.15 Australia    Oceania  
+##  6 AU        1965  2.97 Australia    Oceania  
+##  7 AU        1966  2.89 Australia    Oceania  
+##  8 AU        1967  2.85 Australia    Oceania  
+##  9 AU        1968  2.89 Australia    Oceania  
+## 10 AU        1969  2.89 Australia    Oceania  
+## # … with 3,229 more rows
+```
+
+---
+
+# Manipulate - mutate
+
+.content-box-red[
+WARNING: If you specify a single value instead of a vector, then the values will be repeated by the number of rows.
+]
+
+
+```r
+fertility_df %&gt;% 
+  select(LOCATION, TIME, Value) %&gt;% 
+  mutate(avg_fertility = mean(Value))
+```
+
+```
+## # A tibble: 3,239 × 4
+##    LOCATION  TIME Value avg_fertility
+##    &lt;chr&gt;    &lt;dbl&gt; &lt;dbl&gt;         &lt;dbl&gt;
+##  1 AUS       1960  3.45          2.36
+##  2 AUS       1961  3.55          2.36
+##  3 AUS       1962  3.43          2.36
+##  4 AUS       1963  3.34          2.36
+##  5 AUS       1964  3.15          2.36
+##  6 AUS       1965  2.97          2.36
+##  7 AUS       1966  2.89          2.36
+##  8 AUS       1967  2.85          2.36
+##  9 AUS       1968  2.89          2.36
+## 10 AUS       1969  2.89          2.36
+## # … with 3,229 more rows
+```
+
+---
+
+# Manipulate - ifelse
+
+`ifelse()` returns a vector filled with elements selected from either yes or no depending on the condition.
+
+
+```r
+fertility_df %&gt;% 
+  select(LOCATION, TIME, Value) %&gt;% 
+  mutate(
+    avg_fertility = mean(Value),
+    above_avg = Value &gt; avg_fertility,
+*   high = ifelse(above_avg, "yes, above the avg", "no")
+  )
+```
+
+
+```
+## # A tibble: 3,239 × 6
+##    LOCATION  TIME Value avg_fertility above_avg high              
+##    &lt;chr&gt;    &lt;dbl&gt; &lt;dbl&gt;         &lt;dbl&gt; &lt;lgl&gt;     &lt;chr&gt;             
+##  1 AUS       1960  3.45          2.36 TRUE      yes, above the avg
+##  2 AUS       1961  3.55          2.36 TRUE      yes, above the avg
+##  3 AUS       1962  3.43          2.36 TRUE      yes, above the avg
+##  4 AUS       1963  3.34          2.36 TRUE      yes, above the avg
+##  5 AUS       1964  3.15          2.36 TRUE      yes, above the avg
+##  6 AUS       1965  2.97          2.36 TRUE      yes, above the avg
+##  7 AUS       1966  2.89          2.36 TRUE      yes, above the avg
+##  8 AUS       1967  2.85          2.36 TRUE      yes, above the avg
+##  9 AUS       1968  2.89          2.36 TRUE      yes, above the avg
+## 10 AUS       1969  2.89          2.36 TRUE      yes, above the avg
+## # … with 3,229 more rows
+```
+
+---
+
+# Manipulate - ifelse
+
+`ifelse()` returns a vector filled with elements selected from either yes or no depending on the condition.
+
+
+```r
+fertility_df %&gt;% 
+  select(LOCATION, TIME, Value) %&gt;% 
+  mutate(
+    avg_fertility = mean(Value),
+    above_avg = Value &gt; avg_fertility,
+    high = ifelse(above_avg, "yes, above the avg", "no")
+  )
+```
+
+With a single step
+
+
+```r
+fertility_df %&gt;% 
+  select(LOCATION, TIME, Value) %&gt;% 
+  mutate(
+*   high = ifelse(Value &gt; mean(value), "yes, above the avg", "no")
+  )
+```
+
+---
+
+# Manipulate - case_when
+
+`case_when()` Vectorise multiple if_else() statements (return the first value associated with TRUE condition)
+
+
+```r
+fertility_df %&gt;% 
+  select(LOCATION, TIME, Value) %&gt;% 
+  mutate(
+*     fertility_level = case_when(
+      Value &gt;= 5 ~ "very high",
+      Value &gt;= 3 ~ "high", 
+      Value &gt;= 2.1 ~ "above replacement r",
+      Value &gt;= 1.3 ~ "below replacemnt r",
+      TRUE ~ "very low"
+    )
+  )
+```
+
+
+|LOCATION | TIME| Value|fertility_level     |
+|:--------|----:|-----:|:-------------------|
+|AUS      | 1960|  3.45|high                |
+|AUS      | 1965|  2.97|above replacement r |
+|AUS      | 1976|  2.06|below replacemnt r  |
+|CZE      | 1995|  1.28|very low            |
+|KOR      | 1960|  6.00|very high           |
+
+---
+
+# Manipulate - transmute
+
+`transmute()` Compute new column(s), drop others. (= select + mutate)
+
+
+```r
+fertility_df %&gt;% 
+* transmute(LOCATION, TIME, 
+              fertility_level = case_when(
+                Value &gt;= 5 ~ "very high",
+                Value &gt;= 3 ~ "high", 
+                Value &gt;= 2.1 ~ "above replacement r",
+                Value &gt;= 1.3 ~ "below replacemnt r",
+                TRUE ~ "very low" 
+              )
+  )
+```
+
+
+```
+## # A tibble: 3,239 × 3
+##    LOCATION  TIME fertility_level    
+##    &lt;chr&gt;    &lt;dbl&gt; &lt;chr&gt;              
+##  1 AUS       1960 high               
+##  2 AUS       1961 high               
+##  3 AUS       1962 high               
+##  4 AUS       1963 high               
+##  5 AUS       1964 high               
+##  6 AUS       1965 above replacement r
+##  7 AUS       1966 above replacement r
+##  8 AUS       1967 above replacement r
+##  9 AUS       1968 above replacement r
+## 10 AUS       1969 above replacement r
+## # … with 3,229 more rows
+```
+
+---
+
+# Manipulate - filter
+
+`filter()` Extract rows that meet logical criteria.
+
+
+```r
+fertility_df %&gt;% 
+  filter(LOCATION != "EU" &amp; LOCATION != "OAVG")
+```
+
+```
+## # A tibble: 3,119 × 8
+##    LOCATION INDICATOR SUBJECT MEASURE   FREQUENCY  TIME Value `Flag Codes`
+##    &lt;chr&gt;    &lt;chr&gt;     &lt;chr&gt;   &lt;chr&gt;     &lt;chr&gt;     &lt;dbl&gt; &lt;dbl&gt; &lt;lgl&gt;       
+##  1 AUS      FERTILITY TOT     CHD_WOMAN A          1960  3.45 NA          
+##  2 AUS      FERTILITY TOT     CHD_WOMAN A          1961  3.55 NA          
+##  3 AUS      FERTILITY TOT     CHD_WOMAN A          1962  3.43 NA          
+##  4 AUS      FERTILITY TOT     CHD_WOMAN A          1963  3.34 NA          
+##  5 AUS      FERTILITY TOT     CHD_WOMAN A          1964  3.15 NA          
+##  6 AUS      FERTILITY TOT     CHD_WOMAN A          1965  2.97 NA          
+##  7 AUS      FERTILITY TOT     CHD_WOMAN A          1966  2.89 NA          
+##  8 AUS      FERTILITY TOT     CHD_WOMAN A          1967  2.85 NA          
+##  9 AUS      FERTILITY TOT     CHD_WOMAN A          1968  2.89 NA          
+## 10 AUS      FERTILITY TOT     CHD_WOMAN A          1969  2.89 NA          
+## # … with 3,109 more rows
+```
+
+---
+
+# Manipulate - slice
+
+`slice()` Select rows by positiion
+
+
+```r
+fertility_df %&gt;% 
+  slice(1:3)
+```
+
+```
+## # A tibble: 3 × 8
+##   LOCATION INDICATOR SUBJECT MEASURE   FREQUENCY  TIME Value `Flag Codes`
+##   &lt;chr&gt;    &lt;chr&gt;     &lt;chr&gt;   &lt;chr&gt;     &lt;chr&gt;     &lt;dbl&gt; &lt;dbl&gt; &lt;lgl&gt;       
+## 1 AUS      FERTILITY TOT     CHD_WOMAN A          1960  3.45 NA          
+## 2 AUS      FERTILITY TOT     CHD_WOMAN A          1961  3.55 NA          
+## 3 AUS      FERTILITY TOT     CHD_WOMAN A          1962  3.43 NA
+```
+
+---
+
+# Manipulate - arrange
+
+`arrange()` Order rows by values of a column or columns (low to high), use with `desc()` to order from high to low.
+
+.pull-left[
+
+```r
+fertility_df %&gt;% 
+  select(LOCATION, TIME, 
+         Value) %&gt;% 
+* arrange(Value)
+```
+
+
+```
+## # A tibble: 3,239 × 3
+##    LOCATION  TIME Value
+##    &lt;chr&gt;    &lt;dbl&gt; &lt;dbl&gt;
+##  1 KOR       2021  0.81
+##  2 KOR       2020  0.84
+##  3 KOR       2019  0.92
+##  4 KOR       2018  0.98
+##  5 KOR       2017  1.05
+##  6 KOR       2005  1.09
+##  7 BGR       1997  1.09
+##  8 LVA       1998  1.1 
+##  9 LVA       1997  1.11
+## 10 BGR       1998  1.11
+## # … with 3,229 more rows
+```
+]
+
+.pull-right[
+
+```r
+fertility_df %&gt;% 
+  select(LOCATION, TIME, 
+         Value) %&gt;% 
+* arrange(desc(Value))
+```
+
+
+```
+## # A tibble: 3,239 × 3
+##    LOCATION  TIME Value
+##    &lt;chr&gt;    &lt;dbl&gt; &lt;dbl&gt;
+##  1 SAU       1973  7.31
+##  2 SAU       1974  7.31
+##  3 SAU       1975  7.31
+##  4 SAU       1976  7.31
+##  5 SAU       1972  7.3 
+##  6 SAU       1977  7.3 
+##  7 SAU       1971  7.29
+##  8 SAU       1970  7.28
+##  9 SAU       1978  7.28
+## 10 SAU       1968  7.27
+## # … with 3,229 more rows
+```
+]
+
+---
+
+# Manipulate - group_by &amp; summarise
+
+`group_by()` Create a "grouped" copy of a table.
+
+`summarise()` Compute table of summaries.
+
+
+```r
+fertility_df %&gt;% 
+* group_by(LOCATION)
+```
+
+
+```
+## # A tibble: 3,239 × 8
+## # Groups:   LOCATION [54]
+##    LOCATION INDICATOR SUBJECT MEASURE   FREQUENCY  TIME Value `Flag Codes`
+##    &lt;chr&gt;    &lt;chr&gt;     &lt;chr&gt;   &lt;chr&gt;     &lt;chr&gt;     &lt;dbl&gt; &lt;dbl&gt; &lt;lgl&gt;       
+##  1 AUS      FERTILITY TOT     CHD_WOMAN A          1960  3.45 NA          
+##  2 AUS      FERTILITY TOT     CHD_WOMAN A          1961  3.55 NA          
+##  3 AUS      FERTILITY TOT     CHD_WOMAN A          1962  3.43 NA          
+##  4 AUS      FERTILITY TOT     CHD_WOMAN A          1963  3.34 NA          
+##  5 AUS      FERTILITY TOT     CHD_WOMAN A          1964  3.15 NA          
+##  6 AUS      FERTILITY TOT     CHD_WOMAN A          1965  2.97 NA          
+##  7 AUS      FERTILITY TOT     CHD_WOMAN A          1966  2.89 NA          
+##  8 AUS      FERTILITY TOT     CHD_WOMAN A          1967  2.85 NA          
+##  9 AUS      FERTILITY TOT     CHD_WOMAN A          1968  2.89 NA          
+## 10 AUS      FERTILITY TOT     CHD_WOMAN A          1969  2.89 NA          
+## # … with 3,229 more rows
+```
+
+---
+
+# Manipulate - group_by &amp; summarise
+
+`group_by()` Create a "grouped" copy of a table.
+
+`summarise()` Compute table of summaries.
+
+
+```r
+fertility_df %&gt;% 
+  group_by(LOCATION) %&gt;% 
+* summarise(avg_fertility = mean(Value))
+```
+
+
+```
+## # A tibble: 54 × 2
+##    LOCATION avg_fertility
+##    &lt;chr&gt;            &lt;dbl&gt;
+##  1 ARG               2.82
+##  2 AUS               2.13
+##  3 AUT               1.73
+##  4 BEL               1.84
+##  5 BGR               1.77
+##  6 BRA               3.33
+##  7 CAN               1.91
+##  8 CHE               1.70
+##  9 CHL               2.70
+## 10 CHN               2.97
+## # … with 44 more rows
+```
+
+---
+
+# Manipulate - group_by &amp; summarise
+
+`group_by()` Create a "grouped" copy of a table.
+
+`summarise()` Compute table of summaries.
+
+#### Example - number of observations
+
+.pull-left[
+
+
+```r
+fertility_df %&gt;% 
+  group_by(LOCATION) %&gt;% 
+* summarise(n_obs = n())
+```
+
+
+```
+## # A tibble: 54 × 2
+##    LOCATION n_obs
+##    &lt;chr&gt;    &lt;int&gt;
+##  1 ARG         61
+##  2 AUS         61
+##  3 AUT         61
+##  4 BEL         61
+##  5 BGR         61
+##  6 BRA         61
+##  7 CAN         61
+##  8 CHE         62
+##  9 CHL         61
+## 10 CHN         61
+## # … with 44 more rows
+```
+]
+
+.pull-right[
+You can also replicate it with the `count()` fn.
+
+
+```r
+fertility_df %&gt;% 
+  count(LOCATION)
+```
+
+```
+## # A tibble: 54 × 2
+##    LOCATION     n
+##    &lt;chr&gt;    &lt;int&gt;
+##  1 ARG         61
+##  2 AUS         61
+##  3 AUT         61
+##  4 BEL         61
+##  5 BGR         61
+##  6 BRA         61
+##  7 CAN         61
+##  8 CHE         62
+##  9 CHL         61
+## 10 CHN         61
+## # … with 44 more rows
+```
+
+]
+
+---
+
+# Manipulate - group_by &amp; summarise
+
+`group_by()` Create a "grouped" copy of a table.
+
+`summarise()` Compute table of summaries.
+
+.content-box-red[
+Every other manipulation will behave differently if the data frame is grouped.
+]
+
+
+
+```r
+fertility_df %&gt;% 
+  select(LOCATION, TIME, Value) %&gt;% 
+  group_by(LOCATION) %&gt;% 
+* mutate(avg_fertility = mean(Value)) %&gt;% 
+* slice(1:3)
+```
+
+--
+
+
+```
+## # A tibble: 162 × 4
+## # Groups:   LOCATION [54]
+##    LOCATION  TIME Value avg_fertility
+##    &lt;chr&gt;    &lt;dbl&gt; &lt;dbl&gt;         &lt;dbl&gt;
+##  1 ARG       1960  3.11          2.82
+##  2 ARG       1961  3.1           2.82
+##  3 ARG       1962  3.09          2.82
+##  4 AUS       1960  3.45          2.13
+##  5 AUS       1961  3.55          2.13
+##  6 AUS       1962  3.43          2.13
+##  7 AUT       1960  2.69          1.73
+##  8 AUT       1961  2.78          1.73
+##  9 AUT       1962  2.8           1.73
+## 10 BEL       1960  2.54          1.84
+## # … with 152 more rows
+```
+
+---
+
+## Exercise
+
+.blue[In which decade did the average fertility rate of European countries decrease the most? (in absolute magnitude)]
+
+.content-box-green[
+HINT: use the `first()` and the `last()` fn to calculate difference in a period.
+]
+
+--
+
+
+```r
+fertility_df %&gt;% 
+  select(LOCATION, TIME, Value) %&gt;% 
+  filter(countrycode(LOCATION, "iso3c", "continent") == "Europe") %&gt;% 
+  group_by(TIME) %&gt;% 
+  summarise(avg_fertility = mean(Value)) %&gt;% 
+  arrange(TIME) %&gt;% 
+* mutate(decade = (TIME %/% 10) * 10) %&gt;% 
+  group_by(decade) %&gt;% 
+* summarise(d_fertility = last(avg_fertility) - first(avg_fertility)) %&gt;% 
+  arrange(d_fertility)
+```
+
+
+```
+## # A tibble: 7 × 2
+##   decade d_fertility
+##    &lt;dbl&gt;       &lt;dbl&gt;
+## 1   1970     -0.317 
+## 2   1990     -0.312 
+## 3   1960     -0.248 
+## 4   1980     -0.178 
+## 5   2010     -0.0952
+## 6   2020      0.114 
+## 7   2000      0.138
+```
+
+---
+
+# ..._if, ..._at, ..._all
+
+Some of the previously listed functions have extended versions
+
+--
+
+### Select all columns where the condition is TRUE
+
+
+```r
+fertility_df %&gt;% 
+  select_if(is.numeric)
+```
+
+```
+## # A tibble: 3,239 × 2
+##     TIME Value
+##    &lt;dbl&gt; &lt;dbl&gt;
+##  1  1960  3.45
+##  2  1961  3.55
+##  3  1962  3.43
+##  4  1963  3.34
+##  5  1964  3.15
+##  6  1965  2.97
+##  7  1966  2.89
+##  8  1967  2.85
+##  9  1968  2.89
+## 10  1969  2.89
+## # … with 3,229 more rows
+```
+
+---
+
+# ..._if, ..._at, ..._all
+
+Some of the previously listed functions have extended versions
+
+
+### Modify all columns where the condition is true
+
+HINT: mainly you will use quosure style lambda functions here. This means that after `~`, you can refer with `.` to the current element.
+
+
+```r
+fertility_df %&gt;% 
+  mutate_if(is.numeric, ~ . * 10)
+```
+
+```
+## # A tibble: 3,239 × 8
+##    LOCATION INDICATOR SUBJECT MEASURE   FREQUENCY  TIME Value `Flag Codes`
+##    &lt;chr&gt;    &lt;chr&gt;     &lt;chr&gt;   &lt;chr&gt;     &lt;chr&gt;     &lt;dbl&gt; &lt;dbl&gt; &lt;lgl&gt;       
+##  1 AUS      FERTILITY TOT     CHD_WOMAN A         19600  34.5 NA          
+##  2 AUS      FERTILITY TOT     CHD_WOMAN A         19610  35.5 NA          
+##  3 AUS      FERTILITY TOT     CHD_WOMAN A         19620  34.3 NA          
+##  4 AUS      FERTILITY TOT     CHD_WOMAN A         19630  33.4 NA          
+##  5 AUS      FERTILITY TOT     CHD_WOMAN A         19640  31.5 NA          
+##  6 AUS      FERTILITY TOT     CHD_WOMAN A         19650  29.7 NA          
+##  7 AUS      FERTILITY TOT     CHD_WOMAN A         19660  28.9 NA          
+##  8 AUS      FERTILITY TOT     CHD_WOMAN A         19670  28.5 NA          
+##  9 AUS      FERTILITY TOT     CHD_WOMAN A         19680  28.9 NA          
+## 10 AUS      FERTILITY TOT     CHD_WOMAN A         19690  28.9 NA          
+## # … with 3,229 more rows
+```
+
+---
+
+class: inverse, middle, center
+
+## The {dplyr} functions will return in the next episodes of the tidyverse.
+
+---
+
+background-image: url("tidyverse_files/tidyr-logo.png")
+background-position: center
+background-size: contain
+
+---
+
+# Pivot_wider
+
+Datasets are in long on wide format (but never in the currently desired one `ji("laugh")`)
+
+(The following example is the one we saw last week to present the apply functions. In STATA you mainly operate with tables in wide format)
+
+
+```r
+fertility_wide &lt;- fertility_df %&gt;% 
+  select(LOCATION, TIME, Value) %&gt;% 
+  pivot_wider(names_from = LOCATION, values_from = Value)
+
+fertility_wide
+```
+
+```
+## # A tibble: 62 × 55
+##     TIME   AUS   AUT   BEL   CAN   CZE   DNK   FIN   FRA   DEU   GRC   HUN   ISL
+##    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+##  1  1960  3.45  2.69  2.54  3.9   2.11  2.54  2.71  2.74  2.37  2.23  2.02  4.26
+##  2  1961  3.55  2.78  2.63  3.84  2.13  2.55  2.65  2.82  2.44  2.13  1.94  3.88
+##  3  1962  3.43  2.8   2.59  3.76  2.14  2.54  2.66  2.8   2.44  2.16  1.79  3.98
+##  4  1963  3.34  2.82  2.68  3.67  2.33  2.64  2.66  2.9   2.51  2.14  1.82  3.98
+##  5  1964  3.15  2.79  2.72  3.5   2.36  2.6   2.58  2.91  2.53  2.24  1.8   3.86
+##  6  1965  2.97  2.7   2.62  3.15  2.18  2.61  2.46  2.85  2.5   2.25  1.81  3.71
+##  7  1966  2.89  2.66  2.52  2.81  2.01  2.62  2.4   2.8   2.51  2.32  1.88  3.58
+##  8  1967  2.85  2.62  2.41  2.6   1.9   2.35  2.32  2.67  2.45  2.45  2.01  3.28
+##  9  1968  2.89  2.58  2.31  2.45  1.83  2.12  2.15  2.59  2.36  2.42  2.06  3.07
+## 10  1969  2.89  2.49  2.28  2.4   1.86  2     1.94  2.53  2.21  2.36  2.04  2.99
+## # … with 52 more rows, and 42 more variables: IRL &lt;dbl&gt;, ITA &lt;dbl&gt;, JPN &lt;dbl&gt;,
+## #   KOR &lt;dbl&gt;, LUX &lt;dbl&gt;, MEX &lt;dbl&gt;, NLD &lt;dbl&gt;, NZL &lt;dbl&gt;, NOR &lt;dbl&gt;,
+## #   POL &lt;dbl&gt;, PRT &lt;dbl&gt;, SVK &lt;dbl&gt;, ESP &lt;dbl&gt;, SWE &lt;dbl&gt;, CHE &lt;dbl&gt;,
+## #   TUR &lt;dbl&gt;, GBR &lt;dbl&gt;, USA &lt;dbl&gt;, BRA &lt;dbl&gt;, CHL &lt;dbl&gt;, CHN &lt;dbl&gt;,
+## #   EST &lt;dbl&gt;, IND &lt;dbl&gt;, IDN &lt;dbl&gt;, ISR &lt;dbl&gt;, RUS &lt;dbl&gt;, SVN &lt;dbl&gt;,
+## #   ZAF &lt;dbl&gt;, COL &lt;dbl&gt;, LVA &lt;dbl&gt;, LTU &lt;dbl&gt;, ARG &lt;dbl&gt;, BGR &lt;dbl&gt;,
+## #   HRV &lt;dbl&gt;, CYP &lt;dbl&gt;, MLT &lt;dbl&gt;, ROU &lt;dbl&gt;, SAU &lt;dbl&gt;, OAVG &lt;dbl&gt;, …
+```
+
+---
+
+# Pivot_longer
+
+Yes, `pivot_longer` is to convert back the table into long format.
+
+
+```r
+fertility_wide %&gt;% 
+  pivot_longer(
+    cols = - 1, # all except the 1st
+    # 2:last_col()
+    # AUS, AUT, ... also work
+    names_to = "LOCATION",
+    values_to = "fertility"
+  )
+```
+
+```
+## # A tibble: 3,348 × 3
+##     TIME LOCATION fertility
+##    &lt;dbl&gt; &lt;chr&gt;        &lt;dbl&gt;
+##  1  1960 AUS           3.45
+##  2  1960 AUT           2.69
+##  3  1960 BEL           2.54
+##  4  1960 CAN           3.9 
+##  5  1960 CZE           2.11
+##  6  1960 DNK           2.54
+##  7  1960 FIN           2.71
+##  8  1960 FRA           2.74
+##  9  1960 DEU           2.37
+## 10  1960 GRC           2.23
+## # … with 3,338 more rows
+```
+
+---
+
+### Example
+
+Lets download the [infant mortality rates from Eurostat](https://appsso.eurostat.ec.europa.eu/nui/submitViewTableAction.do) (in Excel format) and link it with the `fertility_df`
+
+&lt;img src="tidyverse_files/eurostat-infant.png" width="4565" style="display: block; margin: auto;" /&gt;
+
+---
+
+
+```r
+infant_mortality_df &lt;- readxl::read_excel("tidyverse_files/demo_minfind.xls")
+```
+
+The issue here is that there are multiple tables on the first sheet (not a rare thing).
+
+
+```r
+infant_mortality_df
+```
+
+```
+## # A tibble: 339 × 62
+##    `Infant mortali…` ...2  ...3  ...4  ...5  ...6  ...7  ...8  ...9  ...10 ...11
+##    &lt;chr&gt;             &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;
+##  1 &lt;NA&gt;              &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+##  2 Last update       4474… &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+##  3 Extracted on      4482… &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+##  4 Source of data    Euro… &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+##  5 &lt;NA&gt;              &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+##  6 INDIC_DE          Earl… &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+##  7 UNIT              Rate  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+##  8 &lt;NA&gt;              &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt; 
+##  9 GEO/TIME          1960  1961  1962  1963  1964  1965  1966  1967  1968  1969 
+## 10 European Union -… :     :     :     :     :     :     :     :     :     :    
+## # … with 329 more rows, and 51 more variables: ...12 &lt;chr&gt;, ...13 &lt;chr&gt;,
+## #   ...14 &lt;chr&gt;, ...15 &lt;chr&gt;, ...16 &lt;chr&gt;, ...17 &lt;chr&gt;, ...18 &lt;chr&gt;,
+## #   ...19 &lt;chr&gt;, ...20 &lt;chr&gt;, ...21 &lt;chr&gt;, ...22 &lt;chr&gt;, ...23 &lt;chr&gt;,
+## #   ...24 &lt;chr&gt;, ...25 &lt;chr&gt;, ...26 &lt;chr&gt;, ...27 &lt;chr&gt;, ...28 &lt;chr&gt;,
+## #   ...29 &lt;chr&gt;, ...30 &lt;chr&gt;, ...31 &lt;chr&gt;, ...32 &lt;chr&gt;, ...33 &lt;chr&gt;,
+## #   ...34 &lt;chr&gt;, ...35 &lt;chr&gt;, ...36 &lt;chr&gt;, ...37 &lt;chr&gt;, ...38 &lt;chr&gt;,
+## #   ...39 &lt;chr&gt;, ...40 &lt;chr&gt;, ...41 &lt;chr&gt;, ...42 &lt;chr&gt;, ...43 &lt;chr&gt;, …
+```
+
+---
+
+### Example
+
+After exploring the data, you may realize that the name of the data is always in the second column. Our table starts after where find the "Infant mortality rate". 
+
+
+```r
+pull(infant_mortality_df, 2) # 2nd column as vector
+```
+
+```
+##   [1] NA                              "44742.521828703699"           
+##   [3] "44822.86385927083"             "Eurostat"                     
+##   [5] NA                              "Early neonatal mortality rate"
+##   [7] "Rate"                          NA                             
+##   [9] "1960"                          ":"                            
+##  [11] ":"                             ":"                            
+##  [13] ":"                             ":"                            
+##  [15] "17.100000000000001"            "10.9"                         
+##  [17] "10.699999999999999"            "13.9"                         
+##  [19] "20.800000000000001"            "19.699999999999999"           
+##  [21] "9.5999999999999996"            "16.100000000000001"           
+##  [23] "12.300000000000001"            "15.9"                         
+##  [25] ":"                             "14.6"                         
+##  [27] "21"                            "17.800000000000001"           
+##  [29] ":"                             ":"                            
+##  [31] "7.2999999999999998"            "16.300000000000001"           
+##  [33] "22.100000000000001"            ":"                            
+##  [35] "11.9"                          "20.199999999999999"           
+##  [37] ":"                             "15"                           
+##  [39] ":"                             "15.6"                         
+##  [41] "10.300000000000001"            "12.6"                         
+##  [43] "11.800000000000001"            ":"                            
+##  [45] ":"                             ":"                            
+##  [47] ":"                             "7.0999999999999996"           
+##  [49] ":"                             "9.9000000000000004"           
+##  [51] "14.4"                          "13.699999999999999"           
+##  [53] ":"                             "18.600000000000001"           
+##  [55] ":"                             ":"                            
+##  [57] ":"                             ":"                            
+##  [59] ":"                             "17.300000000000001"           
+##  [61] ":"                             ":"                            
+##  [63] ":"                             ":"                            
+##  [65] ":"                             ":"                            
+##  [67] ":"                             ":"                            
+##  [69] NA                              NA                             
+##  [71] "not available"                 NA                             
+##  [73] "Infant mortality rate"         "Rate"                         
+##  [75] NA                              "1960"                         
+##  [77] ":"                             ":"                            
+##  [79] ":"                             ":"                            
+##  [81] ":"                             "31.399999999999999"           
+##  [83] "45.100000000000001"            "20"                           
+##  [85] "21.5"                          "33.799999999999997"           
+##  [87] "35"                            "31.100000000000001"           
+##  [89] "29.300000000000001"            "40.100000000000001"           
+##  [91] "35.399999999999999"            ":"                            
+##  [93] "27.699999999999999"            "70.400000000000006"           
+##  [95] "43.899999999999999"            ":"                            
+##  [97] "27"                            "38"                           
+##  [99] "31.5"                          "47.600000000000001"           
+## [101] "38.299999999999997"            "16.5"                         
+## [103] "37.5"                          "56.100000000000001"           
+## [105] "77.5"                          "75.700000000000003"           
+## [107] "35.100000000000001"            "28.600000000000001"           
+## [109] "21"                            "16.600000000000001"           
+## [111] ":"                             ":"                            
+## [113] ":"                             "18.899999999999999"           
+## [115] "13"                            "21.100000000000001"           
+## [117] "16"                            "21.100000000000001"           
+## [119] "22.5"                          ":"                            
+## [121] "114.59999999999999"            "83"                           
+## [123] ":"                             ":"                            
+## [125] ":"                             ":"                            
+## [127] "107"                           "132.5"                        
+## [129] ":"                             ":"                            
+## [131] ":"                             ":"                            
+## [133] ":"                             ":"                            
+## [135] ":"                             NA                             
+## [137] NA                              "not available"                
+## [139] NA                              "Late foetal mortality rate"   
+## [141] "Rate"                          NA                             
+## [143] "1960"                          ":"                            
+## [145] ":"                             ":"                            
+## [147] ":"                             ":"                            
+## [149] "15.300000000000001"            "12.199999999999999"           
+## [151] "9.8000000000000007"            "12.4"                         
+## [153] "15.300000000000001"            "15.5"                         
+## [155] "13"                            "21.899999999999999"           
+## [157] "14.300000000000001"            "27.300000000000001"           
+## [159] ":"                             "17"                           
+## [161] "12.4"                          "24.5"                         
+## [163] ":"                             "10.699999999999999"           
+## [165] "8.9000000000000004"            "16.100000000000001"           
+## [167] "13.199999999999999"            ":"                            
+## [169] "14.9"                          "15"                           
+## [171] "12.5"                          "26.5"                         
+## [173] "15.9"                          "14.199999999999999"           
+## [175] "10.9"                          "15.1"                         
+## [177] "13.699999999999999"            ":"                            
+## [179] ":"                             ":"                            
+## [181] "12.4"                          "12.699999999999999"           
+## [183] "10.4"                          "13.9"                         
+## [185] "11.4"                          "20.100000000000001"           
+## [187] ":"                             "9.8000000000000007"           
+## [189] ":"                             ":"                            
+## [191] ":"                             ":"                            
+## [193] ":"                             "8.6999999999999993"           
+## [195] ":"                             ":"                            
+## [197] ":"                             ":"                            
+## [199] ":"                             ":"                            
+## [201] ":"                             ":"                            
+## [203] NA                              NA                             
+## [205] "not available"                 NA                             
+## [207] "Neonatal mortality rate"       "Rate"                         
+## [209] NA                              "1960"                         
+## [211] ":"                             ":"                            
+## [213] ":"                             ":"                            
+## [215] ":"                             "20.5"                         
+## [217] "19.399999999999999"            "13.1"                         
+## [219] "16.100000000000001"            "23.899999999999999"           
+## [221] "23.199999999999999"            ":"                            
+## [223] "20.399999999999999"            "19.5"                         
+## [225] "20.199999999999999"            ":"                            
+## [227] "17.699999999999999"            "35.100000000000001"           
+## [229] "23.899999999999999"            ":"                            
+## [231] "10.9"                          "13.4"                         
+## [233] "19.100000000000001"            "27"                           
+## [235] ":"                             "13.5"                         
+## [237] "24.600000000000001"            ":"                            
+## [239] "27.899999999999999"            ":"                            
+## [241] "20.399999999999999"            "14.1"                         
+## [243] "14.4"                          "13.4"                         
+## [245] ":"                             ":"                            
+## [247] ":"                             ":"                            
+## [249] "9.1999999999999993"            ":"                            
+## [251] "11.699999999999999"            "16.100000000000001"           
+## [253] "16"                            ":"                            
+## [255] "41.399999999999999"            ":"                            
+## [257] ":"                             ":"                            
+## [259] ":"                             ":"                            
+## [261] "32.799999999999997"            ":"                            
+## [263] ":"                             ":"                            
+## [265] ":"                             ":"                            
+## [267] ":"                             ":"                            
+## [269] ":"                             NA                             
+## [271] NA                              "not available"                
+## [273] NA                              "Perinatal mortality rate"     
+## [275] "Rate"                          NA                             
+## [277] "1960"                          ":"                            
+## [279] ":"                             ":"                            
+## [281] ":"                             ":"                            
+## [283] "32.100000000000001"            "23"                           
+## [285] "20.5"                          "26.199999999999999"           
+## [287] "35.799999999999997"            "34.899999999999999"           
+## [289] "22.5"                          "37.700000000000003"           
+## [291] "26.399999999999999"            "42.799999999999997"           
+## [293] ":"                             "31.399999999999999"           
+## [295] "33.100000000000001"            "41.899999999999999"           
+## [297] ":"                             ":"                            
+## [299] "16.100000000000001"            "32.200000000000003"           
+## [301] "35"                            ":"                            
+## [303] "26.600000000000001"            "34.899999999999999"           
+## [305] ":"                             "41.100000000000001"           
+## [307] ":"                             "29.600000000000001"           
+## [309] "21"                            "27.5"                         
+## [311] "25.399999999999999"            ":"                            
+## [313] ":"                             ":"                            
+## [315] ":"                             "19.699999999999999"           
+## [317] ":"                             "23.699999999999999"           
+## [319] "25.600000000000001"            "33.5"                         
+## [321] ":"                             "28.199999999999999"           
+## [323] ":"                             ":"                            
+## [325] ":"                             ":"                            
+## [327] ":"                             "25.800000000000001"           
+## [329] ":"                             ":"                            
+## [331] ":"                             ":"                            
+## [333] ":"                             ":"                            
+## [335] ":"                             ":"                            
+## [337] NA                              NA                             
+## [339] "not available"
+```
+
+---
+
+### Example
+
+After exploring the data, you may realise that the name of the data is always in the second column. Our data starts where find we the "Infant mortality rate". The first row of the table where we find "GEO/TIME" in the first column
+
+
+```r
+data_start_index &lt;- pull(infant_mortality_df, 2) %&gt;%
+  purrr::detect_index(~ . == "Infant mortality rate" &amp; !is.na(.))
+
+data_start_index
+```
+
+```
+## [1] 73
+```
+
+
+```r
+start_index &lt;- pull(infant_mortality_df, 1) %&gt;% 
+  {. == "GEO/TIME" &amp; !is.na(.)} %&gt;% 
+  which() %&gt;% 
+  detect(~ . &gt; data_start_index)
+```
+
+
+--
+
+And ends at the next empty cell (not ":")
+
+
+```r
+end_index &lt;- pull(infant_mortality_df, 2) %&gt;% 
+  is.na() %&gt;%
+  which() %&gt;% 
+  detect(~ . &gt; start_index)
+```
+
+---
+
+### Example
+
+
+```r
+infant_mortality_df %&gt;% 
+  slice(start_index:end_index)
+```
+
+```
+## # A tibble: 61 × 62
+##    `Infant mortali…` ...2  ...3  ...4  ...5  ...6  ...7  ...8  ...9  ...10 ...11
+##    &lt;chr&gt;             &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;
+##  1 GEO/TIME          1960  1961  1962  1963  1964  1965  1966  1967  1968  1969 
+##  2 European Union -… :     38.2… 36.3… 34.2… 31.8… 30    29.1… 28.6… 29.1… 28   
+##  3 European Union -… :     36.2… 34.6… 32.7… 30.5  28.6… 28    27.5  27.8… 26.8…
+##  4 European Union -… :     36    34.3… 32.5  30.3… 28.5  27.8… 27.3… 27.8… 26.6…
+##  5 Euro area - 19 c… :     34.7… 33.2… 31.8… 29.6… 28.3… 27.6… 26.1… 25.6… 24.6…
+##  6 Euro area - 18 c… :     34.7… 33.2… 31.8… 29.6… 28.3… 27.6… 26.1… 25.6… 24.6…
+##  7 Belgium           31.3… 28.1… 27.5  27.1… 25.3… 23.6… 24.6… 22.8… 21.6… 21.1…
+##  8 Bulgaria          45.1… 37.7… 37.2… 35.7… 32.8… 30.8… 32.2… 33.1… 28.3… 30.5 
+##  9 Czechia           20    19.3… 21.1… 19.6… 19.1… 23.6… 21.8… 21.5  21.6… 21.6…
+## 10 Denmark           21.5  21.8… 20.1… 19.1… 18.6… 18.6… 16.8… 15.8… 16.3… 14.8…
+## # … with 51 more rows, and 51 more variables: ...12 &lt;chr&gt;, ...13 &lt;chr&gt;,
+## #   ...14 &lt;chr&gt;, ...15 &lt;chr&gt;, ...16 &lt;chr&gt;, ...17 &lt;chr&gt;, ...18 &lt;chr&gt;,
+## #   ...19 &lt;chr&gt;, ...20 &lt;chr&gt;, ...21 &lt;chr&gt;, ...22 &lt;chr&gt;, ...23 &lt;chr&gt;,
+## #   ...24 &lt;chr&gt;, ...25 &lt;chr&gt;, ...26 &lt;chr&gt;, ...27 &lt;chr&gt;, ...28 &lt;chr&gt;,
+## #   ...29 &lt;chr&gt;, ...30 &lt;chr&gt;, ...31 &lt;chr&gt;, ...32 &lt;chr&gt;, ...33 &lt;chr&gt;,
+## #   ...34 &lt;chr&gt;, ...35 &lt;chr&gt;, ...36 &lt;chr&gt;, ...37 &lt;chr&gt;, ...38 &lt;chr&gt;,
+## #   ...39 &lt;chr&gt;, ...40 &lt;chr&gt;, ...41 &lt;chr&gt;, ...42 &lt;chr&gt;, ...43 &lt;chr&gt;, …
+```
+
+---
+
+### Example
+
+.content-box-green[
+HINT: If the colnames are not tidy or they are threated as observation, then use the {janitor} package.
+]
+
+--
+
+
+```r
+infant_mortality_df %&gt;% 
+  slice(start_index:end_index) %&gt;% 
+  janitor::row_to_names(1)
+```
+
+```
+## # A tibble: 60 × 62
+##    `GEO/TIME`     `1960` `1961` `1962` `1963` `1964` `1965` `1966` `1967` `1968`
+##    &lt;chr&gt;          &lt;chr&gt;  &lt;chr&gt;  &lt;chr&gt;  &lt;chr&gt;  &lt;chr&gt;  &lt;chr&gt;  &lt;chr&gt;  &lt;chr&gt;  &lt;chr&gt; 
+##  1 European Unio… :      38.20… 36.39… 34.29… 31.89… 30     29.19… 28.69… 29.19…
+##  2 European Unio… :      36.20… 34.60… 32.70… 30.5   28.69… 28     27.5   27.89…
+##  3 European Unio… :      36     34.39… 32.5   30.30… 28.5   27.80… 27.39… 27.80…
+##  4 Euro area - 1… :      34.79… 33.29… 31.80… 29.60… 28.30… 27.60… 26.19… 25.69…
+##  5 Euro area - 1… :      34.79… 33.20… 31.80… 29.60… 28.30… 27.60… 26.19… 25.69…
+##  6 Belgium        31.39… 28.10… 27.5   27.19… 25.30… 23.69… 24.69… 22.89… 21.69…
+##  7 Bulgaria       45.10… 37.79… 37.29… 35.70… 32.89… 30.80… 32.20… 33.10… 28.30…
+##  8 Czechia        20     19.30… 21.10… 19.69… 19.10… 23.69… 21.89… 21.5   21.60…
+##  9 Denmark        21.5   21.80… 20.10… 19.10… 18.69… 18.69… 16.89… 15.80… 16.39…
+## 10 Germany (unti… 33.79… 31.69… 29.30… 27     25.30… 23.89… 23.60… 22.89… 22.80…
+## # … with 50 more rows, and 52 more variables: `1969` &lt;chr&gt;, `1970` &lt;chr&gt;,
+## #   `1971` &lt;chr&gt;, `1972` &lt;chr&gt;, `1973` &lt;chr&gt;, `1974` &lt;chr&gt;, `1975` &lt;chr&gt;,
+## #   `1976` &lt;chr&gt;, `1977` &lt;chr&gt;, `1978` &lt;chr&gt;, `1979` &lt;chr&gt;, `1980` &lt;chr&gt;,
+## #   `1981` &lt;chr&gt;, `1982` &lt;chr&gt;, `1983` &lt;chr&gt;, `1984` &lt;chr&gt;, `1985` &lt;chr&gt;,
+## #   `1986` &lt;chr&gt;, `1987` &lt;chr&gt;, `1988` &lt;chr&gt;, `1989` &lt;chr&gt;, `1990` &lt;chr&gt;,
+## #   `1991` &lt;chr&gt;, `1992` &lt;chr&gt;, `1993` &lt;chr&gt;, `1994` &lt;chr&gt;, `1995` &lt;chr&gt;,
+## #   `1996` &lt;chr&gt;, `1997` &lt;chr&gt;, `1998` &lt;chr&gt;, `1999` &lt;chr&gt;, `2000` &lt;chr&gt;, …
+```
+
+---
+
+### Example
+
+Next issue: All columns are in character format
+
+--
+
+
+```r
+infant_mortality_df %&gt;% 
+  slice(start_index:end_index) %&gt;% 
+  janitor::row_to_names(1) %&gt;% 
+* mutate_at(- 1, as.numeric) # all except the 1st col
+```
+
+
+```
+## # A tibble: 60 × 62
+##    `GEO/TIME`     `1960` `1961` `1962` `1963` `1964` `1965` `1966` `1967` `1968`
+##    &lt;chr&gt;           &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+##  1 European Unio…   NA     38.2   36.4   34.3   31.9   30     29.2   28.7   29.2
+##  2 European Unio…   NA     36.2   34.6   32.7   30.5   28.7   28     27.5   27.9
+##  3 European Unio…   NA     36     34.4   32.5   30.3   28.5   27.8   27.4   27.8
+##  4 Euro area - 1…   NA     34.8   33.3   31.8   29.6   28.3   27.6   26.2   25.7
+##  5 Euro area - 1…   NA     34.8   33.2   31.8   29.6   28.3   27.6   26.2   25.7
+##  6 Belgium          31.4   28.1   27.5   27.2   25.3   23.7   24.7   22.9   21.7
+##  7 Bulgaria         45.1   37.8   37.3   35.7   32.9   30.8   32.2   33.1   28.3
+##  8 Czechia          20     19.3   21.1   19.7   19.1   23.7   21.9   21.5   21.6
+##  9 Denmark          21.5   21.8   20.1   19.1   18.7   18.7   16.9   15.8   16.4
+## 10 Germany (unti…   33.8   31.7   29.3   27     25.3   23.9   23.6   22.9   22.8
+## # … with 50 more rows, and 52 more variables: `1969` &lt;dbl&gt;, `1970` &lt;dbl&gt;,
+## #   `1971` &lt;dbl&gt;, `1972` &lt;dbl&gt;, `1973` &lt;dbl&gt;, `1974` &lt;dbl&gt;, `1975` &lt;dbl&gt;,
+## #   `1976` &lt;dbl&gt;, `1977` &lt;dbl&gt;, `1978` &lt;dbl&gt;, `1979` &lt;dbl&gt;, `1980` &lt;dbl&gt;,
+## #   `1981` &lt;dbl&gt;, `1982` &lt;dbl&gt;, `1983` &lt;dbl&gt;, `1984` &lt;dbl&gt;, `1985` &lt;dbl&gt;,
+## #   `1986` &lt;dbl&gt;, `1987` &lt;dbl&gt;, `1988` &lt;dbl&gt;, `1989` &lt;dbl&gt;, `1990` &lt;dbl&gt;,
+## #   `1991` &lt;dbl&gt;, `1992` &lt;dbl&gt;, `1993` &lt;dbl&gt;, `1994` &lt;dbl&gt;, `1995` &lt;dbl&gt;,
+## #   `1996` &lt;dbl&gt;, `1997` &lt;dbl&gt;, `1998` &lt;dbl&gt;, `1999` &lt;dbl&gt;, `2000` &lt;dbl&gt;, …
+```
+
+---
+
+### Example
+
+And now lets transform it into long format.
+
+--
+
+
+```r
+infant_mortality_df %&gt;% 
+  slice(start_index:end_index) %&gt;% 
+  janitor::row_to_names(1) %&gt;% 
+  mutate_at(- 1, as.numeric) %&gt;% 
+* pivot_longer(- 1, names_to = "TIME", 
+                 values_to = "infant_mortality")
+```
+
+
+```
+## # A tibble: 3,660 × 3
+##    `GEO/TIME`                                TIME  infant_mortality
+##    &lt;chr&gt;                                     &lt;chr&gt;            &lt;dbl&gt;
+##  1 European Union - 27 countries (from 2020) 1960              NA  
+##  2 European Union - 27 countries (from 2020) 1961              38.2
+##  3 European Union - 27 countries (from 2020) 1962              36.4
+##  4 European Union - 27 countries (from 2020) 1963              34.3
+##  5 European Union - 27 countries (from 2020) 1964              31.9
+##  6 European Union - 27 countries (from 2020) 1965              30  
+##  7 European Union - 27 countries (from 2020) 1966              29.2
+##  8 European Union - 27 countries (from 2020) 1967              28.7
+##  9 European Union - 27 countries (from 2020) 1968              29.2
+## 10 European Union - 27 countries (from 2020) 1969              28  
+## # … with 3,650 more rows
+```
+
+---
+
+### Example
+
+Lets filter out aggregates and irrelevant.
+
+--
+
+
+```r
+infant_mortality_df %&gt;% 
+  slice(start_index:end_index) %&gt;% 
+  janitor::row_to_names(1) %&gt;% 
+  mutate_at(- 1, as.numeric) %&gt;% 
+  pivot_longer(- 1, names_to = "TIME", 
+               values_to = "infant_mortality") %&gt;% 
+  rename(geo = `GEO/TIME`) %&gt;% 
+  mutate(
+*   geo = countrycode(geo, "country.name", "iso3c"),
+* ) %&gt;% 
+* filter(!is.na(geo))
+```
+
+
+
+This code filters out the rows where geo is in: .blue[European Union - 27 countries (from 2020), European Union - 28 countries (2013-2020), European Union - 27 countries (2007-2013), Euro area - 19 countries  (from 2015), Euro area - 18 countries (2014), European Economic Area (EU27 from 2020 and IS, LI, NO), European Economic Area (EU28 - 2013-2020 and IS, LI, NO), European Economic Area (EU27 - 2007-2013 and IS, LI, NO), European Free Trade Association, Kosovo (under United Nations Security Council Resolution 1244/99), NA]
+
+--
+
+**Enough?**
+
+---
+
+### Example
+
+`count()` Quickly count the unique values of one or more variables
+
+
+```r
+infant_mortality_df %&gt;% 
+  slice(start_index:end_index) %&gt;% 
+  janitor::row_to_names(1) %&gt;% 
+  mutate_at(- 1, as.numeric) %&gt;% 
+  pivot_longer(- 1, names_to = "TIME", 
+               values_to = "infant_mortality") %&gt;% 
+  rename(geo = `GEO/TIME`) %&gt;% 
+  mutate(
+    geo = countrycode(geo, "country.name", "iso3c"),
+  ) %&gt;% 
+  filter(!is.na(geo)) %&gt;% 
+* count(geo, sort = TRUE)
+```
+
+
+```
+## # A tibble: 47 × 2
+##    geo       n
+##    &lt;chr&gt; &lt;int&gt;
+##  1 DEU     122
+##  2 FRA     122
+##  3 ALB      61
+##  4 AND      61
+##  5 ARM      61
+##  6 AUT      61
+##  7 AZE      61
+##  8 BEL      61
+##  9 BGR      61
+## 10 BIH      61
+## # … with 37 more rows
+```
+
+---
+
+### Example
+
+Remove the irrelevant duplication &amp; convert `TIME` to numeric
+
+
+```r
+infant_mortality_df %&gt;% 
+  slice(start_index:end_index) %&gt;% 
+  janitor::row_to_names(1) %&gt;% 
+  mutate_at(- 1, as.numeric) %&gt;% 
+  pivot_longer(- 1, names_to = "TIME", 
+               values_to = "infant_mortality") %&gt;% 
+  rename(geo = `GEO/TIME`) %&gt;% 
+* filter(
+*   geo != "France (metropolitan)" &amp;
+*     geo != "Germany (until 1990 former territory of the FRG)"
+* ) %&gt;% 
+mutate(
+  geo = countrycode(geo, "country.name", "iso3c"),
+* TIME = as.numeric(TIME)
+) %&gt;% 
+  filter(!is.na(geo)) 
+```
+
+
+```
+## # A tibble: 2,867 × 3
+##    geo    TIME infant_mortality
+##    &lt;chr&gt; &lt;dbl&gt;            &lt;dbl&gt;
+##  1 BEL    1960             31.4
+##  2 BEL    1961             28.1
+##  3 BEL    1962             27.5
+##  4 BEL    1963             27.2
+##  5 BEL    1964             25.3
+##  6 BEL    1965             23.7
+##  7 BEL    1966             24.7
+##  8 BEL    1967             22.9
+##  9 BEL    1968             21.7
+## 10 BEL    1969             21.2
+## # … with 2,857 more rows
+```
+
+---
+
+# Example
+
+Assing it with the same name (re-write the table)
+
+
+```r
+*infant_mortality_df &lt;- infant_mortality_df %&gt;% 
+  slice(start_index:end_index) %&gt;% 
+  janitor::row_to_names(1) %&gt;% 
+  mutate_at(- 1, as.numeric) %&gt;% 
+  pivot_longer(- 1, names_to = "TIME", 
+               values_to = "infant_mortality") %&gt;% 
+  rename(geo = `GEO/TIME`) %&gt;% 
+  filter(
+    geo != "France (metropolitan)" &amp;
+      geo != "Germany (until 1990 former territory of the FRG)"
+  ) %&gt;% 
+mutate(
+  geo = countrycode(geo, "country.name", "iso3c"),
+  TIME = as.numeric(TIME)
+) %&gt;% 
+  filter(!is.na(geo)) 
+```
+
+
+
+---
+
+# Example
+
+Let's transform fertility_df to a similar format
+
+--
+
+
+```r
+fertility_df &lt;- fertility_df %&gt;% 
+  select(
+    geo = LOCATION, TIME, fertility = Value
+  )
+```
+
+--
+
+Now we need to link the two tables.
+
+
+```r
+full_join(x = fertility_df, y = infant_mortality_df)
+```
+
+```
+## Joining, by = c("geo", "TIME")
+```
+
+```
+## # A tibble: 4,150 × 4
+##    geo    TIME fertility infant_mortality
+##    &lt;chr&gt; &lt;dbl&gt;     &lt;dbl&gt;            &lt;dbl&gt;
+##  1 AUS    1960      3.45               NA
+##  2 AUS    1961      3.55               NA
+##  3 AUS    1962      3.43               NA
+##  4 AUS    1963      3.34               NA
+##  5 AUS    1964      3.15               NA
+##  6 AUS    1965      2.97               NA
+##  7 AUS    1966      2.89               NA
+##  8 AUS    1967      2.85               NA
+##  9 AUS    1968      2.89               NA
+## 10 AUS    1969      2.89               NA
+## # … with 4,140 more rows
+```
+
+---
+
+Using the `full_join` fn a message appeared: `Joining, by = c("geo", "TIME")`. The fn linked the two datasets based on the identical names (keys). But what happens if a given value can be found only in one table? We have 4 options to that:
+
+- inner_join(): includes all rows in x and y.
+
+- left_join(): includes all rows in x.
+
+- right_join(): includes all rows in y.
+
+- full_join(): includes all rows in x or y.
+
+---
 
 
 
