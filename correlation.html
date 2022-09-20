@@ -82,10 +82,10 @@ text-decoration: line-through;
 
 3. Variance analysis
 
-### Session 2 - Introduction to .fullprice[Multi]Tidyverse 🌏
+### Session 2 - Introduction to .fullprice[Multi]Tidyverse 🌐
 
 
-2. {dplyr} 🔬
+2. {dplyr} ⛏
 
 3. {tidyr} 🧹
 
@@ -115,14 +115,14 @@ Remember:
 
 --
 
-  - Gives good initial ideas about what you should investigate more detailed
+- Gives good initial ideas about what you should investigate more detailed
 
 --
-  
-  - Often can be well interpreted and can be a "good story"
+
+- Often can be well interpreted and can be a "good story"
 
 --
-    
+
 - Most of advanced methods rely on correlation or variance analysis (OLS, PCA, Clustering, ...)
 
 ---
@@ -134,7 +134,7 @@ Remember:
 --
 
 - Thus this method relies on counting the equal and differing values
-  
+
 --
 
 #### An illustrative example - .blue[Is there a relationship?]
@@ -151,7 +151,7 @@ source of table: https://en.wikipedia.org/wiki/Contingency_table
 
 .blue[Is there a relationship?]
 
-&lt;img src="correlation_files/contingency1.png" width="3496" style="display: block; margin: auto;" /&gt;
+&lt;img src="correlation_files/contingency1.png" width="1060" style="display: block; margin: auto;" /&gt;
 
 --
 
@@ -183,9 +183,292 @@ The contingency table:
 
 ### How to quantify the strength of the relationship?
 
-.blue[Step 2.] Calculate the relative frequency assuming independece.
+.blue[Step 2.] Calculate `\(\chi^2\)`.
+
+&lt;img src="correlation_files/contingency6.png" width="1051" style="display: block; margin: auto;" /&gt;
 
 
+`$$\chi^2=32.82 +23..625 + ... + 3.188 = 115.448$$`
+.blue[Why squared?]
+
+---
+
+### How to quantify the strength of the relationship?
+
+`$$\chi^2 = 115.448$$`
+#### Cramér's V
+
+`$$C=\sqrt{\frac{\chi^2}{N \times \text{min}((r-1), (c-1))}},$$`
+
+where `\(c\)` denotes the number of columns and `\(r\)` the number of rows
+
+C can take values between 0 (**no relationship**), 1 (**perfect relationship**)
+
+In the current example:
+
+`$$C = .7857$$`
+
+---
+
+class: inverse, middle, center
+
+# Pearson correlation
+
+---
+
+### Types of pairwise relationship between numeric values
+
+
+
+&lt;img src="correlation_files/figure-html/unnamed-chunk-9-1.png" style="display: block; margin: auto;" /&gt;
+
+*Note:* Dashed line shows the means.
+
+--
+
+.blue[Why we say its positive or negative?]
+
+--
+
+On average, higher y values are related to higher x values.
+
+---
+
+### How to quantify the strength of the relationship?
+
+We will focus on the covariance which is defined as the mean of the products of the two centralized variables.
+
+`$$C(X, Y) = \frac{\sum{(X_i-\bar{X})(Y_i-\bar{Y})}}{N}$$`
+
+Example: **Labels at points show coordinates**
+
+
+
+
+&lt;img src="correlation_files/figure-html/unnamed-chunk-11-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+### How to quantify the strength of the relationship?
+
+We will focus on the covariance which is defined as the mean of the products of the two centralized variables.
+
+`$$C(X, Y) = \frac{\sum{(X_i-\bar{X})(Y_i-\bar{Y})}}{N}$$`
+
+Example: Labels at points show **centralised** coordinates
+
+
+&lt;img src="correlation_files/figure-html/unnamed-chunk-12-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+### How to quantify the strength of the relationship?
+
+We will focus on the covariance which is defined as the mean of the products of the two centralized variables.
+
+`$$C(X, Y) = \frac{\sum{(X_i-\bar{X})(Y_i-\bar{Y})}}{N}$$`
+
+Example: Labels at points show the **product** of the centralised coordinates
+
+
+&lt;img src="correlation_files/figure-html/unnamed-chunk-13-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+
+
+### How to quantify the strength of the relationship?
+
+`$$C = \frac{-3259.4347826 + -2876.2173913 +  ...  + 3672.8695652}{23} = -674.0132325$$`
+
+#### Pearson correlation (linear correlation coefficient)
+
+`$$r(X, Y)=\frac{C(X, Y)}{\sigma_X\sigma_Y}$$`
+
+`$$r = \frac{-674.0132325}{27.3693086 \times 48.3055983}=-0.0268619$$`
+`$$-1 \text{ (Perfect negative r.)} \leq r \leq 1 \text{ (Perfect positive r.)}$$`
+
+--
+
+#### `\(R^2\)`
+
+`$$R^2=r^2$$`
+
+- PRE: Proportional Reduction of Errors = what extent the variance of one variable explains the variance of the second variable
+
+
+---
+
+### Visualizing the R-squared
+
+
+
+
+
+
+&lt;img src="correlation_files/figure-html/unnamed-chunk-17-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+### Visualizing the R-squared - strong relationship
+
+&lt;img src="correlation_files/figure-html/unnamed-chunk-18-1.png" style="display: block; margin: auto;" /&gt;
+
+.pull-left[
+`$$R^2=99.307%$$` (%)
+]
+
+--
+
+.pull-right[
+&lt;img src="correlation_files/meme_yoda.png" width="250px" height="190px" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+### Visualizing the R-squared - strong  negative relationship
+
+&lt;img src="correlation_files/figure-html/unnamed-chunk-20-1.png" style="display: block; margin: auto;" /&gt;
+
+
+`$$R^2=97.922%$$` (%)
+
+---
+
+### Visualizing the R-squared - outliers
+
+.pull-left[
+&lt;img src="correlation_files/figure-html/unnamed-chunk-21-1.png" style="display: block; margin: auto;" /&gt;
+
+`$$R^2=0.047%$$`
+]
+
+.pull-right[
+&lt;img src="correlation_files/figure-html/unnamed-chunk-22-1.png" style="display: block; margin: auto;" /&gt;
+
+`$$R^2=62.469%$$`
+]
+
+---
+
+background-image: url(correlation_files/trust_meme.jpg)
+background-size: contain
+
+
+
+---
+
+class: middle, center, inverse
+
+# Variance analysis
+
+---
+
+# Variance analysis
+
+--
+
+- Variance analysis can be applied between a nominal and a numeric variable
+
+--
+
+Lets see an example on the `iris` dataset
+
+
+| Sepal.Length | Sepal.Width | Petal.Length | Petal.Width | Species |
+|:------------:|:-----------:|:------------:|:-----------:|:-------:|
+|     5.1      |     3.5     |     1.4      |     0.2     | setosa  |
+|     4.9      |      3      |     1.4      |     0.2     | setosa  |
+|     4.7      |     3.2     |     1.3      |     0.2     | setosa  |
+|     4.6      |     3.1     |     1.5      |     0.2     | setosa  |
+|      5       |     3.6     |     1.4      |     0.2     | setosa  |
+|     ...      |     ...     |     ...      |     ...     |   ...   |
+
+---
+
+# Variance analysis - Sepal length ~ Species
+
+
+|  Species   |  N  |  AVG  |   SD   |  VAR   |     SS     |
+|:----------:|:---:|:-----:|:------:|:------:|:----------:|
+| virginica  | 50  | 6.588 | 0.6359 | 0.4043 | 20.217143  |
+| versicolor | 50  | 5.936 | 0.5162 | 0.2664 | 13.321633  |
+|   setosa   | 50  | 5.006 | 0.3525 | 0.1242 |  6.212449  |
+|   TOTAL    | 150 | 5.843 | 0.8281 | 0.6857 | 102.854027 |
+
+--
+
+.blue[Is there a difference between the species by sepal length?]
+
+--
+
+- In the case of virginica, the average is 1.5 higher than at setosa.
+
+--
+
+- It is almost 2 times the standard deviation among the flowers.
+
+---
+
+### How to quantify the strength of the relationship?
+
+--
+
+.blue[Step 1.] What is the SS between the observations and the mean? **SST**
+
+`$$\sum_{j=1}^M \sum_{i=1}^N\left(Y_{i j}-\bar{Y}\right)^2=\text{SST},$$` 
+
+where `\(M\)` is the number of groups
+
+From the summary table: `\(102.85\)`
+
+
+--
+
+.blue[Step 2.] What is the SS within the groups? **SSW**
+
+`$$\sum_{j=1}^M \sum_{i=1}^{N_j}\left(Y_{i j}-\bar{Y}_j\right)^2=\text{SSW}$$`
+
+
+
+
+`$$\text{SSW} =  6.212 + 13.322 + 20.217 = 39.75$$`
+
+--
+
+.blue[Step 3.] Calculate the `\(H^2\)`.
+
+`$$H^2=\frac{SST-SSW}{SST}=\frac{102.85 - 39.75}{124.2}= .61$$`
+
+---
+
+#### SSB
+
+
+|  Species   |  N  |   AVG    |   d    |    SSB     |
+|:----------:|:---:|:--------:|:------:|:----------:|
+| virginica  | 50  | 6.588000 | 0.745  | 27.7264222 |
+| versicolor | 50  | 5.936000 | 0.093  | 0.4293556  |
+|   setosa   | 50  | 5.006000 | -0.837 | 35.0563556 |
+|   TOTAL    | 150 | 5.843333 |  ...   | 63.2121333 |
+
+
+`$$SSB = (6.588 - 5.843)^2 + (5.936 - 5.843)^2 + (5.006 - 5.843)^2$$`
+
+--
+
+The key equation:
+
+`$$SST = SSB + SSW$$`
+
+--
+
+`$$H^2=\frac{SST-SSW}{SST}=\frac{SSB}{SST}$$`
+
+.content-box-green[
+Based on the above equations, we can see that in the case of variance analysis, we compare how large the variance of the group averages is compared to the total variance.
+]
 
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>

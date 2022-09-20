@@ -1153,6 +1153,12 @@ Using the `full_join` fn a message appeared: `Joining, by = c("geo", "TIME")`. T
 
 ---
 
+---
 
+class: center, middle
+
+# Thank you for your attention!
+
+Slides are available at [www.marcellgranat.com](https://www.marcellgranat.com)
 
 
