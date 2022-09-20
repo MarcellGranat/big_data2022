@@ -265,7 +265,7 @@ library(patchwork)
 
 --
 
-.blue[Why we say its positive or negative?]
+.blue[Why do we say its positive or negative?]
 
 --
 
