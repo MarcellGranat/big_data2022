@@ -17,17 +17,6 @@ editor_options:
   chunk_output_type: console
 ---
 
-
-background-image: url("tidyverse_files/tidyverse-intro.png")
-background-position: center
-background-size: contain
-
-# The tidyverse
-
-???
-
-tidyverse.org
-
 ```{css, echo=FALSE}
 .red { color: red; }
 .blue { color: #378C95; }
@@ -84,6 +73,34 @@ options(htmltools.dir.version = FALSE)
 knitr::opts_chunk$set(echo = TRUE, fig.align = "center", error = TRUE)
 ```
 
+# Today's .blue[Agenda]
+
+### Session 1 - Pairwise "correlation" methods
+
+1. Contingency `r ji("bar_chart")`
+
+2. Pearson 
+
+3. Variance analysis
+
+### Session 2 - Introduction to .fullprice[Multi]Tidyverse `r ji("earth")`
+
+
+2. {dplyr} `r ji("tool")`
+
+3. {tidyr} `r ji("broom")`
+
+---
+
+background-image: url("tidyverse_files/tidyverse-intro.png")
+background-position: center
+background-size: contain
+
+# The tidyverse
+
+???
+
+tidyverse.org
 ---
 
 # The tidyverse
@@ -293,9 +310,6 @@ include_graphics("tidyverse_files/data-transformation - 02.jpg")
 ---
 
 # Manipulate - select
-
-
---
 
 `select()`  Extract the specified columns as a table.
 
@@ -780,7 +794,7 @@ background-size: contain
 
 # Pivot_wider
 
-Datasets are in long on wide format (but never in the currently desired one `ji("laugh")`)
+Datasets are in long on wide format (but never in the currently desired one `r ji("laugh")`)
 
 (The following example is the one we saw last week to present the apply functions. In STATA you mainly operate with tables in wide format)
 
@@ -820,6 +834,8 @@ include_graphics("tidyverse_files/eurostat-infant.png")
 ```
 
 ---
+
+### Example
 
 ```{r message=FALSE, warning=FALSE}
 infant_mortality_df <- readxl::read_excel("tidyverse_files/demo_minfind.xls")
@@ -1072,9 +1088,9 @@ mutate(
 
 ---
 
-# Example
+### Example
 
-Assing it with the same name (re-write the table)
+Assign it with the same name (re-write the table)
 
 ```{r eval=FALSE}
 *infant_mortality_df <- infant_mortality_df %>% 
@@ -1116,7 +1132,7 @@ mutate(
 
 ---
 
-# Example
+### Example
 
 Let's transform fertility_df to a similar format
 
@@ -1150,8 +1166,6 @@ Using the `full_join` fn a message appeared: `Joining, by = c("geo", "TIME")`. T
 - right_join(): includes all rows in y.
 
 - full_join(): includes all rows in x or y.
-
----
 
 ---
 

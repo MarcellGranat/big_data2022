@@ -92,12 +92,6 @@ knitr::opts_chunk$set(echo = FALSE, fig.align = "center", error = TRUE, message 
 
 3. {tidyr} `r ji("broom")`
 
-4. {stringr} `r ji("abc")`
-
-5. {forcats} `r ji("cat")`
-
-6. {purrr} `r ji("infinity")`
-
 ---
 
 # Why do bivariate comparisons?
@@ -542,9 +536,9 @@ $$R^2=`r scales::percent(cor(cov_sample5$x, cov_sample5$y)^2, accuracy = .001)`$
 background-image: url(correlation_files/trust_meme.jpg)
 background-size: contain
 
-```{r}
-# include_graphics("correlation_files/trust_meme.jpg")
-```
+???
+
+source: https://www.facebook.com/photo.php?fbid=800966650901959&set=pb.100029658941599.-2207520000..&type=3
 
 ---
 
@@ -637,7 +631,7 @@ $$\text{SSW} = `r str_flatten(format(g_SSW, digits = 4), " + ")` = `r format(sum
 
 .blue[Step 3.] Calculate the $H^2$.
 
-$$H^2=\frac{SST-SSW}{SST}=\frac{102.85 - 39.75}{124.2}= .61$$
+$$H^2=\frac{SST-SSW}{SST}=\frac{102.85 - 39.75}{102.85}= .61$$
 
 ---
 
