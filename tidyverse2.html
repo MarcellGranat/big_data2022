@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Tidyverse II.</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Marcell Granát" />
+    <meta name="date" content="2022-01-01" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
+    <link href="libs/panelset/panelset.css" rel="stylesheet" />
+    <script src="libs/panelset/panelset.js"></script>
+    <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
+    <script src="libs/tile-view/tile-view.js"></script>
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, title-slide
+
+.title[
+# Tidyverse II.
+]
+.subtitle[
+## <img src="mnb_intezet.png" style="width:30.0%" />
+Big Data and Data Visualisation
+]
+.author[
+### Marcell Granát
+]
+.institute[
+### Central Bank of Hungary &amp; .blue[John von Neumann University]
+]
+.date[
+### 2022
+]
+
+---
+
+
+&lt;style type="text/css"&gt;
+.red { color: red; }
+.blue { color: #378C95; }
+strong { color: red; }
+a { color: #378C95; font-weight: bold; }
+.remark-inline-code { font-weight: 900; background-color: #a7d5e7; }
+.caption { color: #378C95; font-style: italic; text-align: center; }
+
+.content-box { 
+box-sizing: content-box;
+background-color: #378C95;
+/* Total width: 160px + (2 * 20px) + (2 * 8px) = 216px
+Total height: 80px + (2 * 20px) + (2 * 8px) = 136px
+Content box width: 160px
+Content box height: 80px */
+}
+
+.content-box-green {
+background-color: #d9edc2;
+}
+
+.content-box-red {
+background-color: #f9dbdb;
+}
+
+.fullprice {
+text-decoration: line-through;
+}
+&lt;/style&gt;
+
+
+
+
+
+# Today's .blue[Agenda]
+
+### Session 1 - Tidyverse II.
+
+1. {stringr} 🔤
+
+2. {purrr} ⚠️
+
+### Session 2 - Inferential statistics I.
+
+1. Concepts ✍️
+
+2. IID mean estimation
+
+3. Variance estimation
+
+3. Sampling with replacement
+
+---
+
+background-image: url(tidyverse2_files/stringr.png)
+background-size: contain
+
+---
+
+## HINT: [CHEATSHEETS](https://github.com/rstudio/cheatsheets)
+
+&lt;img src="tidyverse2_files/strings - 01.jpg" width="6013" style="display: block; margin: auto;" /&gt;
+
+---
+
+## HINT: [CHEATSHEETS](https://github.com/rstudio/cheatsheets)
+
+&lt;img src="tidyverse2_files/strings - 02.jpg" width="6013" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Stringr - motivation
+
+&gt; All functions in stringr start with `str_` and take a **vector of strings as the first argument**.
+
+This makes it easy to find the string manipulation function you need 🙋
+
+--
+
+
+```r
+courses &lt;- c("Big data", "Behavioral economics", "Dynamic macroeconomics 2", "Communication", "Economic instituions")
+
+courses
+```
+
+```
+## [1] "Big data"                 "Behavioral economics"    
+## [3] "Dynamic macroeconomics 2" "Communication"           
+## [5] "Economic instituions"
+```
+
+#### **C**ombine strings
+
+
+```r
+str_c(courses, " 2")
+```
+
+```
+## [1] "Big data 2"                 "Behavioral economics 2"    
+## [3] "Dynamic macroeconomics 2 2" "Communication 2"           
+## [5] "Economic instituions 2"
+```
+
+---
+
+# Stringr
+
+### Which subject is about economics?
+
+
+```r
+str_detect(courses, "economics")
+```
+
+```
+## [1] FALSE  TRUE  TRUE FALSE FALSE
+```
+
+---
+
+# Stringr
+
+Of course, these functions should also be used in the structure seen earlier.
+
+
+```r
+tibble(courses)
+```
+
+```
+## # A tibble: 5 × 1
+##   courses                 
+##   &lt;chr&gt;                   
+## 1 Big data                
+## 2 Behavioral economics    
+## 3 Dynamic macroeconomics 2
+## 4 Communication           
+## 5 Economic instituions
+```
+
+---
+
+# Stringr
+
+Of course, these functions should also be used in the structure seen earlier.
+
+
+```r
+tibble(courses) %&gt;% 
+  mutate(
+*  about_economics = str_detect(courses, "economic")
+  )
+```
+
+
+```
+## # A tibble: 5 × 2
+##   courses                  about_economics
+##   &lt;chr&gt;                    &lt;lgl&gt;          
+## 1 Big data                 FALSE          
+## 2 Behavioral economics     TRUE           
+## 3 Dynamic macroeconomics 2 TRUE           
+## 4 Communication            FALSE          
+## 5 Economic instituions     FALSE
+```
+
+--
+
+.content-box-red[
+If you look carefully at the outcome, you can see that these functions are **cAsE sENsItIVE** (the FALSE value in the last row).
+]
+
+---
+
+# Stringr
+
+#### Solution 1. - convert to lower case
+
+
+```r
+tibble(courses) %&gt;% 
+  mutate(
+*   courses = str_to_lower(courses),
+    about_economics = str_detect(courses, "economic")
+  )
+```
+
+
+```
+## # A tibble: 5 × 2
+##   courses                  about_economics
+##   &lt;chr&gt;                    &lt;lgl&gt;          
+## 1 big data                 FALSE          
+## 2 behavioral economics     TRUE           
+## 3 dynamic macroeconomics 2 TRUE           
+## 4 communication            FALSE          
+## 5 economic instituions     TRUE
+```
+
+---
+
+# Stringr
+
+#### Solution 2. - detect with lower and upper case
+
+
+```r
+tibble(courses) %&gt;% 
+  mutate(
+*   about_economics = str_detect(courses, "economic|Economic")
+  )
+```
+
+
+```
+## # A tibble: 5 × 2
+##   courses                  about_economics
+##   &lt;chr&gt;                    &lt;lgl&gt;          
+## 1 Big data                 FALSE          
+## 2 Behavioral economics     TRUE           
+## 3 Dynamic macroeconomics 2 TRUE           
+## 4 Communication            FALSE          
+## 5 Economic instituions     TRUE
+```
+
+---
+
+# Stringr
+
+#### Solution 3. - detect with lower and upper first letter
+
+
+```r
+tibble(courses) %&gt;% 
+  mutate(
+*   about_economics = str_detect(courses, "[eE]conomic")
+  )
+```
+
+
+```
+## # A tibble: 5 × 2
+##   courses                  about_economics
+##   &lt;chr&gt;                    &lt;lgl&gt;          
+## 1 Big data                 FALSE          
+## 2 Behavioral economics     TRUE           
+## 3 Dynamic macroeconomics 2 TRUE           
+## 4 Communication            FALSE          
+## 5 Economic instituions     TRUE
+```
+
+---
+
+# Stringr
+
+&gt; Most string functions work with regular expressions, a concise language for describing patterns of text.
+
+--
+
+- `[eE]conomic` was an example to regular expressions (regex)
+
+--
+
+- Regex has a number of .blue[special characters] that we can use to describe the patterns we are looking for
+
+--
+
+- For example: `\\d` is for any numeric character
+
+
+```r
+tibble(courses) %&gt;% 
+  mutate(
+   about_economics = str_detect(courses, "economic"),
+*  not_single_course = str_detect(courses, "\\d")
+  )
+```
+
+
+```
+## # A tibble: 5 × 3
+##   courses                  about_economics not_single_course
+##   &lt;chr&gt;                    &lt;lgl&gt;           &lt;lgl&gt;            
+## 1 Big data                 FALSE           FALSE            
+## 2 Behavioral economics     TRUE            FALSE            
+*## 3 Dynamic macroeconomics 2 TRUE            TRUE             
+## 4 Communication            FALSE           FALSE            
+## 5 Economic instituions     FALSE           FALSE
+```
+
+---
+
+# Stringr
+
+`\\s` is for whitespaces (space/new line/tabulator)
+
+
+```r
+tibble(courses) %&gt;% 
+  mutate(
+*  contain_spaces = str_detect(courses, "\\s")
+  )
+```
+
+
+```
+## # A tibble: 5 × 2
+##   courses                  contain_spaces
+##   &lt;chr&gt;                    &lt;lgl&gt;         
+## 1 Big data                 TRUE          
+## 2 Behavioral economics     TRUE          
+## 3 Dynamic macroeconomics 2 TRUE          
+*## 4 Communication            FALSE         
+## 5 Economic instituions     TRUE
+```
+
+---
+
+# Stringr
+
+`\\w` is for letters (but all of them contain letters)
+
+
+```r
+tibble(courses) %&gt;% 
+  mutate(
+*  contain_letter = str_detect(courses, "\\w")
+  )
+```
+
+
+```
+## # A tibble: 5 × 2
+##   courses                  contain_letter
+##   &lt;chr&gt;                    &lt;lgl&gt;         
+## 1 Big data                 TRUE          
+## 2 Behavioral economics     TRUE          
+## 3 Dynamic macroeconomics 2 TRUE          
+## 4 Communication            TRUE          
+## 5 Economic instituions     TRUE
+```
+
+---
+
+# Stringr
+
+.contain-box-green[
+Each of the regex expressions presented previously has an opposite. The same code in upper case.
+]
+
+--
+
+`\\W` is for non-letter characters (numbers or white-spaces)
+
+
+```r
+tibble(courses) %&gt;% 
+  mutate(
+*  contain_non_letter = str_detect(courses, "\\W")
+  )
+```
+
+
+```
+## # A tibble: 5 × 2
+##   courses                  contain_non_letter
+##   &lt;chr&gt;                    &lt;lgl&gt;             
+## 1 Big data                 TRUE              
+## 2 Behavioral economics     TRUE              
+## 3 Dynamic macroeconomics 2 TRUE              
+## 4 Communication            FALSE             
+## 5 Economic instituions     TRUE
+```
+
+---
+
+# Stringr
+
+There are several other functions in the {stringr} package.
+
+
+```r
+tibble(courses) %&gt;% 
+  mutate(
+*  n_non_letter = str_count(courses, "\\W"),
+*  n_character = str_length(courses)
+  )
+```
+
+
+```
+## # A tibble: 5 × 3
+##   courses                  n_non_letter n_character
+##   &lt;chr&gt;                           &lt;int&gt;       &lt;int&gt;
+## 1 Big data                            1           8
+## 2 Behavioral economics                1          20
+## 3 Dynamic macroeconomics 2            2          24
+## 4 Communication                       0          13
+## 5 Economic instituions                1          20
+```
+
+---
+
+# Stringr
+
+### Extract date from url
+
+[https://economaniablog.hu/2022/09/14/how-to-forecast-the-business-cycle-sentiment-speaks/](https://economaniablog.hu/2022/09/14/how-to-forecast-the-business-cycle-sentiment-speaks/)
+
+
+```r
+x &lt;- "https://economaniablog.hu/2022/09/14/how-to-forecast-the-business-cycle-sentiment-speaks/"
+```
+
+
+```r
+str_extract(x, "20\\d\\d/\\d\\d/\\d\\d")
+```
+
+```
+## [1] "2022/09/14"
+```
+
+--
+
+.content-box-green[
+Those who want to work with webscraping and/or text analysis tools will really need to learn how to use the {stringr} functions!
+]
+
+---
+
+# Stringr
+
+[https://economaniablog.hu/2022/09/14/how-to-forecast-the-business-cycle-sentiment-speaks/](https://economaniablog.hu/2022/09/14/how-to-forecast-the-business-cycle-sentiment-speaks/)
+
+#### Is it a website?
+
+
+```r
+str_starts(x, "https://")
+```
+
+```
+## [1] TRUE
+```
+
+--
+
+#### Remove the base url, assuming that its length is always the same
+
+
+```r
+str_sub(x, end = 26)
+```
+
+```
+## [1] "https://economaniablog.hu/"
+```
+
+---
+
+# Stringr
+
+[https://economaniablog.hu/2022/09/14/how-to-forecast-the-business-cycle-sentiment-speaks/](https://economaniablog.hu/2022/09/14/how-to-forecast-the-business-cycle-sentiment-speaks/)
+
+#### Remove the base url, assuming it lasts until the date
+
+
+```r
+gsub(pattern = ".*20\\d\\d/\\d\\d/\\d\\d", replacement = "", x)
+```
+
+```
+## [1] "/how-to-forecast-the-business-cycle-sentiment-speaks/"
+```
+
+--
+
+#### Remove the text after the base url, assuming it lasts until the date
+
+
+```r
+gsub(pattern = "20\\d\\d/\\d\\d/\\d\\d.*", replacement = "", x)
+```
+
+```
+## [1] "https://economaniablog.hu/"
+```
+
+--
+
+`gsub` also works with regular expressions. Here the `.` refers to anything, and `*` denotes any repetition. Thus `.*` before the pattern means anything before the pattern, and `.*` after the pattern means anything after the pattern. `gsub` is not a part of {string}, that is why its first argument is the pattern, not the string.
+
+---
+
+background-image: url(tidyverse2_files/purrr.png)
+background-size: contain
+
+---
+
+class: inverse, middle, center
+
+## The {stringr} functions will return in the next episodes of the tidyverse.
+
+---
+
+
+# Purrr - introduction
+
+&gt; "{purrr} enhances R’s functional programming (FP) toolkit by providing a complete and consistent set of tools for working with functions and vectors. If you’ve never heard of FP before, the best place to start is the family of `map()` functions which allow you to **replace many for loops** with code that is both more succinct and easier to read. The best place to learn about the `map()` functions is the iteration chapter in [R for data science](https://r4ds.had.co.nz/iteration.html)."
+
+Source: [Package description](https://purrr.tidyverse.org)
+
+---
+
+# Purrr - illustrative example
+
+Lets suppose we have multiple .csv files in our working directory. These files are generated from the app [Publish or Perish](https://harzing.com/resources/publish-or-perish) and contain google search results with different keywords. 
+
+The files can be downloaded from [here](https://codeload.github.com/gist/4ed653c8e655d4ebabaa3071fc7b50a0/zip/5aef770bce91b661744ad8c8b1aed56643f795cf). **Unzip the files and copy into your working directory.**
+
+--
+
+### How to find the files in your working directory?
+
+
+```r
+list.files()
+```
+
+
+```
+## [1] "daily-inflation-online.csv"          "inflation-expectations-forecast.csv"
+## [3] "purrr.png"                           "stringr.png"                        
+## [5] "strings - 01.jpg"                    "strings - 02.jpg"
+```
+
+
+---
+
+# Purrr - illustrative example
+
+### Keep only the file names of csv files
+
+`purrr::keep` keeps the elements, where the condition is TRUE.
+
+
+```r
+file_names &lt;- list.files() %&gt;% 
+* keep(~ str_ends(., "csv"))
+
+file_names
+```
+
+
+```
+## [1] "daily-inflation-online.csv"          "inflation-expectations-forecast.csv"
+```
+
+.content-box-green[
+The previously seen lambda-type (`~` &amp; `.`) function returns again!
+]
+
+---
+
+# Purrr - illustrative example
+
+### Purrr - Read all the csv file at once
+
+`purrr::map` applies a function to each element of a list or atomic vector and returns an object of the same length as the input.
+
+
+
+
+
+```r
+*list_of_data &lt;- map(.x = file_names, .f = read_csv)
+```
+
+
+
+--
+
+
+```r
+class(list_of_data)
+```
+
+```
+## [1] "list"
+```
+
+
+```r
+list_of_data
+```
+
+```
+## [[1]]
+## # A tibble: 998 × 26
+##    Cites Authors         Title  Year Source Publisher ArticleURL CitesURL GSRank
+##    &lt;dbl&gt; &lt;chr&gt;           &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt;     &lt;chr&gt;      &lt;chr&gt;     &lt;dbl&gt;
+##  1  3295 GP Compo, JS W… The …  2011 Quart… Wiley On… https://r… https:/…    875
+##  2   885 E Nakamura, J … High…  2018 The Q… academic… https://a… https:/…    364
+##  3  2708 E Castronova    Synt…  2008 Synth… degruyte… https://w… https:/…    498
+##  4   660 RC Cornes, G v… An e…  2018 Journ… Wiley On… https://a… https:/…    261
+##  5   164 MC Medeiros, G… Fore…  2021 Journ… Taylor &amp;… https://w… https:/…    122
+##  6  5219 GW Schwert      Why …  1989 The j… Wiley On… https://o… https:/…    560
+##  7  1701 PR Hansen, A L… The …  2011 Econo… Wiley On… https://o… https:/…    565
+##  8  2573 LJ Christiano,… The …  2003 inter… Wiley On… https://o… https:/…    586
+##  9  4813 F Black         Noise  1986 The j… Wiley On… https://o… https:/…    333
+## 10   220 C Binder        Coro…  2020 Revie… direct.m… https://d… https:/…    504
+## # … with 988 more rows, and 17 more variables: QueryDate &lt;dttm&gt;, Type &lt;chr&gt;,
+## #   DOI &lt;chr&gt;, ISSN &lt;lgl&gt;, CitationURL &lt;lgl&gt;, Volume &lt;lgl&gt;, Issue &lt;lgl&gt;,
+## #   StartPage &lt;lgl&gt;, EndPage &lt;lgl&gt;, ECC &lt;dbl&gt;, CitesPerYear &lt;dbl&gt;,
+## #   CitesPerAuthor &lt;dbl&gt;, AuthorCount &lt;dbl&gt;, Age &lt;dbl&gt;, Abstract &lt;chr&gt;,
+## #   FullTextURL &lt;chr&gt;, RelatedURL &lt;chr&gt;
+## 
+## [[2]]
+## # A tibble: 980 × 26
+##    Cites Authors         Title  Year Source Publisher ArticleURL CitesURL GSRank
+##    &lt;dbl&gt; &lt;chr&gt;           &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt;     &lt;chr&gt;      &lt;chr&gt;     &lt;dbl&gt;
+##  1 30964 RF Engle        Auto…  1982 Econo… JSTOR     https://w… https:/…    872
+##  2  2592 GW Evans, S Ho… Lear…  2012 Learn… degruyte… https://w… https:/…    683
+##  3   250 O Coibion, Y G… Mone…  2022 Journ… journals… https://w… https:/…     22
+##  4   164 MC Medeiros, G… Fore…  2021 Journ… Taylor &amp;… https://w… https:/…    847
+##  5   324 P Bordalo, N G… Over…  2020 Ameri… aeaweb.o… https://w… https:/…    518
+##  6   958 U Malmendier, … Lear…  2016 The Q… academic… https://a… https:/…    114
+##  7   951 O Coibion, Y G… Info…  2015 Ameri… aeaweb.o… https://w… https:/…    444
+##  8   247 O Coibion, Y G… Infl…  2020 Journ… Elsevier  https://w… https:/…     28
+##  9  2823 LEO Svensson    Infl…  1997 Europ… Elsevier  https://w… https:/…     38
+## 10   110 AM Dietrich, K… News…  2022 Journ… Elsevier  https://w… https:/…    667
+## # … with 970 more rows, and 17 more variables: QueryDate &lt;dttm&gt;, Type &lt;chr&gt;,
+## #   DOI &lt;chr&gt;, ISSN &lt;lgl&gt;, CitationURL &lt;lgl&gt;, Volume &lt;lgl&gt;, Issue &lt;lgl&gt;,
+## #   StartPage &lt;lgl&gt;, EndPage &lt;lgl&gt;, ECC &lt;dbl&gt;, CitesPerYear &lt;dbl&gt;,
+## #   CitesPerAuthor &lt;dbl&gt;, AuthorCount &lt;dbl&gt;, Age &lt;dbl&gt;, Abstract &lt;chr&gt;,
+## #   FullTextURL &lt;chr&gt;, RelatedURL &lt;chr&gt;
+```
+
+---
+
+# Purrr - illustrative example
+
+### Purrr - Read all the csv file at once
+
+What if the file name contained important information? Lets use the real advantage of {tibble} and the `map()`.
+
+
+```r
+tibble(file_names)
+```
+
+```
+## # A tibble: 2 × 1
+##   file_names                         
+##   &lt;chr&gt;                              
+## 1 daily-inflation-online.csv         
+## 2 inflation-expectations-forecast.csv
+```
+
+---
+
+# Purrr - illustrative example
+
+### Purrr - Read all the csv file at once
+
+What if the file name contained important information? Lets use the real advantage of {tibble} and the `map()`.
+
+
+```r
+tibble(file_names) %&gt;% 
+  mutate(
+*   data = map(file_names, read_csv)
+  )
+```
+
+
+```
+## # A tibble: 2 × 2
+##   file_names                          data                    
+##   &lt;chr&gt;                               &lt;list&gt;                  
+## 1 daily-inflation-online.csv          &lt;spec_tbl_df [998 × 26]&gt;
+## 2 inflation-expectations-forecast.csv &lt;spec_tbl_df [980 × 26]&gt;
+```
+
+&gt; "a dream within a dream is a signal that the hard work will come to you" - source: [Dream Meaning](https://www.dreammeaning.xyz/dream-meaning-dream-within-dream-interpretation/)
+
+**A table within a table is a signal of an even harder work!**
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
