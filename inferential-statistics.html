@@ -85,11 +85,553 @@ text-decoration: line-through;
 
 2. IID mean estimation
 
-3. Variance estimation
+---
 
-3. Sampling with replacement
+class: inverse, middle, center
+
+## Statistical inference
 
 ---
+
+# Statistical inference
+
+&gt; "[...] we use the observed data to draw conclusions about the population from which the data came, or about the process by which the data were generated"
+
+--
+
+Three main headings:
+
+1. Point estimation
+
+2. Interval estimation
+
+3. Testing of hypotheses
+
+???
+
+Source: Maddala &amp; Lahiri
+
+---
+
+### Point estimation
+
+- Probability distribution involves a parameter `\(\theta\)`
+
+- Sample from this distribution: `\(y_1, y_2, ..., y_n\)`
+
+- Based on the sample `\(g\)` is our best guess about `\(\theta\)`
+
+- For instance, if `\(\theta\)` is the population mean then `\(g(y_1, y_2, ..., y_n)\)` is the sample mean.
+
+--
+
+### Interval estimation
+
+- We construct two functions based on the sample: `\(g_1(y_1, y_2, ..., y_n)\)` and `\(g_2(y_1, y_2, ..., y_n)\)`
+
+- `\(\theta\)` lies between `\(g_1\)` and `\(g_2\)` with a certain probability
+
+---
+
+# Motivational example
+
+- Let's say our data generation process can generate any number between 1 and 5, it will give 2 numbers at a time.
+
+- Possible pairs: (1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (2, 1), ...
+
+- Let's check it in R!
+
+
+```r
+crossing(x1 = 1:5, x2 = 1:5)
+```
+
+```
+## # A tibble: 25 × 2
+##       x1    x2
+##    &lt;int&gt; &lt;int&gt;
+##  1     1     1
+##  2     1     2
+##  3     1     3
+##  4     1     4
+##  5     1     5
+##  6     2     1
+##  7     2     2
+##  8     2     3
+##  9     2     4
+## 10     2     5
+## # … with 15 more rows
+```
+
+---
+
+# Motivational example
+
+
+```r
+crossing(x1 = 1:5, x2 = 1:5) %&gt;% 
+  * mutate(mu = (x1 + x2) / 2)
+```
+
+.pull-left[
+
+```
+## # A tibble: 25 × 3
+##       x1    x2    mu
+##    &lt;int&gt; &lt;int&gt; &lt;dbl&gt;
+##  1     1     1   1  
+##  2     1     2   1.5
+##  3     1     3   2  
+##  4     1     4   2.5
+##  5     1     5   3  
+##  6     2     1   1.5
+##  7     2     2   2  
+##  8     2     3   2.5
+##  9     2     4   3  
+## 10     2     5   3.5
+## # … with 15 more rows
+```
+]
+
+.pull-right[
+
+```r
+crossing(x1 = 1:5, x2 = 1:5) %&gt;% 
+  mutate(mu = (x1 + x2) / 2) %&gt;% 
+  summarise(g = mean(mu))
+```
+
+```
+## # A tibble: 1 × 1
+##       g
+##   &lt;dbl&gt;
+## 1     3
+```
+
+
+```r
+mean(1:5)
+```
+
+```
+## [1] 3
+```
+]
+
+--
+
+**The average of the all possible sample means are identical as the population mean**
+
+---
+
+# Motivational example 2
+
+
+```r
+my_var &lt;- function(x) {
+  (x - mean(x)) %&gt;% 
+    .^2 %&gt;% 
+    sum() %&gt;% 
+    {. / length(x)}
+}
+
+my_var(c(1, 5))
+```
+
+```
+## [1] 4
+```
+
+---
+
+# Motivational example 2
+
+
+```r
+crossing(x1 = 1:5, x2 = 1:5) %&gt;% 
+  rowwise() %&gt;% 
+  mutate(s = my_var(c(x1, x2)))
+```
+
+.pull-left[
+
+```
+## # A tibble: 8 × 3
+## # Rowwise: 
+##      x1    x2     s
+##   &lt;int&gt; &lt;int&gt; &lt;dbl&gt;
+## 1     1     1  0   
+## 2     1     2  0.25
+## 3     1     3  1   
+## 4     1     4  2.25
+## 5     1     5  4   
+## 6     2     1  0.25
+## 7     2     2  0   
+## 8     2     3  0.25
+```
+]
+
+.pull-right[
+
+```r
+crossing(x1 = 1:5, x2 = 1:5) %&gt;% 
+  rowwise() %&gt;% 
+  mutate(s = my_var(c(x1, x2))) %&gt;% 
+  ungroup() %&gt;% 
+  summarise(g = mean(s)) %&gt;% 
+  pull
+```
+
+```
+## [1] 1
+```
+
+
+```r
+my_var(1:5)
+```
+
+```
+## [1] 2
+```
+]
+
+--
+
+The average of the all possible samples standard deviation are **not identical** as the standard deviation o the population.
+
+---
+
+# Motivational example 2
+
+Did we make a mistake when we wrote the function? Let's see with the built-in one!
+
+
+```r
+crossing(x1 = 1:5, x2 = 1:5) %&gt;% 
+  rowwise() %&gt;% 
+  mutate(s = var(c(x1, x2)))
+```
+
+.pull-left[
+
+```
+## # A tibble: 8 × 3
+## # Rowwise: 
+##      x1    x2     s
+##   &lt;int&gt; &lt;int&gt; &lt;dbl&gt;
+## 1     1     1   0  
+## 2     1     2   0.5
+## 3     1     3   2  
+## 4     1     4   4.5
+## 5     1     5   8  
+## 6     2     1   0.5
+## 7     2     2   0  
+## 8     2     3   0.5
+```
+]
+
+.pull-right[
+
+```r
+crossing(x1 = 1:5, x2 = 1:5) %&gt;% 
+  rowwise() %&gt;% 
+  mutate(s = var(c(x1, x2))) %&gt;% 
+  ungroup() %&gt;% 
+  summarise(g = mean(s)) %&gt;% 
+  pull
+```
+
+```
+## [1] 2
+```
+
+
+```r
+var(1:5)
+```
+
+```
+## [1] 2.5
+```
+]
+
+---
+
+# Motivational example 2
+
+Did we make a mistake when we wrote the function? Let's see with the built-in one!
+
+
+```r
+crossing(x1 = 1:5, x2 = 1:5) %&gt;% 
+  rowwise() %&gt;% 
+  mutate(s = var(c(x1, x2)))
+```
+
+.pull-left[
+
+```
+## # A tibble: 8 × 3
+## # Rowwise: 
+##      x1    x2     s
+##   &lt;int&gt; &lt;int&gt; &lt;dbl&gt;
+## 1     1     1   0  
+## 2     1     2   0.5
+## 3     1     3   2  
+## 4     1     4   4.5
+*## 5     1     5   8  
+## 6     2     1   0.5
+## 7     2     2   0  
+## 8     2     3   0.5
+```
+]
+
+.pull-right[
+
+```r
+crossing(x1 = 1:5, x2 = 1:5) %&gt;% 
+  rowwise() %&gt;% 
+  mutate(s = var(c(x1, x2))) %&gt;% 
+  ungroup() %&gt;% 
+  summarise(g = mean(s)) %&gt;% 
+  pull
+```
+
+```
+## [1] 2
+```
+
+
+```r
+var(1:5)
+```
+
+```
+## [1] 2.5
+```
+]
+
+---
+
+# Motivation example 2
+
+Sample variance:
+
+`$$s^2=\frac{\sum_{i=1}^N\left(Y_i-\bar{Y}\right)^2}{n-1}$$`
+
+- As the previous example showed, the average of all the possible sample variances are identical to the population variance, only if the denominator equals `\(n-1\)`. 
+
+(Mathematical proof is long and unnecessary for us)
+
+- This is called **unbiased** estimation
+
+---
+
+# Interval estimation
+
+.pull-left[
+
+
+&gt; "Our assumption is that there is an unknown process that generates the data we have and that this process can be described by a probability distribution"
+
+- But how can we know what this distribution can be?
+]
+
+.pull-right[
+
+&lt;img src="tidyverse2_files/meme_assumption Közepes.jpeg" width="819" style="display: block; margin: auto;" /&gt;
+]
+
+
+???
+
+source: Maddala &amp; Lahiri
+
+---
+
+## Normal distribution
+
+Normal distribution is a specially important distribution in statistics:
+
+.pull-left[
+
+1. It is very common in technical science and natural sciences
+
+2. Most of the distribution converges to normal distribution by a given parameter
+
+3. **CLT:** If independent random variables are summed up, their properly normalized sum tends toward a normal distribution even if the original variables themselves are not normally distributed.
+]
+
+.pull-right[
+&lt;img src="tidyverse2_files/clt_meme.jpg" width="736" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+## Normal distribution
+
+Application for simulation and visualizations:
+
+
+```r
+shiny::runGitHub("statistical-estimation", 
+                 "marcellgranat", ref = "main")
+```
+
+`$$f(x)=\frac{1}{\sigma \sqrt{2 \pi}} e^{-\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^2}$$`
+
+--
+
+**Distribution** and **.blue[density]** function of normal distribution
+
+&lt;img src="inferential-statistics_files/figure-html/unnamed-chunk-23-1.png" height="250" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Interval estimation
+
+&gt; `\(\theta\)` lies between `\(g_1\)` and `\(g_2\)` with a certain probability
+
+goal: Find `\(g_1\)` and `\(g_2\)`
+
+If the distribution is normal distribution, and mean = 0, sd = 1 (standard normal distribution), then
+
+&lt;img src="inferential-statistics_files/figure-html/unnamed-chunk-24-1.png" height="250" style="display: block; margin: auto;" /&gt;
+
+2.5% of standard normally distributed variables are smaller than -1.959964.
+
+
+
+---
+
+## Interval estimation
+
+&lt;img src="inferential-statistics_files/figure-html/unnamed-chunk-25-1.png" height="250" style="display: block; margin: auto;" /&gt;
+
+97.5% of standard normally distributed variables are smaller than 1.959964.
+
+---
+
+## Interval estimation
+
+&lt;img src="inferential-statistics_files/figure-html/unnamed-chunk-26-1.png" height="250" style="display: block; margin: auto;" /&gt;
+
+95% of standard normally distributed variables are between -1.959964 and 1.959964.
+
+.content-box-green[
+Use the `qnorm` function to find the boundaries.
+]
+
+---
+
+## Interval estimation
+
+- We know already the distribution (we assume), and we can use the sample mean for the mean. But what about the standard deviation (variance)?
+
+Variance in population:
+
+
+```
+*## [1] 2
+```
+
+Variance of sample averages (n = 2):
+
+
+```r
+crossing(x1 = 1:5, x2 = 1:5) %&gt;% 
+  rowwise() %&gt;% 
+  mutate(
+    m = mean(c(x1, x2))
+    ) %&gt;% 
+  ungroup() %&gt;% 
+  summarise(my_var(m))
+```
+
+```
+## # A tibble: 1 × 1
+##   `my_var(m)`
+##         &lt;dbl&gt;
+*## 1           1
+```
+
+---
+
+## Interval estimation
+
+- We know already the distribution (we assume), and we can use the sample mean for the mean. But what about the standard deviation (variance)?
+
+Variance in population:
+
+
+```
+*## [1] 2
+```
+
+Variance of sample averages (n = **3**):
+
+
+```r
+crossing(x1 = 1:5, x2 = 1:5, x3 = 1:5) %&gt;% 
+  rowwise() %&gt;% 
+  mutate(
+    m = mean(c(x1, x2, x3))
+    ) %&gt;% 
+  ungroup() %&gt;% 
+  summarise(my_var(m))
+```
+
+```
+## # A tibble: 1 × 1
+##   `my_var(m)`
+##         &lt;dbl&gt;
+*## 1       0.667
+```
+
+## Interval estimation
+
+`$$\sigma^2_{\text{sample avg}} = \frac{\sigma^2_{\text{population}}}{n}$$`
+`$$\sigma_{\text{sample avg}} = \frac{\sigma_{\text{population}}}{\sqrt{n}}$$`
+---
+
+### Example
+
+An machine extract coffee into the bottles. It is known from previous data recordings that the weight loaded by the machine is a random variable with a normal distribution, with a standard deviation of 1.5 g.
+The weight (g) of the coffee granules in the bottles in the 16-element sample taken to check the accuracy of the machine:
+
+55, 54, 54, 56, 57, 56, 55, 57, 54, 56, 55, 54, 57, 54, 56, 50.
+
+#### Let!s calculate the 95% confidence interval to expected weight.
+
+--
+
+
+```r
+y &lt;- c(55, 54, 54, 56, 57, 56, 55, 57, 54, 56, 55, 54, 57, 54, 56, 50)
+
+mean(y)
+```
+
+```
+## [1] 55
+```
+
+As seen in the previous examples if the sd in the population is 1.5, then the sd of the sample averages is `\(1.5/\sqrt{16} = .375\)`.
+
+Lower bound = `\(55 - .375 \times 1.96\)`
+
+Upper bound = `\(55 + .375 \times 1.96\)`
+
+
+---
+
+class: center, middle
+
+# Thank you for your attention!
+
+Slides are available at [www.marcellgranat.com](https://www.marcellgranat.com)
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>

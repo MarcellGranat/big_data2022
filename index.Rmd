@@ -26,7 +26,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 1. [Introduction to R](introduction-to-r.html)
 
-1. [Tidyverse](tidyverse.html)
+1. [Tidyverse I](tidyverse.html)
+
+1. [Tidyverse II](tidyverse2.html)
+
+1. [Statistical inference I](inferential-statistics.html)
 
 ------------------------------------------------------------------------
 

@@ -88,8 +88,464 @@ knitr::opts_chunk$set(echo = FALSE, fig.align = "center", error = TRUE)
 
 2. IID mean estimation
 
-3. Variance estimation
+---
 
-3. Sampling with replacement
+class: inverse, middle, center
+
+## Statistical inference
 
 ---
+
+# Statistical inference
+
+> "[...] we use the observed data to draw conclusions about the population from which the data came, or about the process by which the data were generated"
+
+--
+
+Three main headings:
+
+1. Point estimation
+
+2. Interval estimation
+
+3. Testing of hypotheses
+
+???
+
+Source: Maddala & Lahiri
+
+---
+
+### Point estimation
+
+- Probability distribution involves a parameter $\theta$
+
+- Sample from this distribution: $y_1, y_2, ..., y_n$
+
+- Based on the sample $g$ is our best guess about $\theta$
+
+- For instance, if $\theta$ is the population mean then $g(y_1, y_2, ..., y_n)$ is the sample mean.
+
+--
+
+### Interval estimation
+
+- We construct two functions based on the sample: $g_1(y_1, y_2, ..., y_n)$ and $g_2(y_1, y_2, ..., y_n)$
+
+- $\theta$ lies between $g_1$ and $g_2$ with a certain probability
+
+---
+
+# Motivational example
+
+- Let's say our data generation process can generate any number between 1 and 5, it will give 2 numbers at a time.
+
+- Possible pairs: (1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (2, 1), ...
+
+- Let's check it in R!
+
+```{r echo = TRUE}
+crossing(x1 = 1:5, x2 = 1:5)
+```
+
+---
+
+# Motivational example
+
+```{r eval = FALSE, echo = TRUE}
+crossing(x1 = 1:5, x2 = 1:5) %>% 
+  * mutate(mu = (x1 + x2) / 2)
+```
+
+.pull-left[
+```{r}
+crossing(x1 = 1:5, x2 = 1:5) %>% 
+  mutate(mu = (x1 + x2) / 2)
+```
+]
+
+.pull-right[
+```{r echo = TRUE}
+crossing(x1 = 1:5, x2 = 1:5) %>% 
+  mutate(mu = (x1 + x2) / 2) %>% 
+  summarise(g = mean(mu))
+```
+
+```{r echo=TRUE}
+mean(1:5)
+```
+]
+
+--
+
+**The average of the all possible sample means are identical as the population mean**
+
+---
+
+# Motivational example 2
+
+```{r echo = TRUE}
+my_var <- function(x) {
+  (x - mean(x)) %>% 
+    .^2 %>% 
+    sum() %>% 
+    {. / length(x)}
+}
+
+my_var(c(1, 5))
+```
+
+---
+
+# Motivational example 2
+
+```{r eval = FALSE, echo = TRUE}
+crossing(x1 = 1:5, x2 = 1:5) %>% 
+  rowwise() %>% 
+  mutate(s = my_var(c(x1, x2)))
+```
+
+.pull-left[
+```{r}
+crossing(x1 = 1:5, x2 = 1:5) %>% 
+  rowwise() %>% 
+  mutate(s = my_var(c(x1, x2))) %>% 
+  head(8)
+```
+]
+
+.pull-right[
+```{r echo = TRUE}
+crossing(x1 = 1:5, x2 = 1:5) %>% 
+  rowwise() %>% 
+  mutate(s = my_var(c(x1, x2))) %>% 
+  ungroup() %>% 
+  summarise(g = mean(s)) %>% 
+  pull
+```
+
+```{r echo=TRUE}
+my_var(1:5)
+```
+]
+
+--
+
+The average of the all possible samples standard deviation are **not identical** as the standard deviation o the population.
+
+---
+
+# Motivational example 2
+
+Did we make a mistake when we wrote the function? Let's see with the built-in one!
+
+```{r eval = FALSE, echo = TRUE}
+crossing(x1 = 1:5, x2 = 1:5) %>% 
+  rowwise() %>% 
+  mutate(s = var(c(x1, x2)))
+```
+
+.pull-left[
+```{r}
+crossing(x1 = 1:5, x2 = 1:5) %>% 
+  rowwise() %>% 
+  mutate(s = var(c(x1, x2))) %>% 
+  head(8)
+```
+]
+
+.pull-right[
+```{r echo = TRUE}
+crossing(x1 = 1:5, x2 = 1:5) %>% 
+  rowwise() %>% 
+  mutate(s = var(c(x1, x2))) %>% 
+  ungroup() %>% 
+  summarise(g = mean(s)) %>% 
+  pull
+```
+
+```{r echo=TRUE}
+var(1:5)
+```
+]
+
+---
+
+# Motivational example 2
+
+Did we make a mistake when we wrote the function? Let's see with the built-in one!
+
+```{r eval = FALSE, echo = TRUE}
+crossing(x1 = 1:5, x2 = 1:5) %>% 
+  rowwise() %>% 
+  mutate(s = var(c(x1, x2)))
+```
+
+.pull-left[
+```{r highlight.output = 9}
+crossing(x1 = 1:5, x2 = 1:5) %>% 
+  rowwise() %>% 
+  mutate(s = var(c(x1, x2))) %>% 
+  head(8)
+```
+]
+
+.pull-right[
+```{r echo = TRUE}
+crossing(x1 = 1:5, x2 = 1:5) %>% 
+  rowwise() %>% 
+  mutate(s = var(c(x1, x2))) %>% 
+  ungroup() %>% 
+  summarise(g = mean(s)) %>% 
+  pull
+```
+
+```{r echo=TRUE}
+var(1:5)
+```
+]
+
+---
+
+# Motivation example 2
+
+Sample variance:
+
+$$s^2=\frac{\sum_{i=1}^N\left(Y_i-\bar{Y}\right)^2}{n-1}$$
+
+- As the previous example showed, the average of all the possible sample variances are identical to the population variance, only if the denominator equals $n-1$. 
+
+(Mathematical proof is long and unnecessary for us)
+
+- This is called **unbiased** estimation
+
+---
+
+# Interval estimation
+
+.pull-left[
+
+
+> "Our assumption is that there is an unknown process that generates the data we have and that this process can be described by a probability distribution"
+
+- But how can we know what this distribution can be?
+]
+
+.pull-right[
+
+```{r}
+include_graphics("tidyverse2_files/meme_assumption Közepes.jpeg")
+```
+]
+
+
+???
+
+source: Maddala & Lahiri
+
+---
+
+## Normal distribution
+
+Normal distribution is a specially important distribution in statistics:
+
+.pull-left[
+
+1. It is very common in technical science and natural sciences
+
+2. Most of the distribution converges to normal distribution by a given parameter
+
+3. **CLT:** If independent random variables are summed up, their properly normalized sum tends toward a normal distribution even if the original variables themselves are not normally distributed.
+]
+
+.pull-right[
+```{r}
+include_graphics("tidyverse2_files/clt_meme.jpg")
+```
+
+]
+
+---
+
+## Normal distribution
+
+Application for simulation and visualizations:
+
+```{r eval=FALSE, echo=TRUE}
+shiny::runGitHub("statistical-estimation", 
+                 "marcellgranat", ref = "main")
+```
+
+$$f(x)=\frac{1}{\sigma \sqrt{2 \pi}} e^{-\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^2}$$
+
+--
+
+**Distribution** and **.blue[density]** function of normal distribution
+
+```{r fig.height=2.5, out.height="250", dpi = 400}
+ggplot() +
+  geom_function(fun = dnorm, color = "#378C95", size = 2) +
+  geom_function(fun = pnorm, color = "red", size = 2) +
+  geom_vline(xintercept = 0, lty = 2) +
+  geom_hline(yintercept = .5, lty = 2) +
+  scale_x_continuous(limits = c(-5, 5), expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_classic() +
+  labs(x = NULL, y = NULL)
+```
+
+---
+
+## Interval estimation
+
+> $\theta$ lies between $g_1$ and $g_2$ with a certain probability
+
+goal: Find $g_1$ and $g_2$
+
+If the distribution is normal distribution, and mean = 0, sd = 1 (standard normal distribution), then
+
+```{r fig.height=2.5, out.height="250", dpi = 400}
+ggplot() +
+  geom_function(fun = pnorm, color = "red", size = 1) +
+  annotate("line", x = c(- Inf, qnorm(.025)), y = c(0.025, 0.025), lty = 2) +
+  annotate("line", x = c(qnorm(.025), qnorm(.025)), y = c(0, 0.025), lty = 2) +
+  annotate("point", x = qnorm(.025), y = 0.025, color = "#378C95", size = 2) +
+  scale_x_continuous(limits = c(-5, 5), expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_classic() +
+  labs(x = NULL, y = NULL)
+```
+
+2.5% of standard normally distributed variables are smaller than `r qnorm(.025)`.
+
+
+
+---
+
+## Interval estimation
+
+```{r fig.height=2.5, out.height="250", dpi = 400}
+ggplot() +
+  geom_function(fun = pnorm, color = "red", size = 1) +
+  annotate("line", x = c(- Inf, qnorm(.975)), y = c(0.975, 0.975), lty = 2) +
+  annotate("line", x = c(qnorm(.975), qnorm(.975)), y = c(0, 0.975), lty = 2) +
+  annotate("point", x = qnorm(.975), y = 0.975, color = "#378C95", size = 2) +
+  scale_x_continuous(limits = c(-5, 5), expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_classic() +
+  labs(x = NULL, y = NULL)
+```
+
+97.5% of standard normally distributed variables are smaller than `r qnorm(.975)`.
+
+---
+
+## Interval estimation
+
+```{r fig.height=2.5, out.height="250", dpi = 400}
+ggplot() +
+  geom_function(fun = pnorm, color = "red", size = 1) +
+  geom_function(fun = dnorm, color = "#378C95", size = 1) +
+  annotate("line", x = c(- Inf, qnorm(.975)), y = c(0.975, 0.975), lty = 2) +
+  annotate("line", x = c(qnorm(.975), qnorm(.975)), y = c(0, 0.975), lty = 2) +
+  annotate("point", x = qnorm(.975), y = 0.975, color = "#378C95", size = 2) +
+  annotate("line", x = c(- Inf, qnorm(.025)), y = c(0.025, 0.025), lty = 2) +
+  annotate("line", x = c(qnorm(.025), qnorm(.025)), y = c(0, 0.025), lty = 2) +
+  annotate("point", x = qnorm(.025), y = 0.025, color = "#378C95", size = 2) +
+  scale_x_continuous(limits = c(-5, 5), expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_classic() +
+  labs(x = NULL, y = NULL)
+```
+
+95% of standard normally distributed variables are between `r qnorm(.025)` and `r qnorm(.975)`.
+
+.content-box-green[
+Use the `qnorm` function to find the boundaries.
+]
+
+---
+
+## Interval estimation
+
+- We know already the distribution (we assume), and we can use the sample mean for the mean. But what about the standard deviation (variance)?
+
+Variance in population:
+
+```{r, highlight.output=1}
+my_var(1:5)
+```
+
+Variance of sample averages (n = 2):
+
+```{r echo = TRUE, highlight.output=4}
+crossing(x1 = 1:5, x2 = 1:5) %>% 
+  rowwise() %>% 
+  mutate(
+    m = mean(c(x1, x2))
+    ) %>% 
+  ungroup() %>% 
+  summarise(my_var(m))
+```
+
+---
+
+## Interval estimation
+
+- We know already the distribution (we assume), and we can use the sample mean for the mean. But what about the standard deviation (variance)?
+
+Variance in population:
+
+```{r, highlight.output=1}
+my_var(1:5)
+```
+
+Variance of sample averages (n = **3**):
+
+```{r echo = TRUE, highlight.output=4}
+crossing(x1 = 1:5, x2 = 1:5, x3 = 1:5) %>% 
+  rowwise() %>% 
+  mutate(
+    m = mean(c(x1, x2, x3))
+    ) %>% 
+  ungroup() %>% 
+  summarise(my_var(m))
+```
+
+## Interval estimation
+
+$$\sigma^2_{\text{sample avg}} = \frac{\sigma^2_{\text{population}}}{n}$$
+$$\sigma_{\text{sample avg}} = \frac{\sigma_{\text{population}}}{\sqrt{n}}$$
+---
+
+### Example
+
+An machine extract coffee into the bottles. It is known from previous data recordings that the weight loaded by the machine is a random variable with a normal distribution, with a standard deviation of 1.5 g.
+The weight (g) of the coffee granules in the bottles in the 16-element sample taken to check the accuracy of the machine:
+
+55, 54, 54, 56, 57, 56, 55, 57, 54, 56, 55, 54, 57, 54, 56, 50.
+
+#### Let!s calculate the 95% confidence interval to expected weight.
+
+--
+
+```{r echo=TRUE}
+y <- c(55, 54, 54, 56, 57, 56, 55, 57, 54, 56, 55, 54, 57, 54, 56, 50)
+
+mean(y)
+```
+
+As seen in the previous examples if the sd in the population is 1.5, then the sd of the sample averages is $1.5/\sqrt{16} = .375$.
+
+Lower bound = $55 - .375 \times 1.96$
+
+Upper bound = $55 + .375 \times 1.96$
+
+
+---
+
+class: center, middle
+
+# Thank you for your attention!
+
+Slides are available at [www.marcellgranat.com](https://www.marcellgranat.com)

@@ -112,7 +112,7 @@ background-size: contain
 
 &gt; All functions in stringr start with `str_` and take a **vector of strings as the first argument**.
 
-This makes it easy to find the string manipulation function you need 🙋
+This makes it easy to find the string manipulation function you need 😆
 
 --
 
@@ -571,9 +571,11 @@ list.files()
 
 
 ```
-## [1] "daily-inflation-online.csv"          "inflation-expectations-forecast.csv"
-## [3] "purrr.png"                           "stringr.png"                        
-## [5] "strings - 01.jpg"                    "strings - 02.jpg"
+##  [1] "clt_meme.jpg"                        "daily-inflation-online.csv"         
+##  [3] "inflation-expectations-forecast.csv" "meme_assumption Közepes.jpeg"       
+##  [5] "meme_assumption.png"                 "meme_estimate.png"                  
+##  [7] "purrr.png"                           "stringr.png"                        
+##  [9] "strings - 01.jpg"                    "strings - 02.jpg"
 ```
 
 
@@ -727,6 +729,291 @@ tibble(file_names) %&gt;%
 &gt; "a dream within a dream is a signal that the hard work will come to you" - source: [Dream Meaning](https://www.dreammeaning.xyz/dream-meaning-dream-within-dream-interpretation/)
 
 **A table within a table is a signal of an even harder work!**
+
+---
+
+# Purrr - illustrative example
+
+- If a list is included in a tibble column, additional operations can be performed on it always with the help of the map function.
+
+--
+
+#### Average citation per topic
+
+The `Cites` column contains the number of citations per item.
+
+Let's see the first table to know what function we need to write to calculate the average.
+
+
+```r
+literature_df &lt;- tibble(file_names) %&gt;% 
+  mutate(
+    data = map(file_names, read_csv)
+  )
+
+literature_df %&gt;% 
+  pull(data) %&gt;% # now its a simple list
+  .[[1]] # the 1st table
+```
+
+
+```
+## # A tibble: 998 × 26
+##    Cites Authors         Title  Year Source Publisher ArticleURL CitesURL GSRank
+##    &lt;dbl&gt; &lt;chr&gt;           &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt;     &lt;chr&gt;      &lt;chr&gt;     &lt;dbl&gt;
+##  1  3295 GP Compo, JS W… The …  2011 Quart… Wiley On… https://r… https:/…    875
+##  2   885 E Nakamura, J … High…  2018 The Q… academic… https://a… https:/…    364
+##  3  2708 E Castronova    Synt…  2008 Synth… degruyte… https://w… https:/…    498
+##  4   660 RC Cornes, G v… An e…  2018 Journ… Wiley On… https://a… https:/…    261
+##  5   164 MC Medeiros, G… Fore…  2021 Journ… Taylor &amp;… https://w… https:/…    122
+##  6  5219 GW Schwert      Why …  1989 The j… Wiley On… https://o… https:/…    560
+##  7  1701 PR Hansen, A L… The …  2011 Econo… Wiley On… https://o… https:/…    565
+##  8  2573 LJ Christiano,… The …  2003 inter… Wiley On… https://o… https:/…    586
+##  9  4813 F Black         Noise  1986 The j… Wiley On… https://o… https:/…    333
+## 10   220 C Binder        Coro…  2020 Revie… direct.m… https://d… https:/…    504
+## # … with 988 more rows, and 17 more variables: QueryDate &lt;dttm&gt;, Type &lt;chr&gt;,
+## #   DOI &lt;chr&gt;, ISSN &lt;lgl&gt;, CitationURL &lt;lgl&gt;, Volume &lt;lgl&gt;, Issue &lt;lgl&gt;,
+## #   StartPage &lt;lgl&gt;, EndPage &lt;lgl&gt;, ECC &lt;dbl&gt;, CitesPerYear &lt;dbl&gt;,
+## #   CitesPerAuthor &lt;dbl&gt;, AuthorCount &lt;dbl&gt;, Age &lt;dbl&gt;, Abstract &lt;chr&gt;,
+## #   FullTextURL &lt;chr&gt;, RelatedURL &lt;chr&gt;
+```
+
+---
+
+# Purrr - illustrative example
+
+
+```r
+calculate_avg_cite &lt;- function(.data) {
+    mean(.data$Cites, na.rm = TRUE)
+}
+```
+
+
+```r
+literature_df %&gt;% 
+  pull(data) %&gt;% # now its a simple list
+  .[[1]] %&gt;% # simple table
+  calculate_avg_cite() # test on 1st table
+```
+
+```
+## [1] 110.7756
+```
+
+---
+
+# Purrr - illustrative example
+
+
+```r
+literature_df %&gt;% 
+  mutate(
+*   avg_cite = map(data, calculate_avg_cite)
+  )
+```
+
+
+```
+## # A tibble: 2 × 3
+##   file_names                          data                     avg_cite 
+*##   &lt;chr&gt;                               &lt;list&gt;                   &lt;list&gt;   
+## 1 daily-inflation-online.csv          &lt;spec_tbl_df [998 × 26]&gt; &lt;dbl [1]&gt;
+## 2 inflation-expectations-forecast.csv &lt;spec_tbl_df [980 × 26]&gt; &lt;dbl [1]&gt;
+```
+
+--
+
+- The function works, but the output is also a **list**.
+
+- In the case of map functions, the output will always be a list if we do not **specify what it simplifies to**. 
+
+---
+
+# Purrr - illustrative example
+
+
+```r
+literature_df %&gt;% 
+  mutate(
+*   avg_cite = map_dbl(data, calculate_avg_cite)
+  )
+```
+
+
+```
+## # A tibble: 2 × 3
+##   file_names                          data                     avg_cite
+*##   &lt;chr&gt;                               &lt;list&gt;                      &lt;dbl&gt;
+## 1 daily-inflation-online.csv          &lt;spec_tbl_df [998 × 26]&gt;     111.
+## 2 inflation-expectations-forecast.csv &lt;spec_tbl_df [980 × 26]&gt;     165.
+```
+
+--
+
+Other alternatives for simplifying: `map_dbl`, `map_chr`, `map_lgl`, `map_df`
+
+---
+
+# Purrr - illustrative 2
+
+Lets open the url of the most cited articles by topic, which is newer than 10 years, and the abstarct is about the US.
+
+--
+
+Step 1. Unnest the tables
+
+
+```r
+literature_df %&gt;% 
+  unnest(data)
+```
+
+```
+## # A tibble: 1,978 × 27
+##    file_names     Cites Authors Title  Year Source Publisher ArticleURL CitesURL
+##    &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt;     &lt;chr&gt;      &lt;chr&gt;   
+##  1 daily-inflati…  3295 GP Com… The …  2011 Quart… Wiley On… https://r… https:/…
+##  2 daily-inflati…   885 E Naka… High…  2018 The Q… academic… https://a… https:/…
+##  3 daily-inflati…  2708 E Cast… Synt…  2008 Synth… degruyte… https://w… https:/…
+##  4 daily-inflati…   660 RC Cor… An e…  2018 Journ… Wiley On… https://a… https:/…
+##  5 daily-inflati…   164 MC Med… Fore…  2021 Journ… Taylor &amp;… https://w… https:/…
+##  6 daily-inflati…  5219 GW Sch… Why …  1989 The j… Wiley On… https://o… https:/…
+##  7 daily-inflati…  1701 PR Han… The …  2011 Econo… Wiley On… https://o… https:/…
+##  8 daily-inflati…  2573 LJ Chr… The …  2003 inter… Wiley On… https://o… https:/…
+##  9 daily-inflati…  4813 F Black Noise  1986 The j… Wiley On… https://o… https:/…
+## 10 daily-inflati…   220 C Bind… Coro…  2020 Revie… direct.m… https://d… https:/…
+## # … with 1,968 more rows, and 18 more variables: GSRank &lt;dbl&gt;,
+## #   QueryDate &lt;dttm&gt;, Type &lt;chr&gt;, DOI &lt;chr&gt;, ISSN &lt;lgl&gt;, CitationURL &lt;lgl&gt;,
+## #   Volume &lt;lgl&gt;, Issue &lt;lgl&gt;, StartPage &lt;lgl&gt;, EndPage &lt;lgl&gt;, ECC &lt;dbl&gt;,
+## #   CitesPerYear &lt;dbl&gt;, CitesPerAuthor &lt;dbl&gt;, AuthorCount &lt;dbl&gt;, Age &lt;dbl&gt;,
+## #   Abstract &lt;chr&gt;, FullTextURL &lt;chr&gt;, RelatedURL &lt;chr&gt;
+```
+
+---
+
+# Purrr - illustrative 2
+
+#### Step 2. Select the relevant columns
+
+
+```r
+literature_df %&gt;% 
+  unnest(data) %&gt;% 
+  select(file_names, Cites, Year, ArticleURL, Abstract)
+```
+
+```
+## # A tibble: 1,978 × 5
+##    file_names                 Cites  Year ArticleURL                    Abstract
+##    &lt;chr&gt;                      &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;                         &lt;chr&gt;   
+##  1 daily-inflation-online.csv  3295  2011 https://rmets.onlinelibrary.… … , wit…
+##  2 daily-inflation-online.csv   885  2018 https://academic.oup.com/qje… … daily…
+##  3 daily-inflation-online.csv  2708  2008 https://www.degruyter.com/do… … From …
+##  4 daily-inflation-online.csv   660  2018 https://agupubs.onlinelibrar… … in ea…
+##  5 daily-inflation-online.csv   164  2021 https://www.tandfonline.com/… … and t…
+##  6 daily-inflation-online.csv  5219  1989 https://onlinelibrary.wiley.… … bond …
+##  7 daily-inflation-online.csv  1701  2011 https://onlinelibrary.wiley.… … First…
+##  8 daily-inflation-online.csv  2573  2003 https://onlinelibrary.wiley.… … and i…
+##  9 daily-inflation-online.csv  4813  1986 https://onlinelibrary.wiley.… … is ob…
+## 10 daily-inflation-online.csv   220  2020 https://direct.mit.edu/rest/… … Onlin…
+## # … with 1,968 more rows
+```
+
+---
+
+# Purrr - illustrative 2
+
+#### Step 3. Filter the abstract
+
+
+```r
+literature_df %&gt;% 
+  unnest(data) %&gt;% 
+  select(file_names, Cites, Year, ArticleURL, Abstract) %&gt;% 
+  filter(str_detect(Abstract, "US"), Year &gt;= 2013)
+```
+
+```
+## # A tibble: 39 × 5
+##    file_names                 Cites  Year ArticleURL                    Abstract
+##    &lt;chr&gt;                      &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;                         &lt;chr&gt;   
+##  1 daily-inflation-online.csv   164  2021 https://www.tandfonline.com/… … and t…
+##  2 daily-inflation-online.csv   120  2020 https://www.nber.org/papers/… … Furth…
+##  3 daily-inflation-online.csv   338  2016 https://www.aeaweb.org/artic… … onlin…
+##  4 daily-inflation-online.csv   248  2017 https://onlinelibrary.wiley.… … The d…
+##  5 daily-inflation-online.csv   183  2014 https://onlinelibrary.wiley.… … LPT w…
+##  6 daily-inflation-online.csv    37  2020 https://www.nber.org/papers/… … daily…
+##  7 daily-inflation-online.csv    87  2017 https://www.sciencedirect.co… … The F…
+##  8 daily-inflation-online.csv    13  2022 https://www.sciencedirect.co… … Onlin…
+##  9 daily-inflation-online.csv    51  2015 https://agupubs.onlinelibrar… … We us…
+## 10 daily-inflation-online.csv     7  2021 https://www.sciencedirect.co… … the p…
+## # … with 29 more rows
+```
+
+---
+
+# Purrr - illustrative 2
+
+#### Step 4. Keep the 5 most cited.
+
+
+```r
+literature_df %&gt;% 
+  unnest(data) %&gt;% 
+  select(file_names, Cites, Year, ArticleURL, Abstract) %&gt;% 
+  filter(str_detect(Abstract, "US"), Year &gt;= 2013) %&gt;% 
+  group_by(file_names) %&gt;% 
+  slice_max(Cites, n = 5)
+```
+
+```
+## # A tibble: 10 × 5
+## # Groups:   file_names [2]
+##    file_names                          Cites  Year ArticleURL           Abstract
+##    &lt;chr&gt;                               &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;                &lt;chr&gt;   
+##  1 daily-inflation-online.csv            338  2016 https://www.aeaweb.… "… onli…
+##  2 daily-inflation-online.csv            248  2017 https://onlinelibra… "… The …
+##  3 daily-inflation-online.csv            183  2014 https://onlinelibra… "… LPT …
+##  4 daily-inflation-online.csv            164  2021 https://www.tandfon… "… and …
+##  5 daily-inflation-online.csv            120  2020 https://www.nber.or… "… Furt…
+##  6 inflation-expectations-forecast.csv    99  2013 https://papers.ssrn… "… a na…
+##  7 inflation-expectations-forecast.csv    93  2014 https://onlinelibra… "… betw…
+##  8 inflation-expectations-forecast.csv    78  2016 https://onlinelibra… "… We p…
+##  9 inflation-expectations-forecast.csv    76  2013 https://www.science… "… the …
+## 10 inflation-expectations-forecast.csv    64  2016 https://www.science… "… fede…
+```
+
+---
+
+# Purrr - illustrative 2
+
+#### Step 5. Pull the urls and open each in the browser
+
+In this task, the `walk` function can be used, which works in the same way as `map`, but has **no output**. (appropriate for side-effects)
+
+
+```r
+literature_df %&gt;% 
+  unnest(data) %&gt;% 
+  select(file_names, Cites, Year, ArticleURL, Abstract) %&gt;% 
+  filter(str_detect(Abstract, "US"), Year &gt;= 2013) %&gt;% 
+  group_by(file_names) %&gt;% 
+  slice_max(Cites, n = 5) %&gt;% 
+  pull(ArticleURL) %&gt;% 
+  walk(browseURL)
+```
+
+---
+
+class: center, middle
+
+# Thank you for your attention!
+
+Slides are available at [www.marcellgranat.com](https://www.marcellgranat.com)
+
+
+
 
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>

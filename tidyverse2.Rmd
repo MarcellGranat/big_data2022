@@ -569,3 +569,187 @@ tibble(file_names) %>%
 
 **A table within a table is a signal of an even harder work!**
 
+---
+
+# Purrr - illustrative example
+
+- If a list is included in a tibble column, additional operations can be performed on it always with the help of the map function.
+
+--
+
+#### Average citation per topic
+
+The `Cites` column contains the number of citations per item.
+
+Let's see the first table to know what function we need to write to calculate the average.
+
+```{r eval=FALSE}
+literature_df <- tibble(file_names) %>% 
+  mutate(
+    data = map(file_names, read_csv)
+  )
+
+literature_df %>% 
+  pull(data) %>% # now its a simple list
+  .[[1]] # the 1st table
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+literature_df <- tibble(file_names) %>% 
+  mutate(
+    data = map(file_names, read_tidyverse2_csv)
+  )
+
+literature_df %>% 
+  pull(data) %>% # now its a simple list
+  .[[1]] 
+```
+
+---
+
+# Purrr - illustrative example
+
+```{r}
+calculate_avg_cite <- function(.data) {
+    mean(.data$Cites, na.rm = TRUE)
+}
+```
+
+```{r}
+literature_df %>% 
+  pull(data) %>% # now its a simple list
+  .[[1]] %>% # simple table
+  calculate_avg_cite() # test on 1st table
+```
+
+---
+
+# Purrr - illustrative example
+
+```{r eval=FALSE}
+literature_df %>% 
+  mutate(
+*   avg_cite = map(data, calculate_avg_cite)
+  )
+```
+
+```{r echo=FALSE, highlight.output = 3}
+literature_df %>% 
+  mutate(
+    avg_cite = map(data, calculate_avg_cite)
+  )
+```
+
+--
+
+- The function works, but the output is also a **list**.
+
+- In the case of map functions, the output will always be a list if we do not **specify what it simplifies to**. 
+
+---
+
+# Purrr - illustrative example
+
+```{r eval=FALSE}
+literature_df %>% 
+  mutate(
+*   avg_cite = map_dbl(data, calculate_avg_cite)
+  )
+```
+
+```{r echo=FALSE, highlight.output = 3}
+literature_df %>% 
+  mutate(
+    avg_cite = map_dbl(data, calculate_avg_cite),
+  )
+```
+
+--
+
+Other alternatives for simplifying: `map_dbl`, `map_chr`, `map_lgl`, `map_df`
+
+---
+
+# Purrr - illustrative 2
+
+Lets open the url of the most cited articles by topic, which is newer than 10 years, and the abstarct is about the US.
+
+--
+
+Step 1. Unnest the tables
+
+```{r}
+literature_df %>% 
+  unnest(data)
+```
+
+---
+
+# Purrr - illustrative 2
+
+#### Step 2. Select the relevant columns
+
+```{r}
+literature_df %>% 
+  unnest(data) %>% 
+  select(file_names, Cites, Year, ArticleURL, Abstract)
+```
+
+---
+
+# Purrr - illustrative 2
+
+#### Step 3. Filter the abstract
+
+```{r}
+literature_df %>% 
+  unnest(data) %>% 
+  select(file_names, Cites, Year, ArticleURL, Abstract) %>% 
+  filter(str_detect(Abstract, "US"), Year >= 2013)
+```
+
+---
+
+# Purrr - illustrative 2
+
+#### Step 4. Keep the 5 most cited.
+
+```{r}
+literature_df %>% 
+  unnest(data) %>% 
+  select(file_names, Cites, Year, ArticleURL, Abstract) %>% 
+  filter(str_detect(Abstract, "US"), Year >= 2013) %>% 
+  group_by(file_names) %>% 
+  slice_max(Cites, n = 5)
+```
+
+---
+
+# Purrr - illustrative 2
+
+#### Step 5. Pull the urls and open each in the browser
+
+In this task, the `walk` function can be used, which works in the same way as `map`, but has **no output**. (appropriate for side-effects)
+
+```{r}
+literature_df %>% 
+  unnest(data) %>% 
+  select(file_names, Cites, Year, ArticleURL, Abstract) %>% 
+  filter(str_detect(Abstract, "US"), Year >= 2013) %>% 
+  group_by(file_names) %>% 
+  slice_max(Cites, n = 5) %>% 
+  pull(ArticleURL) %>% 
+  walk(browseURL)
+```
+
+---
+
+class: center, middle
+
+# Thank you for your attention!
+
+Slides are available at [www.marcellgranat.com](https://www.marcellgranat.com)
+
+
+
+
