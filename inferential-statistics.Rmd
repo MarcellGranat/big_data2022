@@ -512,6 +512,8 @@ crossing(x1 = 1:5, x2 = 1:5, x3 = 1:5) %>%
   summarise(my_var(m))
 ```
 
+---
+
 ## Interval estimation
 
 $$\sigma^2_{\text{sample avg}} = \frac{\sigma^2_{\text{population}}}{n}$$
