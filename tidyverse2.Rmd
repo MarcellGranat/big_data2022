@@ -88,10 +88,6 @@ knitr::opts_chunk$set(echo = TRUE, fig.align = "center", error = TRUE)
 
 2. IID mean estimation
 
-3. Variance estimation
-
-3. Sampling with replacement
-
 ---
 
 background-image: url(tidyverse2_files/stringr.png)
@@ -731,7 +727,7 @@ literature_df %>%
 
 In this task, the `walk` function can be used, which works in the same way as `map`, but has **no output**. (appropriate for side-effects)
 
-```{r}
+```{r eval=FALSE}
 literature_df %>% 
   unnest(data) %>% 
   select(file_names, Cites, Year, ArticleURL, Abstract) %>% 
