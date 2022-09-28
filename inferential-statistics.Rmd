@@ -379,7 +379,7 @@ shiny::runGitHub("statistical-estimation",
 You need to install 4 packages to use it: `shiny`, `shinydashboard`, `shinyWidgets` & `tidyverse`
 
 $$f(x)=\frac{1}{\sigma \sqrt{2 \pi}} e^{-\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^2}$$
-
+˜˜
 --
 
 **Distribution** and **.blue[density]** function of normal distribution
