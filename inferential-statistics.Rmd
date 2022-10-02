@@ -104,11 +104,22 @@ class: inverse, middle, center
 
 Three main headings:
 
+
+.pull-left[
+
 1. Point estimation
 
 2. Interval estimation
 
 3. Testing of hypotheses
+]
+
+.pull-right[
+```{r echo=FALSE}
+include_graphics("tidyverse2_files/meme_estimate.png")
+```
+
+]
 
 ???
 
@@ -334,7 +345,7 @@ $$s^2=\frac{\sum_{i=1}^N\left(Y_i-\bar{Y}\right)^2}{n-1}$$
 .pull-right[
 
 ```{r}
-include_graphics("tidyverse2_files/meme_assumption Közepes.jpeg")
+include_graphics("tidyverse2_files/meme_assumption.png")
 ```
 ]
 
@@ -549,6 +560,20 @@ Lower bound = $55 - .375 \times 1.96$
 
 Upper bound = $55 + .375 \times 1.96$
 
+
+---
+
+# References
+
+```{r, print_refs, results='asis', echo=FALSE, warning=FALSE, message=FALSE}
+library(RefManageR)
+bib <- ReadBib("inferential-statistics.bib", check = FALSE)
+
+print(bib, 
+  .opts = list(check.entries = FALSE, 
+               style = "html", 
+               bib.style = "authoryear"))
+```
 
 ---
 
