@@ -998,6 +998,10 @@ For illustrative reasons, let's modify the context again.
 P-value:
 
 
+```r
+2 * (1 - pnorm(1.910497))
+```
+
 ```
 ## [1] 0.05606925
 ```
@@ -1023,6 +1027,10 @@ class: inverse, middle, center
 - Same steps, but use the `qt` function
 
 
+```r
+qt(.05, df = 365 -1)
+```
+
 ```
 ## [1] -1.649051
 ```
@@ -1034,7 +1042,16 @@ class: inverse, middle, center
 ## Code in R
 
 
+```r
+s_length &lt;- iris %&gt;% 
+  filter(Species == "setosa") %&gt;% 
+  pull(Sepal.Length)
+```
 
+
+```r
+t.test(s_length, alternative = "two.sided")
+```
 
 ```
 ## 
@@ -1053,6 +1070,10 @@ class: inverse, middle, center
 
 ## Code in R
 
+
+```r
+t.test(s_length, alternative = "greater", mu = 5)
+```
 
 ```
 ## 
@@ -1132,24 +1153,9 @@ download_yahoo &lt;- . %&gt;%
   read_csv() %&gt;% 
   arrange(desc(Date))
 
-download_yahoo("https://finance.yahoo.com/quote/%5EIXIC/history?period1=34560000&amp;period2=1664755200&amp;interval=1d&amp;filter=history&amp;frequency=1d&amp;includeAdjustedClose=true")
-```
+snp_df &lt;- download_yahoo("https://finance.yahoo.com/quote/%5EGSPC/history?period1=-1325635200&amp;period2=1664841600&amp;interval=1d&amp;filter=history&amp;frequency=1d&amp;includeAdjustedClose=true")
 
-```
-## # A tibble: 13,028 × 7
-##    Date         Open   High    Low  Close `Adj Close`     Volume
-##    &lt;date&gt;      &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;       &lt;dbl&gt;      &lt;dbl&gt;
-##  1 2022-09-30 10698. 10883. 10572. 10576.      10576. 4649710000
-##  2 2022-09-29 10894. 10899. 10623. 10738.      10738. 4516630000
-##  3 2022-09-28 10818. 11102. 10776. 11052.      11052. 4556100000
-##  4 2022-09-27 10955. 11041. 10741. 10830.      10830. 4445050000
-##  5 2022-09-26 10833. 11024  10789. 10803.      10803. 4697730000
-##  6 2022-09-23 10953. 10958. 10733. 10868.      10868. 5134350000
-##  7 2022-09-22 11167. 11204. 11025. 11067.      11067. 4916470000
-##  8 2022-09-21 11466. 11614. 11219. 11220.      11220. 4471000000
-##  9 2022-09-20 11440. 11521. 11344. 11425.      11425. 4028100000
-## 10 2022-09-19 11339. 11538. 11338. 11535.      11535. 4168670000
-## # … with 13,018 more rows
+nasdaq_df &lt;- download_yahoo("https://finance.yahoo.com/quote/%5EIXIC/history?period1=34560000&amp;period2=1664841600&amp;interval=1d&amp;filter=history&amp;frequency=1d&amp;includeAdjustedClose=true")
 ```
 
 ---

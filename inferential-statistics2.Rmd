@@ -970,7 +970,7 @@ $$z = \frac{45.2-45}{2/\sqrt{365}}=1.910497$$
 
 P-value:
 
-```{r}
+```{r echo=TRUE}
 2 * (1 - pnorm(1.910497))
 ```
 ]
@@ -996,7 +996,7 @@ class: inverse, middle, center
 
 - Same steps, but use the `qt` function
 
-```{r}
+```{r echo=TRUE}
 qt(.05, df = 365 -1)
 ```
 
@@ -1006,20 +1006,20 @@ qt(.05, df = 365 -1)
 
 ## Code in R
 
-```{r}
+```{r echo=TRUE}
 s_length <- iris %>% 
   filter(Species == "setosa") %>% 
   pull(Sepal.Length)
 ```
 
-```{r}
+```{r echo=TRUE}
 t.test(s_length, alternative = "two.sided")
 ```
 ---
 
 ## Code in R
 
-```{r}
+```{r echo=TRUE}
 t.test(s_length, alternative = "greater", mu = 5)
 ```
 
@@ -1086,7 +1086,9 @@ download_yahoo <- . %>%
   read_csv() %>% 
   arrange(desc(Date))
 
-download_yahoo("https://finance.yahoo.com/quote/%5EIXIC/history?period1=34560000&period2=1664755200&interval=1d&filter=history&frequency=1d&includeAdjustedClose=true")
+snp_df <- download_yahoo("https://finance.yahoo.com/quote/%5EGSPC/history?period1=-1325635200&period2=1664841600&interval=1d&filter=history&frequency=1d&includeAdjustedClose=true")
+
+nasdaq_df <- download_yahoo("https://finance.yahoo.com/quote/%5EIXIC/history?period1=34560000&period2=1664841600&interval=1d&filter=history&frequency=1d&includeAdjustedClose=true")
 ```
 
 ---
