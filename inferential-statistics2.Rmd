@@ -1056,7 +1056,7 @@ The proportion in a given sample follows binomial distribution.
 $$\text{Var}(p) = \frac{P(1-P)}{n}$$
 ]
 
-.pull-left[
+.pull-right[
 Estimator:
 $$s_p^2 = \frac{p(1-p)}{n-1}$$
 
@@ -1076,11 +1076,6 @@ Comparing the properties of two samples taken from different populations.
 
 One frequent application: compare returns!
 
-```{r}
-read_html("https://finance.yahoo.com/quote/ES%3DF/history?period1=1507075200&period2=1664755205&interval=1d&filter=history&frequency=1d&includeAdjustedClose=true") %>% 
-    html_table()
-```
-
 ```{r echo=TRUE}
 library(magrittr)
 
@@ -1090,9 +1085,7 @@ download_yahoo <- . %>%
   str_c("https://query1.finance.yahoo.com/v7/finance/download/", .) %>% 
   read_csv() %>% 
   arrange(desc(Date))
-```
 
-```{r}
 download_yahoo("https://finance.yahoo.com/quote/%5EIXIC/history?period1=34560000&period2=1664755200&interval=1d&filter=history&frequency=1d&includeAdjustedClose=true")
 ```
 

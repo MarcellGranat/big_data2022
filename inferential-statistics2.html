@@ -100,24 +100,24 @@ Let's continue where we stopped!
 
 --
 
-An machine extract coffee into the bottles. It is known from previous data recordings that the weight loaded by the machine is a random variable with a normal distribution, with a standard deviation of 1.5 g.
+A machine extracts coffee into the bottles. It is known from previous data recordings that the weight loaded by the machine is a random variable with a normal distribution, with a standard deviation of 1.5 g.
 The weight (g) of the coffee granules in the bottles in the 16-element sample taken to check the accuracy of the machine:
 
 55, 54, 54, 56, 57, 56, 55, 57, 54, 56, 55, 54, 57, 54, 56, 50.
 
-#### Let!s calculate the 95% confidence interval to expected weight.
+#### Let!s calculate the 95% confidence interval to the expected weight.
 
 ---
 ## An illustrative example
 
 Let's continue where we stopped!
 
-An machine extract coffee into the bottles. It is known from previous data recordings that the weight loaded by the machine is a random variable with a normal distribution, **with a standard deviation of 1.5 g.**
+A machine extracts coffee into the bottles. It is known from previous data recordings that the weight loaded by the machine is a random variable with a normal distribution, **with a standard deviation of 1.5 g.**
 The weight (g) of the coffee granules in the bottles in the 16-element sample taken to check the accuracy of the machine:
 
 55, 54, 54, 56, 57, 56, 55, 57, 54, 56, 55, 54, 57, 54, 56, 50.
 
-#### Let!s calculate the 95% confidence interval to expected weight.
+#### Let!s calculate the 95% confidence interval to the expected weight.
 
 --
 
@@ -125,13 +125,13 @@ The weight (g) of the coffee granules in the bottles in the 16-element sample ta
 
 --
 
-#### Let!s calculate the 95% confidence interval to expected weight assuming that we have no prior information about the standard deviation.
+#### Let!s calculate the 95% confidence interval to the expected weight assuming that we have no prior information about the standard deviation.
 
-In this case, there is another uncertainty factor in the calculation. We also **estimate the standard deviation** for drawn the distribution.
+In this case, there is another uncertainty factor in the calculation. We also **estimate the standard deviation** for drawing the distribution.
 
 ---
 
-## Mean estimation with unknown standard deviation
+## Mean estimation with an unknown standard deviation
 
 Mean point estimation:
 
@@ -174,7 +174,7 @@ $$
 t(n-1)=\frac{\bar{x}-\mu}{S / \sqrt{n}},
 $$
 
-where `\(n-1\)` is called as the degree of freedom.
+where `\(n-1\)` is called the degree of freedom.
 
 &lt;img src="inferential-statistics2_files/figure-html/unnamed-chunk-3-1.png" width="700px" height="400px" style="display: block; margin: auto;" /&gt;
 
@@ -182,7 +182,7 @@ where `\(n-1\)` is called as the degree of freedom.
 
 ## An illustrative example
 
-#### Let!s calculate the 95% confidence interval to expected weight assuming that we have no prior information about the standard deviation.
+#### Let!s calculate the 95% confidence interval to the expected weight assuming that we have no prior information about the standard deviation.
 
 --
 
@@ -267,7 +267,7 @@ sd(y) # divided by n - 1 !!!
 
 The daily payment amount in a bank follows a normal distribution, with parameters `\(\mu\)`=HUF 3.6 million, `\(\sigma\)`=HUF 0.9 million.
 
-#### What is the probablity that on a given day the payment amount is ...
+#### What is the probability that on a given day the payment amount is ...
 
 --
 
@@ -291,7 +291,7 @@ pnorm(q = 3, mean = 3.6, sd = .9)
 
 The daily payment amount in a bank follows a normal distribution, with parameters `\(\mu\)`=HUF 3.6 million, `\(\sigma\)`=HUF 0.9 million.
 
-#### What is the probablity that on a given day the payment amount is ...
+#### What is the probability that on a given day the payment amount is ...
 
 ##### 1. below HUF 3 million?
 
@@ -325,7 +325,7 @@ pnorm(q = 3, mean = 3.6, sd = .9)
 
 The daily payment amount in a bank follows a normal distribution, with parameters `\(\mu\)`=HUF 3.6 million, `\(\sigma\)`=HUF 0.9 million.
 
-#### What is the probablity that on a given day the payment amount is ...
+#### What is the probability that on a given day the payment amount is ...
 
 ##### 3. between HUF 2.7 and 4.5 million?
 
@@ -398,7 +398,7 @@ Source: Maddala &amp; Lahiri
 
 Steps of hypothesis testing:
 
-1. Set two disjunct hypothesis (only one can be true at once)
+1. Set two disjunct hypotheses (only one can be true at once)
 
 --
 
@@ -676,13 +676,13 @@ r_interval(mu = -20, s = 40, n = 1000000, multiplier = 1.65)
 
 ### An illustrative example
 
-- Even if HUF 44 million does not sound a huge difference, if the s.d. in the sample equals 2, then the s.d. of the sample averages is 2 / 365^.5 = 0.1046848
+- Even if HUF 44 million does not sound like a huge difference, if the s.d. in the sample equals 2, then the s.d. of the sample averages is 2 / 365^.5 = 0.1046848
 
-- .1 \* 3 would also be a highly significant difference to not belive that the population mean is 45
+- .1 \* 3 would also be a highly significant difference to not believe that the population mean is 45
 
-- In general, the procedure is to assign a specific boundory (critical value) or boundories, from which if the value of the test statistic falls further, then I reject the null hypothesis.
+- In general, the procedure is to assign a specific boundary (critical value) or boundaries, from which if the value of the test statistic falls further, then I reject the null hypothesis.
 
-- Lets say that I want to reject if the probability of getting a sample average with that value or lower should be .blue[5%]. This is the **significance level**.
+- Let's say that I want to reject if the probability of getting a sample average with that value or lower should be .blue[5%]. This is the **significance level**.
 
 --                                                                    
 
@@ -724,7 +724,7 @@ qnorm(.05)
 
 ## How to set the .blue[hypothesis]?
 
-#### Alternative: **more** (significance level (alpha) = 5%)
+#### Alternative: **greater** (significance level (alpha) = 5%)
 
 .pull-left[
 
@@ -774,13 +774,13 @@ qnorm(c(.025, .975))
 
 ## Type I &amp; type II errors
 
-- If the null hypothesis is true, we take a random sample, then the probability to reject incorrectly the H0 is alpha.
+- If the null hypothesis is true, we take a random sample, and then the probability to reject incorrectly the H0 is alpha.
 
   - We call this Type I error
 
 --
 
-- What if the H0 if false in the reality?
+- What if the H0 is false in the reality?
 
 Let's assume the following hypothesis:
 
@@ -966,7 +966,7 @@ pnorm(9.5525)
 ```
 ]
 
-- .blue[IDEA:] in the case of "more" alternative, substitute the test statistics into the probability function, **subtract it from 1**, and if the resulting value (**p-value**) is lower than the significance level, you can reject the null.
+- .blue[IDEA:] in the case of "greater" alternative, substitute the test statistics into the probability function, **subtract it from 1**, and if the resulting value (**p-value**) is lower than the significance level, you can reject the null.
 
 
 ```r
@@ -1101,7 +1101,7 @@ The proportion in a given sample follows binomial distribution.
 `$$\text{Var}(p) = \frac{P(1-P)}{n}$$`
 ]
 
-.pull-left[
+.pull-right[
 Estimator:
 `$$s_p^2 = \frac{p(1-p)}{n-1}$$`
 
@@ -1122,11 +1122,6 @@ Comparing the properties of two samples taken from different populations.
 One frequent application: compare returns!
 
 
-```
-## Error in html_table(.): could not find function "html_table"
-```
-
-
 ```r
 library(magrittr)
 
@@ -1136,8 +1131,9 @@ download_yahoo &lt;- . %&gt;%
   str_c("https://query1.finance.yahoo.com/v7/finance/download/", .) %&gt;% 
   read_csv() %&gt;% 
   arrange(desc(Date))
-```
 
+download_yahoo("https://finance.yahoo.com/quote/%5EIXIC/history?period1=34560000&amp;period2=1664755200&amp;interval=1d&amp;filter=history&amp;frequency=1d&amp;includeAdjustedClose=true")
+```
 
 ```
 ## # A tibble: 13,028 × 7
@@ -1171,7 +1167,6 @@ class: center, middle
 # Thank you for your attention!
 
 Slides are available at [www.marcellgranat.com](https://www.marcellgranat.com)
-
 
 
 
