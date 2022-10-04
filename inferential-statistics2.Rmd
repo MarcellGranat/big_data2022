@@ -96,11 +96,11 @@ knitr::opts_chunk$set(echo = FALSE,
 
 3. Hypothesis testing in R
 
-4. Univariate testing
+4. One-sample testing
 
-5. Bivariate testing
+5. Two-sample tests
 
-6. Multivariate testing
+6. Multiple-sample tests
 
 ---
 
@@ -115,24 +115,24 @@ Let's continue where we stopped!
 
 --
 
-An machine extract coffee into the bottles. It is known from previous data recordings that the weight loaded by the machine is a random variable with a normal distribution, with a standard deviation of 1.5 g.
+A machine extracts coffee into the bottles. It is known from previous data recordings that the weight loaded by the machine is a random variable with a normal distribution, with a standard deviation of 1.5 g.
 The weight (g) of the coffee granules in the bottles in the 16-element sample taken to check the accuracy of the machine:
 
 55, 54, 54, 56, 57, 56, 55, 57, 54, 56, 55, 54, 57, 54, 56, 50.
 
-#### Let!s calculate the 95% confidence interval to expected weight.
+#### Let!s calculate the 95% confidence interval to the expected weight.
 
 ---
 ## An illustrative example
 
 Let's continue where we stopped!
 
-An machine extract coffee into the bottles. It is known from previous data recordings that the weight loaded by the machine is a random variable with a normal distribution, **with a standard deviation of 1.5 g.**
+A machine extracts coffee into the bottles. It is known from previous data recordings that the weight loaded by the machine is a random variable with a normal distribution, **with a standard deviation of 1.5 g.**
 The weight (g) of the coffee granules in the bottles in the 16-element sample taken to check the accuracy of the machine:
 
 55, 54, 54, 56, 57, 56, 55, 57, 54, 56, 55, 54, 57, 54, 56, 50.
 
-#### Let!s calculate the 95% confidence interval to expected weight.
+#### Let!s calculate the 95% confidence interval to the expected weight.
 
 --
 
@@ -140,13 +140,13 @@ The weight (g) of the coffee granules in the bottles in the 16-element sample ta
 
 --
 
-#### Let!s calculate the 95% confidence interval to expected weight assuming that we have no prior information about the standard deviation.
+#### Let!s calculate the 95% confidence interval to the expected weight assuming that we have no prior information about the standard deviation.
 
-In this case, there is another uncertainty factor in the calculation. We also **estimate the standard deviation** for drawn the distribution.
+In this case, there is another uncertainty factor in the calculation. We also **estimate the standard deviation** for drawing the distribution.
 
 ---
 
-## Mean estimation with unknown standard deviation
+## Mean estimation with an unknown standard deviation
 
 Mean point estimation:
 
@@ -206,7 +206,7 @@ $$
 t(n-1)=\frac{\bar{x}-\mu}{S / \sqrt{n}},
 $$
 
-where $n-1$ is called as the degree of freedom.
+where $n-1$ is called the degree of freedom.
 
 ```{r out.height="400px"}
 t_dist <- function(df = 1:3) {
@@ -232,7 +232,7 @@ t_dist(c(1, 3, 30, 100)) +
 
 ## An illustrative example
 
-#### Let!s calculate the 95% confidence interval to expected weight assuming that we have no prior information about the standard deviation.
+#### Let!s calculate the 95% confidence interval to the expected weight assuming that we have no prior information about the standard deviation.
 
 --
 
@@ -287,7 +287,7 @@ sd(y) # divided by n - 1 !!!
 
 The daily payment amount in a bank follows a normal distribution, with parameters $\mu$=HUF 3.6 million, $\sigma$=HUF 0.9 million.
 
-#### What is the probablity that on a given day the payment amount is ...
+#### What is the probability that on a given day the payment amount is ...
 
 --
 
@@ -314,7 +314,7 @@ ggplot(data = tibble(x = c(-2.5, 8))) +
 
 The daily payment amount in a bank follows a normal distribution, with parameters $\mu$=HUF 3.6 million, $\sigma$=HUF 0.9 million.
 
-#### What is the probablity that on a given day the payment amount is ...
+#### What is the probability that on a given day the payment amount is ...
 
 ##### 1. below HUF 3 million?
 
@@ -338,7 +338,7 @@ pnorm(q = 3, mean = 3.6, sd = .9)
 
 The daily payment amount in a bank follows a normal distribution, with parameters $\mu$=HUF 3.6 million, $\sigma$=HUF 0.9 million.
 
-#### What is the probablity that on a given day the payment amount is ...
+#### What is the probability that on a given day the payment amount is ...
 
 ##### 3. between HUF 2.7 and 4.5 million?
 
@@ -409,7 +409,7 @@ Source: Maddala & Lahiri
 
 Steps of hypothesis testing:
 
-1. Set two disjunct hypothesis (only one can be true at once)
+1. Set two disjunct hypotheses (only one can be true at once)
 
 --
 
@@ -563,13 +563,13 @@ r_interval(mu = -20, s = 40, n = 1000000, multiplier = 1.65)
 
 ### An illustrative example
 
-- Even if HUF 44 million does not sound a huge difference, if the s.d. in the sample equals 2, then the s.d. of the sample averages is 2 / 365^.5 = 0.1046848
+- Even if HUF 44 million does not sound like a huge difference, if the s.d. in the sample equals 2, then the s.d. of the sample averages is 2 / 365^.5 = 0.1046848
 
-- .1 \* 3 would also be a highly significant difference to not belive that the population mean is 45
+- .1 \* 3 would also be a highly significant difference to not believe that the population mean is 45
 
-- In general, the procedure is to assign a specific boundory (critical value) or boundories, from which if the value of the test statistic falls further, then I reject the null hypothesis.
+- In general, the procedure is to assign a specific boundary (critical value) or boundaries, from which if the value of the test statistic falls further, then I reject the null hypothesis.
 
-- Lets say that I want to reject if the probability of getting a sample average with that value or lower should be .blue[5%]. This is the **significance level**.
+- Let's say that I want to reject if the probability of getting a sample average with that value or lower should be .blue[5%]. This is the **significance level**.
 
 --                                                                    
 
@@ -617,7 +617,7 @@ p1 / p2
 
 ## How to set the .blue[hypothesis]?
 
-#### Alternative: **more** (significance level (alpha) = 5%)
+#### Alternative: **greater** (significance level (alpha) = 5%)
 
 .pull-left[
 
@@ -689,13 +689,13 @@ p1 / p2
 
 ## Type I & type II errors
 
-- If the null hypothesis is true, we take a random sample, then the probability to reject incorrectly the H0 is alpha.
+- If the null hypothesis is true, we take a random sample, and then the probability to reject incorrectly the H0 is alpha.
 
   - We call this Type I error
 
 --
 
-- What if the H0 if false in the reality?
+- What if the H0 is false in the reality?
 
 Let's assume the following hypothesis:
 
@@ -825,6 +825,14 @@ include_graphics("inferential_statistics2_files/tpye_error_table.png")
 
 ---
 
+## Type I & type II errors
+
+```{r fig.width=3, out.width="300px", out.height="480"}
+include_graphics("inferential_statistics2_files/meme_error.jpg")
+```
+
+---
+
 ## How to make a decision about the .blue[null hypothesis]?
 
 - Calculate the test statistics and compare it to the critical values.
@@ -900,20 +908,215 @@ ggplot(data = tibble(x = c(-5, 5))) +
   theme_minimal()
 ```
 
+--
+
 .pull-left[
 $$z = \frac{46-45}{2/\sqrt{365}}=9.5525$$
 ]
 
 .pull-right[
 ```{r echo=TRUE}
-qnorm(9.5525)
+pnorm(9.5525)
 ```
 ]
 
+---
+
+## How to make a decision about the .blue[null hypothesis]?
+
+For illustrative reasons, let's modify the context again.
+
+.pull-left[
+$$H_0: \: \mu \leq 45 \: \text{against} \: H_1: \: \mu > 45$$
+]
+
+.pull-right[
+$$\bar{x} = 46$$
+]
+
+.pull-left[
+$$z = \frac{46-45}{2/\sqrt{365}}=9.5525$$
+]
+
+.pull-right[
+```{r echo=TRUE}
+pnorm(9.5525)
+```
+]
+
+- .blue[IDEA:] in the case of "greater" alternative, substitute the test statistics into the probability function, **subtract it from 1**, and if the resulting value (**p-value**) is lower than the significance level, you can reject the null.
+
+```{r echo=TRUE}
+1 - pnorm(9.5525)
+```
+
+---
+
+## How to make a decision about the .blue[null hypothesis]?
+
+For illustrative reasons, let's modify the context again.
+
+.pull-left[
+$$H_0: \: \mu = 45 \: \text{against} \: H_1: \: \mu \neq 45$$
+]
+
+.pull-right[
+$$\bar{x} = 45.2$$
+]
+
+$$z = \frac{45.2-45}{2/\sqrt{365}}=1.910497$$
+
+.pull-left[
+
+P-value:
+
+```{r}
+2 * (1 - pnorm(1.910497))
+```
+]
+
+.pull[
+```{r out.height="150px", out.width="300px"}
+include_graphics("inferential_statistics2_files/meme_no_accept.jpg")
+```
+
+]
+
+---
+
+class: inverse, middle, center
+
+## T-test
+
+---
+
+## T-test
+
+- Same theoretical consideration as at the estimation: population variance is unknown (mainly we use this)
+
+- Same steps, but use the `qt` function
+
+```{r}
+qt(.05, df = 365 -1)
+```
+
+**Critical values are further from the H0 average!**
+
+---
+
+## Code in R
+
+```{r}
+s_length <- iris %>% 
+  filter(Species == "setosa") %>% 
+  pull(Sepal.Length)
+```
+
+```{r}
+t.test(s_length, alternative = "two.sided")
+```
+---
+
+## Code in R
+
+```{r}
+t.test(s_length, alternative = "greater", mu = 5)
+```
+
+---
+
+class: inverse, middle, center
+
+## Test of Proportion
+
+---
+
+## Test of Proportion
+
+.pull-left[
 
 
+Proportion in the population:
 
+$$P = \frac{K}{N}$$
 
+]
+
+.pull-right[
+
+Estimator:
+
+$$p = \frac{k}{n}$$
+
+]
+
+The proportion in a given sample follows binomial distribution.
+
+.pull-left[
+$$\text{Var}(p) = \frac{P(1-P)}{n}$$
+]
+
+.pull-left[
+Estimator:
+$$s_p^2 = \frac{p(1-p)}{n-1}$$
+
+]
+
+In the case of a large sample, due to the CLT, the binomial distribution also approaches the normal distribution, so after determining the standard error, we perform the same steps as in the case of the simple z-test.
+
+---
+
+class: inverse, center, middle
+
+# Two-sample tests
+
+---
+
+Comparing the properties of two samples taken from different populations.
+
+One frequent application: compare returns!
+
+```{r}
+read_html("https://finance.yahoo.com/quote/ES%3DF/history?period1=1507075200&period2=1664755205&interval=1d&filter=history&frequency=1d&includeAdjustedClose=true") %>% 
+    html_table()
+```
+
+```{r echo=TRUE}
+library(magrittr)
+
+download_yahoo <- . %>% 
+  str_remove_all(".+(?<=quote/)|/history?|&frequency=1d") %>% 
+  str_replace("filter", "events") %>% 
+  str_c("https://query1.finance.yahoo.com/v7/finance/download/", .) %>% 
+  read_csv() %>% 
+  arrange(desc(Date))
+```
+
+```{r}
+download_yahoo("https://finance.yahoo.com/quote/%5EIXIC/history?period1=34560000&period2=1664755200&interval=1d&filter=history&frequency=1d&includeAdjustedClose=true")
+```
+
+---
+
+# References
+
+```{r, print_refs, results='asis', echo=FALSE, warning=FALSE, message=FALSE}
+library(RefManageR)
+bib <- ReadBib("inferential-statistics.bib", check = FALSE)
+
+print(bib, 
+  .opts = list(check.entries = FALSE, 
+               style = "html", 
+               bib.style = "authoryear"))
+```
+
+---
+
+class: center, middle
+
+# Thank you for your attention!
+
+Slides are available at [www.marcellgranat.com](https://www.marcellgranat.com)
 
 
 
