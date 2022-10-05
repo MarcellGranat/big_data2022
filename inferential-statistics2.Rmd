@@ -1072,9 +1072,18 @@ class: inverse, center, middle
 
 ---
 
-Comparing the properties of two samples taken from different populations.
+## Two-sample test
 
-One frequent application: compare returns!
+The idea behind the two-sample mean test (A.K.A. Welch) is to take the difference of sample means and compare them.
+
+$$t=\frac{\Delta \bar{X}}{s_{\Delta \bar{X}}}=\frac{\bar{X}_1-\bar{X}_2}{\sqrt{s_{\bar{X}_1}^2+s_{\bar{X}_2}^2}}$$
+--
+
+Frequent applications: compare returns of .blue[stocks/indexes/portfolios]
+
+---
+
+## An illustrative example
 
 ```{r echo=TRUE}
 library(magrittr)
@@ -1089,7 +1098,61 @@ download_yahoo <- . %>%
 snp_df <- download_yahoo("https://finance.yahoo.com/quote/%5EGSPC/history?period1=-1325635200&period2=1664841600&interval=1d&filter=history&frequency=1d&includeAdjustedClose=true")
 
 nasdaq_df <- download_yahoo("https://finance.yahoo.com/quote/%5EIXIC/history?period1=34560000&period2=1664841600&interval=1d&filter=history&frequency=1d&includeAdjustedClose=true")
+
+snp_df
 ```
+
+---
+
+## An illustrative example
+
+#### Step 1. Join the two tables
+
+Our goal is to join the two tables by the Date column. For this purpose we should rename the `Adj Close` column to the name of the index. And we are interested only in the days when values for both indexes are available.
+
+```{r echo=TRUE}
+inner_join(
+  x = select(snp_df, Date, snp = `Adj Close`),
+  y = select(nasdaq_df, Date, nasdaq = `Adj Close`),
+  by = "Date"
+)
+```
+
+---
+
+#### Step 2. Derive return
+
+
+```{r echo=TRUE}
+stock_index_ret_df <- inner_join(
+  x = select(snp_df, Date, snp = `Adj Close`),
+  y = select(nasdaq_df, Date, nasdaq = `Adj Close`),
+  by = "Date"
+) %>% 
+  mutate_at(-1, ~ . / lag(.) - 1) %>% # % increase to previous
+  drop_na() # no obs in the first row
+
+stock_index_ret_df
+```
+
+---
+
+## An illustrative example
+
+The `t.test` function works with vectors.
+
+```{r eval=FALSE, echo=TRUE}
+t.test(x = stock_index_ret_df$snp, y = stock_index_ret_df$nasdaq)
+```
+
+Identical with tidy solution:
+
+```{r echo=TRUE}
+stock_index_ret_df %$% # !!! treat columns as separate vectors
+  t.test(snp, nasdaq)
+```
+
+
 
 ---
 
@@ -1112,8 +1175,3 @@ class: center, middle
 # Thank you for your attention!
 
 Slides are available at [www.marcellgranat.com](https://www.marcellgranat.com)
-
-
-
-
-

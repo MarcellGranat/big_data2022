@@ -1138,9 +1138,18 @@ class: inverse, center, middle
 
 ---
 
-Comparing the properties of two samples taken from different populations.
+## Two-sample test
 
-One frequent application: compare returns!
+The idea behind the two-sample mean test (A.K.A. Welch) is to take the difference of sample means and compare them.
+
+`$$t=\frac{\Delta \bar{X}}{s_{\Delta \bar{X}}}=\frac{\bar{X}_1-\bar{X}_2}{\sqrt{s_{\bar{X}_1}^2+s_{\bar{X}_2}^2}}$$`
+--
+
+Frequent applications: compare returns of .blue[stocks/indexes/portfolios]
+
+---
+
+## An illustrative example
 
 
 ```r
@@ -1156,7 +1165,130 @@ download_yahoo &lt;- . %&gt;%
 snp_df &lt;- download_yahoo("https://finance.yahoo.com/quote/%5EGSPC/history?period1=-1325635200&amp;period2=1664841600&amp;interval=1d&amp;filter=history&amp;frequency=1d&amp;includeAdjustedClose=true")
 
 nasdaq_df &lt;- download_yahoo("https://finance.yahoo.com/quote/%5EIXIC/history?period1=34560000&amp;period2=1664841600&amp;interval=1d&amp;filter=history&amp;frequency=1d&amp;includeAdjustedClose=true")
+
+snp_df
 ```
+
+```
+## # A tibble: 23,803 × 7
+##    Date        Open  High   Low Close `Adj Close`     Volume
+##    &lt;date&gt;     &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;       &lt;dbl&gt;      &lt;dbl&gt;
+##  1 2022-10-03 3610. 3698. 3605. 3678.       3678. 4806680000
+##  2 2022-09-30 3633. 3671. 3584. 3586.       3586. 5645360000
+##  3 2022-09-29 3687. 3687. 3610. 3640.       3640. 4681810000
+##  4 2022-09-28 3652. 3737. 3641. 3719.       3719. 4684850000
+##  5 2022-09-27 3686. 3718. 3623. 3647.       3647. 4577740000
+##  6 2022-09-26 3683. 3716. 3645. 3655.       3655. 4886140000
+##  7 2022-09-23 3727. 3727. 3647. 3693.       3693. 5144270000
+##  8 2022-09-22 3782. 3791. 3749. 3758.       3758. 4284600000
+##  9 2022-09-21 3871. 3907. 3789. 3790.       3790. 4078330000
+## 10 2022-09-20 3875. 3876. 3828. 3856.       3856. 4058050000
+## # … with 23,793 more rows
+```
+
+---
+
+## An illustrative example
+
+#### Step 1. Join the two tables
+
+Our goal is to join the two tables by the Date column. For this purpose we should rename the `Adj Close` column to the name of the index. And we are interested only in the days when values for both indexes are available.
+
+
+```r
+inner_join(
+  x = select(snp_df, Date, snp = `Adj Close`),
+  y = select(nasdaq_df, Date, nasdaq = `Adj Close`),
+  by = "Date"
+)
+```
+
+```
+## # A tibble: 13,029 × 3
+##    Date         snp nasdaq
+##    &lt;date&gt;     &lt;dbl&gt;  &lt;dbl&gt;
+##  1 2022-10-03 3678. 10815.
+##  2 2022-09-30 3586. 10576.
+##  3 2022-09-29 3640. 10738.
+##  4 2022-09-28 3719. 11052.
+##  5 2022-09-27 3647. 10830.
+##  6 2022-09-26 3655. 10803.
+##  7 2022-09-23 3693. 10868.
+##  8 2022-09-22 3758. 11067.
+##  9 2022-09-21 3790. 11220.
+## 10 2022-09-20 3856. 11425.
+## # … with 13,019 more rows
+```
+
+---
+
+#### Step 2. Derive return
+
+
+
+```r
+stock_index_ret_df &lt;- inner_join(
+  x = select(snp_df, Date, snp = `Adj Close`),
+  y = select(nasdaq_df, Date, nasdaq = `Adj Close`),
+  by = "Date"
+) %&gt;% 
+  mutate_at(-1, ~ . / lag(.) - 1) %&gt;% # % increase to previous
+  drop_na() # no obs in the first row
+
+stock_index_ret_df
+```
+
+```
+## # A tibble: 13,028 × 3
+##    Date            snp   nasdaq
+##    &lt;date&gt;        &lt;dbl&gt;    &lt;dbl&gt;
+##  1 2022-09-30 -0.0252  -0.0222 
+##  2 2022-09-29  0.0153   0.0153 
+##  3 2022-09-28  0.0216   0.0293 
+##  4 2022-09-27 -0.0193  -0.0201 
+##  5 2022-09-26  0.00212 -0.00245
+##  6 2022-09-23  0.0104   0.00602
+##  7 2022-09-22  0.0175   0.0183 
+##  8 2022-09-21  0.00850  0.0139 
+##  9 2022-09-20  0.0174   0.0183 
+## 10 2022-09-19  0.0114   0.00963
+## # … with 13,018 more rows
+```
+
+---
+
+## An illustrative example
+
+The `t.test` function works with vectors.
+
+
+```r
+t.test(x = stock_index_ret_df$snp, y = stock_index_ret_df$nasdaq)
+```
+
+Identical with tidy solution:
+
+
+```r
+stock_index_ret_df %$% # !!! treat columns as separate vectors
+  t.test(snp, nasdaq)
+```
+
+```
+## 
+## 	Welch Two Sample t-test
+## 
+## data:  snp and nasdaq
+## t = 0.4086, df = 25543, p-value = 0.6828
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  -0.0002284549  0.0003487907
+## sample estimates:
+##     mean of x     mean of y 
+## -0.0002189758 -0.0002791437
+```
+
+
 
 ---
 
@@ -1173,11 +1305,6 @@ class: center, middle
 # Thank you for your attention!
 
 Slides are available at [www.marcellgranat.com](https://www.marcellgranat.com)
-
-
-
-
-
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
