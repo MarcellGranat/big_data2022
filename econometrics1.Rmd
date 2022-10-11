@@ -90,8 +90,6 @@ knitr::opts_chunk$set(echo = FALSE,
 
 ### Session 1 - The OLS
 
-1. The concept
-
 ### Session2 - Multivariate models
 
 
@@ -428,7 +426,7 @@ How to interpret the results?
 
 1. A house with one additional m^2 in the area would cost € 7918 more
 
-2. If the area would be zero, the price would be - 134910 (both part are impossible, this is just a meaningless extrapolation)
+2. If the area would be zero, the price would be - 134910 (both parts are impossible, this is just a meaningless extrapolation)
 
 Now we see the estimated coefficients (beta values), but what else can we extract?
 
@@ -436,7 +434,7 @@ Now we see the estimated coefficients (beta values), but what else can we extrac
 
 ### Amsterdam house data
 
-The old school (and disadvantageous) method
+The old-school (and disadvantageous) method
 
 ```{r echo=TRUE}
 fit <- lm(formula = Price ~ Area, data = amsterdam_house_df)
@@ -527,7 +525,7 @@ p +
 
 ### What is the standard error of the coef?
 
-Let's create a function for the data generating process (DGP), where coefficients can be specified.
+Let's create a function for the data-generating process (DGP), where coefficients can be specified.
 
 ```{r echo=TRUE}
 dgp <- function(b0 = 100, b1 = 20, n = 100) {
@@ -536,7 +534,7 @@ dgp <- function(b0 = 100, b1 = 20, n = 100) {
 }
 ```
 
-Let's generate several trajectory with that.
+Let's generate several trajectories with that.
 
 ```{r echo=TRUE}
 tibble(data = rerun(5, dgp()))
@@ -598,7 +596,7 @@ include_graphics("econometrics_files/meme_lowp.JPG")
 
 --
 
-.blue[And what is the probability of comitting type I error?]
+.blue[And what is the probability of committing a type I error?]
 
 --
 
