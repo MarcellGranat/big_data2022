@@ -1163,7 +1163,7 @@ library(RefManageR)
 bib <- ReadBib("inferential-statistics.bib", check = FALSE)
 
 print(bib, 
-  .opts = list(check.entries = FALSE, 
+  .opts = list(check.entries = FALSE,
                style = "html", 
                bib.style = "authoryear"))
 ```
