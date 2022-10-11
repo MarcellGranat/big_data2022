@@ -613,10 +613,10 @@ Let's run the previously created dgp function, but set b1 to 0. How often is the
 ```{r echo=TRUE}
 tibble(data = rerun(1e3, dgp(b1 = 0))) %>% 
   mutate(
-  fit = map(data, function(xx) lm(formula = y ~ x, data = xx)),
-  tidied = map(fit, broom::tidy),
-  pvalues = map(tidied, pull),
-  b1_p = map_dbl(pvalues, 2)
+    fit = map(data, function(xx) lm(formula = y ~ x, data = xx)),
+    tidied = map(fit, broom::tidy),
+    pvalues = map(tidied, pull),
+    b1_p = map_dbl(pvalues, 2)
   ) %>% 
   summarise(rate_type1 = sum(b1_p < .05) / n())
 ```
@@ -635,10 +635,10 @@ class: inverse, middle, center
 
 --
 
-  - For instance, price can be determined based on the area size and the number of rooms
-  
-  
-  $$Y_i = \beta_0 + \beta_1 \times X_{i, 1} + \beta_2 \times X_{i, 2} + \epsilon_i,$$
+- For instance, price can be determined based on the area size and the number of rooms
+
+
+$$Y_i = \beta_0 + \beta_1 \times X_{i, 1} + \beta_2 \times X_{i, 2} + \epsilon_i,$$
 where
 
 $$X_i,2 = \text{The number of the rooms}$$
@@ -699,7 +699,183 @@ Of course not.
 include_graphics("econometrics_files/meme_opposite.JPG")
 ```
 
+---
+
+## Multivariate regression
+
+#### Multicollinearity
+
+```{r}
+amsterdam_house_df %>% 
+  select(Price, Area, Room) %>% 
+  GGally::ggpairs()
+```
+
+---
+
+```{r echo=TRUE}
+form <- c("Price ~ Area", "Price ~ Area + Room", "Price ~ Room", 
+          "Area ~ Room", "Room ~ Area"
+)
+```
+
+```{r echo=TRUE}
+tibble(form) %>% 
+  mutate(
+    fit = map(form, lm, data = drop_na(
+      amsterdam_house_df, 
+      Price, Area, Room)
+    ),
+    tidied = map(fit, broom::tidy)
+  ) %>% 
+  unnest(tidied) %>% 
+  select(form, term, estimate) %>% 
+  pivot_wider(names_from = term, values_from = estimate)
+```
+
+---
+
+.pull-left[
 
 
+```{r out.height="450px", out.width="700px"}
+DiagrammeR::mermaid("
+  graph TD
+  A(Room)-.29.2.->B(Area)
+  A-->|-51009.|C(Price)
+  B-->|29.2*9057|C
+                    
+                    ", width = 700, height = 400)
+```
 
+]
+
+.pull-right[
+$$\text{Total effect} = \text{direct effect} + \text{indirect effect}$$
+$$213895 = 29.2 \times 9057 - 51009$$
+]
+
+1. .blue[Total effect: ]If we want to buy a house with one additional room, it is expected to cost 213,895 euros more.
+
+2. .blue[Indirect effect: ]A house with 1 additional room would be expected to be 29.2 square meters larger, and the average price per square meter is 9,057 euros.
+
+3. .blue[Direct effect: ] If we compare houses with exactly the same area size, then the one with one extra room would cost 51009 euros less.
+
+---
+
+## Type I error in multivariate model
+
+Let's create a function for a new DGP wtih two regressors.
+
+```{r echo=TRUE}
+dgp_multi <- function(b0 = 100, b1 = 0, b2 = 0, n = 100) {
+    tibble(x1 = rnorm(n, sd = .8), x2 = rnorm(n, sd = 5)) %>% 
+    mutate(y = b0 + b1 * x1 + b2 * x2 + rnorm(n))
+  }
+
+dgp_multi()
+```
+
+---
+
+## Type I error in multivariate model
+
+```{r echo=TRUE}
+tibble(data = rerun(1e3, dgp_multi())) %>% 
+  mutate(
+    fit = map(data, function(xx) lm(y ~ x1 + x2, data = xx)),
+    tidied = map(fit, broom::tidy),
+    pvalues = map(tidied, pull),
+    p_b1 = map_dbl(pvalues, 2),
+    p_b2 = map_dbl(pvalues, 3),
+    error_commited = p_b1 < .05 | p_b2 < .05
+  ) %>% 
+  summarise(sum(error_commited) / n())
+```
+
+--
+
+We run two test at each model!
+
+At each the probability of commiting a type I error is 5%. 
+
+--
+
+The joint probability to not commit type I error is:
+
+$$1 - .95 \times .95 = 0.0975$$
+
+---
+
+## Type I error in multivariate model
+
+As more and more variables are included in the model, the probability of making a type 1 error increases. 
+
+--
+
+In the case of many variables, even if the outcome variable is not related to any of them, we will still find a significant parameter.
+
+.blue[Solution:] F-test
+
+---
+
+## F-test
+
+.pull-left[
+$$F=\frac{(\mathrm{RRSS}-\mathrm{URSS}) / r}{\mathrm{URSS} /(n-k-1)}$$
+
+where
+
+URSS = unrestricted residual sum of squares
+
+RSSS = restricted residual sum of squares obtained by imposing the restrictions of the hypothesis
+
+r = number of restrictions imposed by hypothesis
+
+]
+
+.pull-right[
+```{r out.height="300px", out.width="240px"}
+include_graphics("econometrics_files/meme_test.JPG")
+```
+]
+
+Testing whether the explanatory variables jointly explain the variance significantly:
+
+$$\beta_1=\beta_2=\cdots=\beta_k=0$$
+
+---
+
+## F-test
+
+
+.pull-left[
+
+- The F distribution takes only positive values
+
+- Always "greater" alternative
+
+- Mainly report only the p-value
+]
+
+.pull-rigth[
+```{r out.height="175px", out.width="300px"}
+ggplot(data.frame(x = c(-10, 10)), aes(x=  x)) +
+  geom_function(fun = "df", args = list(df1 = 2, df2 = 917)) +
+  labs(title = "Density function of the F distribution (2, 927)", x = NULL, y = NULL)
+```
+
+]
+
+```{r echo=TRUE}
+broom::glance(fit)
+```
+
+---
+
+class: center, middle
+
+# Thank you for your attention!
+
+Slides are available at [www.marcellgranat.com](https://www.marcellgranat.com)
 

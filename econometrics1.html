@@ -104,8 +104,8 @@ of giving **empirical content** to economic theories and verifying them or refut
 
 --
 
-<div id="htmlwidget-6d3c9f6cf5adc87dd662" style="width:700px;height:300px;" class="DiagrammeR html-widget"></div>
-<script type="application/json" data-for="htmlwidget-6d3c9f6cf5adc87dd662">{"x":{"diagram":"\ngraph LR\n  A(Research question)-->B(Data collection)\n  A-->C(Formulate the model)\n  B-->D(Model estimation)\n  C-->D\n  D-->E(Testing the model)\n  E-.re-estimation.->D\n  E-->F(Policy decision)\n  E-->G(Prediction)\n"},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-55b7cc0e8b943d1a734e" style="width:700px;height:300px;" class="DiagrammeR html-widget"></div>
+<script type="application/json" data-for="htmlwidget-55b7cc0e8b943d1a734e">{"x":{"diagram":"\ngraph LR\n  A(Research question)-->B(Data collection)\n  A-->C(Formulate the model)\n  B-->D(Model estimation)\n  C-->D\n  D-->E(Testing the model)\n  E-.re-estimation.->D\n  E-->F(Policy decision)\n  E-->G(Prediction)\n"},"evals":[],"jsHooks":[]}</script>
 
 --
 
@@ -650,7 +650,7 @@ rerun(1e3, dgp()) %&gt;% # 1000 generated trajectory
 ## # A tibble: 1 × 4
 ##   `mean(se_b0)` `sd(b0)` `mean(se_b1)` `sd(b1)`
 ##           &lt;dbl&gt;    &lt;dbl&gt;         &lt;dbl&gt;    &lt;dbl&gt;
-## 1         0.100    0.103        0.0339   0.0325
+## 1         0.100    0.103        0.0337   0.0338
 ```
 
 ---
@@ -696,10 +696,10 @@ Let's run the previously created dgp function, but set b1 to 0. How often is the
 ```r
 tibble(data = rerun(1e3, dgp(b1 = 0))) %&gt;% 
   mutate(
-  fit = map(data, function(xx) lm(formula = y ~ x, data = xx)),
-  tidied = map(fit, broom::tidy),
-  pvalues = map(tidied, pull),
-  b1_p = map_dbl(pvalues, 2)
+    fit = map(data, function(xx) lm(formula = y ~ x, data = xx)),
+    tidied = map(fit, broom::tidy),
+    pvalues = map(tidied, pull),
+    b1_p = map_dbl(pvalues, 2)
   ) %&gt;% 
   summarise(rate_type1 = sum(b1_p &lt; .05) / n())
 ```
@@ -708,7 +708,7 @@ tibble(data = rerun(1e3, dgp(b1 = 0))) %&gt;%
 ## # A tibble: 1 × 1
 ##   rate_type1
 ##        &lt;dbl&gt;
-## 1      0.034
+## 1      0.059
 ```
 
 ---
@@ -725,10 +725,10 @@ class: inverse, middle, center
 
 --
 
-  - For instance, price can be determined based on the area size and the number of rooms
-  
-  
-  `$$Y_i = \beta_0 + \beta_1 \times X_{i, 1} + \beta_2 \times X_{i, 2} + \epsilon_i,$$`
+- For instance, price can be determined based on the area size and the number of rooms
+
+
+`$$Y_i = \beta_0 + \beta_1 \times X_{i, 1} + \beta_2 \times X_{i, 2} + \epsilon_i,$$`
 where
 
 `$$X_i,2 = \text{The number of the rooms}$$`
@@ -803,9 +803,216 @@ Of course not.
 
 &lt;img src="econometrics_files/meme_opposite.JPG" width="315px" height="250px" style="display: block; margin: auto;" /&gt;
 
+---
+
+## Multivariate regression
+
+#### Multicollinearity
+
+&lt;img src="econometrics1_files/figure-html/unnamed-chunk-35-1.png" width="700px" height="450px" style="display: block; margin: auto;" /&gt;
+
+---
 
 
+```r
+form &lt;- c("Price ~ Area", "Price ~ Area + Room", "Price ~ Room", 
+          "Area ~ Room", "Room ~ Area"
+)
+```
 
+
+```r
+tibble(form) %&gt;% 
+  mutate(
+    fit = map(form, lm, data = drop_na(
+      amsterdam_house_df, 
+      Price, Area, Room)
+    ),
+    tidied = map(fit, broom::tidy)
+  ) %&gt;% 
+  unnest(tidied) %&gt;% 
+  select(form, term, estimate) %&gt;% 
+  pivot_wider(names_from = term, values_from = estimate)
+```
+
+```
+## # A tibble: 5 × 4
+##   form                `(Intercept)`      Area     Room
+##   &lt;chr&gt;                       &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 Price ~ Area           -134910.   7918.         NA  
+## 2 Price ~ Area + Room     -62040.   9057.     -51009. 
+## 3 Price ~ Room           -140283.     NA      213895. 
+## 4 Area ~ Room                 -8.64   NA          29.2
+## 5 Room ~ Area                  1.43    0.0223     NA
+```
+
+---
+
+.pull-left[
+
+
+<div id="htmlwidget-e5de0c1c15af890e08e4" style="width:700px;height:400px;" class="DiagrammeR html-widget"></div>
+<script type="application/json" data-for="htmlwidget-e5de0c1c15af890e08e4">{"x":{"diagram":"\n  graph TD\n  A(Room)-.29.2.->B(Area)\n  A-->|-51009.|C(Price)\n  B-->|29.2*9057|C\n                    \n                    "},"evals":[],"jsHooks":[]}</script>
+
+]
+
+.pull-right[
+`$$\text{Total effect} = \text{direct effect} + \text{indirect effect}$$`
+`$$213895 = 29.2 \times 9057 - 51009$$`
+]
+
+1. .blue[Total effect: ]If we want to buy a house with one additional room, it is expected to cost 213,895 euros more.
+
+2. .blue[Indirect effect: ]A house with 1 additional room would be expected to be 29.2 square meters larger, and the average price per square meter is 9,057 euros.
+
+3. .blue[Direct effect: ] If we compare houses with exactly the same area size, then the one with one extra room would cost 51009 euros less.
+
+---
+
+## Type I error in multivariate model
+
+Let's create a function for a new DGP wtih two regressors.
+
+
+```r
+dgp_multi &lt;- function(b0 = 100, b1 = 0, b2 = 0, n = 100) {
+    tibble(x1 = rnorm(n, sd = .8), x2 = rnorm(n, sd = 5)) %&gt;% 
+    mutate(y = b0 + b1 * x1 + b2 * x2 + rnorm(n))
+  }
+
+dgp_multi()
+```
+
+```
+## # A tibble: 100 × 3
+##         x1      x2     y
+##      &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;
+##  1  0.0552  0.985   97.9
+##  2  1.17   -4.73    99.6
+##  3 -0.213   0.345  100. 
+##  4 -0.790  -1.27    99.2
+##  5 -1.54    2.48    99.9
+##  6  1.05    1.48    98.4
+##  7 -0.753  -6.74    99.8
+##  8 -0.248  -3.25   100. 
+##  9 -0.405  -4.55    98.9
+## 10 -0.358   0.0503 100. 
+## # … with 90 more rows
+```
+
+---
+
+## Type I error in multivariate model
+
+
+```r
+tibble(data = rerun(1e3, dgp_multi())) %&gt;% 
+  mutate(
+    fit = map(data, function(xx) lm(y ~ x1 + x2, data = xx)),
+    tidied = map(fit, broom::tidy),
+    pvalues = map(tidied, pull),
+    p_b1 = map_dbl(pvalues, 2),
+    p_b2 = map_dbl(pvalues, 3),
+    error_commited = p_b1 &lt; .05 | p_b2 &lt; .05
+  ) %&gt;% 
+  summarise(sum(error_commited) / n())
+```
+
+```
+## # A tibble: 1 × 1
+##   `sum(error_commited)/n()`
+##                       &lt;dbl&gt;
+## 1                     0.102
+```
+
+--
+
+We run two test at each model!
+
+At each the probability of commiting a type I error is 5%. 
+
+--
+
+The joint probability to not commit type I error is:
+
+`$$1 - .95 \times .95 = 0.0975$$`
+
+---
+
+## Type I error in multivariate model
+
+As more and more variables are included in the model, the probability of making a type 1 error increases. 
+
+--
+
+In the case of many variables, even if the outcome variable is not related to any of them, we will still find a significant parameter.
+
+.blue[Solution:] F-test
+
+---
+
+## F-test
+
+.pull-left[
+`$$F=\frac{(\mathrm{RRSS}-\mathrm{URSS}) / r}{\mathrm{URSS} /(n-k-1)}$$`
+
+where
+
+URSS = unrestricted residual sum of squares
+
+RSSS = restricted residual sum of squares obtained by imposing the restrictions of the hypothesis
+
+r = number of restrictions imposed by hypothesis
+
+]
+
+.pull-right[
+&lt;img src="econometrics_files/meme_test.JPG" width="240px" height="300px" style="display: block; margin: auto;" /&gt;
+]
+
+Testing whether the explanatory variables jointly explain the variance significantly:
+
+`$$\beta_1=\beta_2=\cdots=\beta_k=0$$`
+
+---
+
+## F-test
+
+
+.pull-left[
+
+- The F distribution takes only positive values
+
+- Always "greater" alternative
+
+- Mainly report only the p-value
+]
+
+.pull-rigth[
+&lt;img src="econometrics1_files/figure-html/unnamed-chunk-42-1.png" width="300px" height="175px" style="display: block; margin: auto;" /&gt;
+
+]
+
+
+```r
+broom::glance(fit)
+```
+
+```
+## # A tibble: 1 × 12
+##   r.squared adj.r.squared  sigma statistic   p.value    df  logLik    AIC    BIC
+##       &lt;dbl&gt;         &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+## 1     0.705         0.704 2.93e5     1096. 7.71e-244     2 -12885. 25778. 25797.
+## # … with 3 more variables: deviance &lt;dbl&gt;, df.residual &lt;int&gt;, nobs &lt;int&gt;
+```
+
+---
+
+class: center, middle
+
+# Thank you for your attention!
+
+Slides are available at [www.marcellgranat.com](https://www.marcellgranat.com)
 
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
