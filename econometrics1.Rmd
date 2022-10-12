@@ -92,8 +92,6 @@ knitr::opts_chunk$set(echo = FALSE,
 
 ### Session2 - Multivariate models
 
-
-
 ---
 
 class: inverse, middle, center
@@ -244,7 +242,7 @@ include_graphics("econometrics_files/meme_error.JPG")
 
 --
 
-The result would be a line under the points...
+The result would be a line above the points...
 
 ---
 
@@ -530,7 +528,7 @@ Let's create a function for the data-generating process (DGP), where coefficient
 ```{r echo=TRUE}
 dgp <- function(b0 = 100, b1 = 20, n = 100) {
   tibble(x = rnorm(n, sd = 3)) %>% 
-    mutate(y = b0 + b1 * x + rnorm(n))
+    mutate(y = b0 + b1 * x + rnorm(n, sd = 25))
 }
 ```
 
@@ -566,6 +564,35 @@ rerun(1e3, dgp()) %>% # 1000 generated trajectory
     sd(b1), # sd of the point estimates
   )
 ```
+
+---
+
+#### What is the standard error of the coef?
+
+```{r, animation.hook='gifski'}
+rerun(20, dgp(n = 25)) %>% 
+  tibble(data = .) %>% 
+  mutate(
+    fit = map(data, ~ lm(formula = "y ~ x", data = .)),
+    map_df(fit, coefficients),
+    p = map(data, ~ {
+      ggplot(.) +
+        aes(x, y) +
+        geom_vline(xintercept = 0, lty = 2) +
+        geom_point(alpha = .5) +
+        geom_smooth(method = "lm", se = FALSE, fullrange = TRUE) +
+        xlim(-7, 7) +
+        ylim(-100, 300)
+    }),
+    l = map2_chr(`(Intercept)`, x, ~ str_c("intercept: ", format(.x, digits = 6), ", slope: ", format(.y, digits = 6))),
+    p = map2(p, l, ~ .x + ggtitle(.y))
+  ) %>% 
+  arrange(x) %>% 
+  pull(p) %>% 
+  walk(print)
+```
+
+The visualization above shows the simulated data points with the previously created `dgp`. It can be seen that due to the random terms, the intercept and the slope will be slightly different for each trajectory. The standard deviations of the estimated parameters are the standard errors.
 
 ---
 ### Amsterdam house data
@@ -646,6 +673,21 @@ $$X_i,2 = \text{The number of the rooms}$$
 
 ---
 
+## Visualisation
+
+```{r}
+amsterdam_house_df %>% 
+plotly::plot_ly(
+  x= ~Area,
+  y= ~Room,
+  z= ~Price,
+  sizemode= 'absolute',
+  sizeref= .4
+)
+```
+
+---
+
 ## Multivariate regression
 
 .content-box-red[This is not covered by the course!]
@@ -677,7 +719,6 @@ fit <- lm(formula = Price ~ Area + Room, data = amsterdam_house_df)
 
 fit
 ```
-
 
 ---
 
