@@ -1,0 +1,761 @@
+---
+title: "Econometrics II"
+subtitle: "![](mnb_intezet.png){ width=30% } \n Big Data and Data Visualisation"
+author: "Marcell Granát"
+institute: "Central Bank of Hungary & .blue[John von Neumann University]"
+date: "2022"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      titleSlideClass: [center, middle]
+  seal: false
+editor_options: 
+  chunk_output_type: console
+---
+
+```{css, echo=FALSE}
+.red { color: red; }
+.blue { color: #378C95; }
+strong { color: red; }
+a { color: #378C95; font-weight: bold; }
+.remark-inline-code { font-weight: 900; background-color: #a7d5e7; }
+.caption { color: #378C95; font-style: italic; text-align: center; }
+
+.content-box { 
+box-sizing: content-box;
+background-color: #378C95;
+/* Total width: 160px + (2 * 20px) + (2 * 8px) = 216px
+Total height: 80px + (2 * 20px) + (2 * 8px) = 136px
+Content box width: 160px
+Content box height: 80px */
+}
+
+.content-box-green {
+background-color: #d9edc2;
+}
+
+.content-box-red {
+background-color: #f9dbdb;
+}
+
+.fullprice {
+text-decoration: line-through;
+}
+```
+
+```{r xaringan-themer, include=FALSE, warning=FALSE}
+library(xaringanthemer)
+library(knitr)
+library(granatlib)
+library(emo)
+library(magrittr)
+library(tidyverse)
+library(patchwork)
+style_mono_accent(
+  base_color = "#DC322F",               # bright red
+  inverse_background_color = "#002B36", # dark dark blue
+  inverse_header_color = "#378C95",     # light aqua green
+  inverse_text_color = "#FFFFFF",       # white
+  title_slide_background_color = "var(--base)",
+  text_font_google = google_font("Kelly Slab"),
+  header_font_google = google_font("Oleo Script")
+)
+
+xaringanExtra::use_panelset()
+xaringanExtra::html_dependency_clipboard()
+xaringanExtra::html_dependency_scribble(pen_color = "#378C95", 3, 4)
+xaringanExtra::use_tile_view()
+
+xaringanExtra::style_panelset_tabs(
+  active_foreground = "#378C95"
+)
+```
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+options(htmltools.dir.version = FALSE)
+knitr::opts_chunk$set(echo = FALSE,
+                      fig.align = "center", 
+                      error = TRUE,
+                      message = F,
+                      out.width = "700px",
+                      fig.width = 7,
+                      fig.height = 4.5, 
+                      out.height = "450px",
+                      dpi = 400,
+                      warning = FALSE)
+```
+
+# Today's .blue[Agenda]
+
+### Violation of the Assumptions of the Basic Regression Model
+
+1. Heteroskedasticity
+
+2. Multicollinearity
+
+### Model Selection
+
+---
+
+class: inverse, middle, center
+
+# Heteroskedasticity
+
+---
+
+## Motivation
+
+> "A study of the incidence of **kidney cancer in the 3,141 counties** of the United States reveals a remarkable pattern. The counties in which the incidence of kidney cancer is **lowest are mostly rural, sparsely populated, and located in traditionally Republican states** in the Midwest, the South, and the West. .blue[What do you make of this?]"
+
+--
+
+> "Now consider the counties in which the incidence of **kidney cancer is highest**. These ailing counties tend to be **mostly rural, sparsely populated, and located in traditionally Republican states**"
+
+--
+
+> "Something is wrong, of course. The rural lifestyle cannot explain both very high and very low incidence of kidney cancer."
+
+???
+
+Source: Kahneman 2011
+
+---
+
+## Motivation
+
+> "**Half the marbles are red, half are white.** Next, imagine a very patient person (or a robot) who blindly draws 4 marbles from the urn, records the number of red balls in the sample, throws the balls back into the urn, and then does it all again, many times. [...] **Jack draws 4 marbles on each trial, Jill draws 7.** They both record each time they observe a homogeneous sample—all white or all red."
+
+--
+
+> "If they go on long enough, **Jack will observe such extreme outcomes more often than Jill**—by a factor of 8 (the expected percentages are 12.5% and 1.56%)."
+
+???
+
+Source: Kahneman 2011
+
+## Heteroskedasticity
+
+> One of the assumptions in the regression equation is that the errors are a common variance. This is known as the **homoskedasticity** assumption. If the errors do not have a
+**constant variance**, we say they are **heteroskedastic**.
+
+???
+
+source: Maddala
+
+---
+
+### Homoskedastic residuals
+
+.panelset.sideways[
+.panel[.panel-name[DGP]
+
+```{r}
+skedasticity_dgp <- function(b0 = 100, b1 = 5,
+                             bs = 0, # new
+                             n = 100) {
+  tibble(x = runif(n = n)) %>% 
+    mutate(
+      x_rank = rank(x) / n(),
+      e = rnorm(n = n, sd = (1 + x_rank * bs)),
+      y = b0 + b1 * x + e
+    )
+}
+```
+
+
+```{r results='hide', echo=TRUE, eval=FALSE}
+skedasticity_dgp <- function(b0 = 100, b1 = 5,
+                             bs = 0, # new
+                             n = 100) {
+  tibble(x = runif(n = n)) %>% 
+    mutate(
+      *     x_rank = rank(x) / n(),
+      *     e = rnorm(n = n, sd = (1 + x_rank * bs)),
+      y = b0 + b1 * x + e
+    )
+}
+
+skedasticity_dgp() %>% 
+  lm(formula = y ~ x) %>% 
+  broom::augment()
+```
+
+
+]
+.panel[.panel-name[Scatter plot]
+```{r out.width="600px", fig.width=6}
+set.seed(3)
+
+skedasticity_df <- skedasticity_dgp()
+
+skedasticity_ <- ted_df <- skedasticity_df %>% 
+  lm(formula = y ~ x) %>% 
+  broom::augment()
+
+ggplot(data = skedasticity_fitted_df) +
+  geom_linerange(aes(x = x, ymin=  y, ymax = .fitted, color = "Residual")) +
+  geom_point(aes(x, y), fill = "grey70", shape = 21) +
+  geom_smooth(aes(x, y), method = "lm", se = FALSE, fullrange = TRUE, color = "red2") +
+  labs(color = NULL) +
+  scale_color_manual(values = "#378C95")
+```
+
+]
+
+.panel[.panel-name[Residuals]
+```{r out.width="600px", fig.width=6}
+skedasticity_fitted_df %>% 
+  select(y, x, .resid) %>% 
+  pivot_longer(- .resid) %>% 
+  ggplot() +
+  geom_point(aes(value, .resid)) +
+  facet_wrap(~ name, scales = "free_x", ncol = 1) +
+  geom_hline(yintercept = 0) +
+  theme_bw()
+```
+
+]
+
+.panel[.panel-name[|Residuals|]
+```{r out.width="600px", fig.width=6}
+skedasticity_fitted_df %>% 
+  select(y, x, .resid) %>% 
+  pivot_longer(- .resid) %>% 
+  ggplot() +
+  geom_point(aes(value, abs(.resid))) +
+  facet_wrap(~ name, scales = "free_x", ncol = 1) +
+  geom_hline(yintercept = 0) +
+  geom_smooth(aes(value, abs(.resid)), se = FALSE) +
+  theme_bw()
+```
+
+]
+]
+
+
+---
+
+### Heteroskedastic residuals
+
+.panelset.sideways[
+.panel[.panel-name[DGP]
+
+
+```{r results='hide', echo=TRUE, eval=FALSE}
+skedasticity_dgp <- function(b0 = 100, b1 = 5,
+                             bs = 0, # new
+                             n = 100) {
+  tibble(x = runif(n = n)) %>% 
+    mutate(
+      *     x_rank = rank(x) / n(),
+      *     e = rnorm(n = n, sd = (1 + x_rank * bs)),
+      y = b0 + b1 * x + e
+    )
+}
+
+skedasticity_dgp(bs = 15) %>% 
+  lm(formula = y ~ x) %>% 
+  broom::augment()
+```
+
+
+]
+.panel[.panel-name[Scatter plot]
+```{r out.width="600px", fig.width=6}
+set.seed(3)
+
+skedasticity_df <- skedasticity_dgp(bs = 15)
+
+skedasticity_fitted_df <- skedasticity_df %>% 
+  lm(formula = y ~ x) %>% 
+  broom::augment()
+
+ggplot(data = skedasticity_fitted_df) +
+  geom_linerange(aes(x = x, ymin=  y, ymax = .fitted, color = "Residual")) +
+  geom_point(aes(x, y), fill = "grey70", shape = 21) +
+  geom_smooth(aes(x, y), method = "lm", se = FALSE, fullrange = TRUE, color = "red2") +
+  labs(color = NULL) +
+  scale_color_manual(values = "#378C95")
+```
+
+]
+
+.panel[.panel-name[Residuals]
+```{r out.width="600px", fig.width=6}
+skedasticity_fitted_df %>% 
+  select(y, x, .resid) %>% 
+  pivot_longer(- .resid) %>% 
+  ggplot() +
+  geom_point(aes(value, .resid)) +
+  facet_wrap(~ name, scales = "free_x", ncol = 1) +
+  geom_hline(yintercept = 0) +
+  theme_bw()
+```
+
+]
+
+.panel[.panel-name[|Residuals|]
+```{r out.width="600px", fig.width=6}
+skedasticity_fitted_df %>% 
+  select(y, x, .resid) %>% 
+  pivot_longer(- .resid) %>% 
+  ggplot() +
+  geom_point(aes(value, abs(.resid))) +
+  facet_wrap(~ name, scales = "free_x", ncol = 1) +
+  geom_hline(yintercept = 0) +
+  geom_smooth(aes(value, abs(.resid)), se = FALSE) +
+  theme_bw()
+```
+
+]
+]
+
+---
+
+### Consequences of heteroskedasticity
+
+To demonstrate what causes heteroskedasticity, let's apply the simulation framework we saw last week with a new kind of data-generating process.
+
+```{r echo=TRUE}
+skedasticity_dgp <- function(b0 = 100, b1 = 5,
+                             bs = 0, # new
+                             n = 100) {
+  tibble(x = runif(n = n)) %>% 
+    mutate(
+      x_rank = rank(x) / n(),
+      e = rnorm(n = n, sd = (1 + x_rank * bs)),
+      # sd = (1 + 0) | lowest x
+      # sd = (1 + bs) | highest x
+      y = b0 + b1 * x + e
+    )
+}
+```
+
+---
+
+### Consequences of heteroskedasticity
+
+If there is no heteroskedasticity ...
+
+```{r echo=TRUE, cache=TRUE}
+rerun(.n = 1e5, skedasticity_dgp(b0 = 100, b1 = 0, bs = 0)) %>% 
+  tibble(data = .) %>% 
+  mutate(
+    fit = map(data, lm, formula = y ~ x),
+    tidied = map(fit, broom::tidy),
+    tidied = map_df(tidied, slice, 2)
+  ) %>% 
+  unnest(tidied) %>% 
+  summarise(
+    mean(estimate), sd(estimate),
+    mean(std.error), mean(p.value < .05)
+  ) %>% 
+  kable()
+```
+
+---
+
+### Consequences of heteroskedasticity
+
+If there is heteroskedasticity ...
+
+```{r echo=TRUE, cache=TRUE}
+rerun(.n = 1e5, skedasticity_dgp(b0 = 100, b1 = 0, bs = 10)) %>% 
+  tibble(data = .) %>% 
+  mutate(
+    fit = map(data, lm, formula = y ~ x),
+    tidied = map(fit, broom::tidy),
+    tidied = map_df(tidied, slice, 2)
+  ) %>% 
+  unnest(tidied) %>% 
+  summarise(
+    mean(estimate), sd(estimate),
+    mean(std.error), mean(p.value < .05)
+  ) %>% 
+  kable()
+```
+
+--
+
+**The estimated SEs become biased and inconsistent.** This results that the corresponding hypothesis tests also become incorrect. (The estimated effect remains unbiased)
+
+---
+
+### Baltimore
+
+.panelset.sideways[
+.panel[.panel-name[Data & model]
+
+```{r echo=TRUE, eval=FALSE}
+density_df <- read_csv("https://gist.githubusercontent.com/MarcellGranat/94d19897ff0ae6ce019f0a960e7a7f62/raw/ec5a220ce8e91775284913562ef6f3ac71c69903/baltimore.csv")
+```
+
+```{r}
+density_df <- read_csv("econometrics2/baltimore.csv")
+```
+
+```{r echo=TRUE}
+fit <- lm(data = density_df, formula = pop_density ~ dist_from_cent)
+```
+
+
+]
+.panel[.panel-name[Scatter plot]
+```{r out.width="600px", fig.width=6}
+ggplot(data = broom::augment(fit)) +
+  geom_linerange(aes(x = dist_from_cent, ymin=  pop_density, ymax = .fitted, color = "Residual")) +
+  geom_point(aes(dist_from_cent, pop_density), fill = "grey70", shape = 21) +
+  geom_smooth(aes(dist_from_cent, pop_density), method = "lm", se = FALSE, fullrange = TRUE, color = "red2") +
+  labs(color = NULL) +
+  scale_color_manual(values = "#378C95")
+```
+
+]
+
+.panel[.panel-name[Residuals]
+```{r out.width="600px", fig.width=6}
+broom::augment(fit) %>% 
+  select(pop_density, dist_from_cent, .resid) %>% 
+  pivot_longer(- .resid) %>% 
+  ggplot() +
+  geom_point(aes(value, .resid)) +
+  facet_wrap(~ name, scales = "free_x", ncol = 1) +
+  geom_hline(yintercept = 0) +
+  theme_bw()
+```
+
+]
+
+.panel[.panel-name[|Residuals|]
+```{r out.width="600px", fig.width=6}
+broom::augment(fit) %>% 
+  select(pop_density, dist_from_cent, .resid) %>% 
+  pivot_longer(- .resid) %>% 
+  ggplot() +
+  geom_point(aes(value, abs(.resid))) +
+  facet_wrap(~ name, scales = "free_x", ncol = 1) +
+  geom_hline(yintercept = 0) +
+  geom_smooth(aes(value, abs(.resid)), se = FALSE) +
+  theme_bw()
+```
+
+]
+]
+
+---
+
+## How to detect it? - Goldfeld-Quandt Test
+
+##### 1. Choose an explanatory variable, you want to test whether the variance is constant in line with that
+
+--
+
+##### 2. Sort the observations based on that variable into 3 groups and remove the middle one. (tercentiles are a common choice)
+
+```{r}
+density_df %>% 
+  mutate(
+    g = cut_number(dist_from_cent, 3, labels = FALSE)
+  ) %>% 
+  ggplot() +
+  aes(dist_from_cent, pop_density, fill = as.factor(g)) +
+  geom_point(shape = 21, size = 2) +
+  labs(fill = NULL)
+```
+
+---
+
+## How to detect it? - Goldfeld-Quandt Test
+
+##### 3. Fit the model on both kept group
+
+```{r}
+density_df %>% 
+  mutate(
+    g = cut_number(dist_from_cent, 3, labels = FALSE)
+  ) %>% 
+  filter(g != 2) %>% 
+  ggplot() +
+  aes(dist_from_cent, pop_density, fill = as.factor(g)) +
+  geom_point(shape = 21, size = 2) +
+  geom_smooth(aes(color = as.factor(g)), method = "lm") +
+  labs(fill = NULL) +
+  theme(legend.position = "none")
+```
+
+---
+
+##### 4. Calculate the sum of squared errors in both groups and subsitute into the following test.
+
+$$F=\frac{\hat{\sigma}_2^2}{\hat{\sigma}_1^2}=\frac{\mathrm{ESS}_2 /\left(n_2-k\right)}{\mathrm{ESS}_1 /\left(n_1-k\right)} $$
+
+This gives you the estimated F statistics for the null hypothesis that the sum of squared errors do not differ from each other (constant variance).
+
+--
+
+```{r}
+fit <- lm(data = density_df, formula = pop_density ~ dist_from_cent)
+nrow(density_df) / 3
+lmtest::gqtest(fit, order.by = ~ pop_density, fraction = 13, data = density_df)
+```
+
+---
+
+## How to detect it? - Breusch-Pagan Test
+
+#### Take the residuals from the estimated model and build an auxiliary regression on the squared errors.
+
+$$\epsilon_i^2=\alpha_1+\alpha_2 Z_{i 2}+\alpha_3 Z_{i 3}+\cdots+\alpha_p Z_{i p}$$
+
+--
+
+From this regression the test statistics:
+
+$$\text{LM}=nR^2$$
+
+--
+
+This must be compared with the corresponding Chi-square value
+
+$$\text{p-value}=P(\chi^2_{p-1}>\text{LM})$$
+
+```{r echo=TRUE}
+lmtest::bptest(fit) # default: the same covariates
+```
+
+---
+
+## How to detect it? - White Test
+
+#### Take the residuals from the estimated models and build an auxiliary regression on the squared errors.
+
+$$\epsilon_i^2=\alpha_1+\alpha_2 X_{i 2}+\alpha_3 X_{i 3}+\alpha_4 X_{i 2}^2+\alpha_5 X_{i 3}^2+\alpha_6 X_{i 2} X_{i 3}$$
+
+--
+
+From this regression the test statistics:
+
+$$\text{LM}=nR^2$$
+
+--
+
+This must be compared with the corresponding Chi-square value
+
+$$\text{p-value}=P(\chi^2_{p-1}>\text{LM})$$
+
+```{r echo=TRUE}
+whitestrap::white_test(fit)
+```
+
+---
+
+## And then what?
+
+We have shown that the estimated standard errors are biased in the presence of heteroskedasticity. .blue[We must repair that.]
+
+```{r echo=TRUE}
+lmtest::coeftest(fit, vcov = sandwich::vcovHC(fit))
+```
+
+---
+
+### Simulation
+
+Take out the p-value
+
+```{r echo=TRUE}
+lmtest::coeftest(fit, vcov = sandwich::vcovHC(fit)) %>% 
+  .[2, 4]
+```
+
+Assign a function
+
+```{r echo=TRUE}
+heterosked_p_value <- function(x) {
+  lmtest::coeftest(x, vcov = sandwich::vcovHC(x))[2, 4]
+}
+```
+
+```{r cache=TRUE, echo=TRUE}
+rerun(.n = 1e5, skedasticity_dgp(b0 = 100, b1 = 0, bs = 10)) %>% 
+  tibble(data = .) %>% 
+  mutate(
+    fit = map(data, lm, formula = y ~ x),
+    p_value = map_dbl(fit, heterosked_p_value)
+  ) %$% 
+  mean(p_value < .05)
+```
+
+---
+
+class: inverse, middle, center
+
+# Multicollinearity
+
+---
+
+## Multicollinearity
+
+Multicollinearity = explanatory variables (regresors/covariates/independent variables) are highly intercorrelated
+
+--
+
+Think about the house data from the last week. If the area is bigger, the expected price is higher, just as the expected number of rooms.
+
+---
+
+## Exact (perfect) multicollinearity
+
+Suppose the following case:
+
+- if you have a degree, then your expected income is 1200 euros.
+
+- without a degree, it is 800.
+
+Let's estimate it with the following formula:
+
+$$y_i=\beta_0+\beta_1 \times x_{i,1} + \beta_2 \times x_{i,2} + \epsilon_i,$$
+
+where
+
+$$x_{i,1}=\text{1, if the individual has a degree, 0 else}$$
+$$x_{i,2}=\text{1, if the individual does not have a degree, 0 else}$$
+
+.pull-left[
+Problem: all the presented coefficient combinations would lead to the same estimated values.
+
+We can not use OLS!
+]
+
+.pull-right[
+
+
+| $\beta_0$ | $\beta_1$ | $\beta_2$ |
+|:---------:|:---------:|:---------:|
+|     800     |     400     |     0     |
+|     700     |     500     |     100     |
+|     1200     |     0     |     -400     |
+
+]
+
+---
+
+## Exact (perfect) multicollinearity
+
+This is why you have to always create exactly as many coefficients for categorical variables as levels it has minus 1. This is called dummy coding.
+
+If you drop B2, then only one solution is appropriate.
+
+| $\beta_0$ | $\beta_1$ |
+|:---------:|:---------:|
+|     800     |     400     |
+
+
+
+---
+
+## Simulation
+
+```{r echo=TRUE}
+multicol_dgp <- function(b0 = 100, b1 = 5, b12 = 7, b2 = 5, n = 100) {
+  tibble(x1 = rnorm(n = n)) %>% 
+    mutate(
+      x2 = b12 * x1 + rnorm(n = n),
+      y = b0 + b1 * x1 + b2 * x2 + rnorm(n = n) # <
+    )
+}
+```
+
+```{r echo=TRUE}
+multicol_dgp()
+```
+
+
+---
+
+## Simulation
+
+```{r echo=TRUE, cache=TRUE}
+rerun(1e4, multicol_dgp()) %>% 
+  tibble(data = .) %>% 
+  mutate(
+    fit = map(data, lm, formula = y ~ x1 + x2),
+    tidied = map(fit, broom::tidy),
+    x1 = map_df(tidied, slice, 2),
+    x2 = map_df(tidied, slice, 3)
+  ) %>% 
+  summarise(
+    sd(x1$estimate), mean(x1$std.error),
+    sd(x2$estimate), mean(x2$std.error)
+  ) %>% 
+  pivot_longer(everything())
+```
+
+**Estimations are still consistent and unbiased!**
+
+---
+
+## Simulation II
+
+```{r echo=TRUE}
+rerun(1e3, multicol_dgp(b1 = .1)) %>% 
+  tibble(data = .) %>% 
+  mutate(
+    fit_bivariate = map(data, lm, formula = y ~ x1),
+    fit_trivariate = map(data, lm, formula = y ~ x1 + x2),
+    tidied_bivariate = map(fit_bivariate, broom::tidy),
+    tidied_trivariate = map(fit_trivariate, broom::tidy),
+    x1_bi = map_df(tidied_bivariate, slice, 2),
+    x1_tri = map_df(tidied_trivariate, slice, 2)
+  ) %>% 
+  summarise(mean(x1_bi$p.value), mean(x1_tri$p.value))
+```
+
+---
+
+## Simulation III
+
+```{r echo=TRUE}
+rerun(1e2, multicol_dgp(b1 = .1, b2 = .1)) %>% 
+  tibble(data = .) %>% 
+  mutate(
+    fit_bivariate = map(data, lm, formula = y ~ x1),
+    fit_trivariate = map(data, lm, formula = y ~ x1 + x2),
+    bi = map_df(fit_bivariate, broom::glance),
+    tr = map_df(fit_trivariate, broom::glance),
+  ) %>% 
+  summarise(
+    mean(bi$r.squared > tr$r.squared),
+    mean(bi$adj.r.squared > tr$adj.r.squared),
+    mean(bi$AIC < tr$AIC),
+    mean(bi$BIC < tr$BIC)
+  ) %>% 
+  pivot_longer(everything())
+```
+
+---
+
+## Simulation III
+
+.blue[The listed criteria values can be used to select the relevant regressors.]
+
+r.squared = The relative decrease in the squared error compared to a null model (as we saw at the correlation coefficient).
+
+
+--
+
+$$\text{Adjusted }R^2=1-\frac{SSE/(n - p)}{SST/(n-1)}$$
+
+AIC:
+
+$$AIC = SSE \times e^{2(k+1)/n}$$
+
+$$BIC = n \times ln(SSE/n) + k \times ln(n)$$
+
+
+
