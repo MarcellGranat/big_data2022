@@ -145,8 +145,8 @@ skedasticity_dgp &lt;- function(b0 = 100, b1 = 5,
                              n = 100) {
   tibble(x = runif(n = n)) %&gt;% 
     mutate(
-      *     x_rank = rank(x) / n(),
-      *     e = rnorm(n = n, sd = (1 + x_rank * bs)),
+*     x_rank = rank(x) / n(),
+*     e = rnorm(n = n, sd = (1 + x_rank * bs)),
       y = b0 + b1 * x + e
     )
 }
@@ -161,24 +161,18 @@ skedasticity_dgp() %&gt;%
 .panel[.panel-name[Scatter plot]
 
 ```
-## Error in ggplot(data = skedasticity_fitted_df): object 'skedasticity_fitted_df' not found
+## Error in ggplot(data = we): object 'we' not found
 ```
 
 ]
 
 .panel[.panel-name[Residuals]
-
-```
-## Error in select(., y, x, .resid): object 'skedasticity_fitted_df' not found
-```
+&lt;img src="econometrics2_files/figure-html/unnamed-chunk-5-1.png" width="600px" height="450px" style="display: block; margin: auto;" /&gt;
 
 ]
 
 .panel[.panel-name[|Residuals|]
-
-```
-## Error in select(., y, x, .resid): object 'skedasticity_fitted_df' not found
-```
+&lt;img src="econometrics2_files/figure-html/unnamed-chunk-6-1.png" width="600px" height="450px" style="display: block; margin: auto;" /&gt;
 
 ]
 ]
@@ -380,8 +374,10 @@ This gives you the estimated F statistics for the null hypothesis that the sum o
 --
 
 
-```
-## [1] 13
+```r
+fit &lt;- lm(data = density_df, formula = pop_density ~ dist_from_cent)
+
+lmtest::gqtest(fit, order.by = ~ pop_density, fraction = 13, data = density_df)
 ```
 
 ```

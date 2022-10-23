@@ -174,8 +174,8 @@ skedasticity_dgp <- function(b0 = 100, b1 = 5,
                              n = 100) {
   tibble(x = runif(n = n)) %>% 
     mutate(
-      *     x_rank = rank(x) / n(),
-      *     e = rnorm(n = n, sd = (1 + x_rank * bs)),
+*     x_rank = rank(x) / n(),
+*     e = rnorm(n = n, sd = (1 + x_rank * bs)),
       y = b0 + b1 * x + e
     )
 }
@@ -193,11 +193,11 @@ set.seed(3)
 
 skedasticity_df <- skedasticity_dgp()
 
-skedasticity_ <- ted_df <- skedasticity_df %>% 
+skedasticity_fitted_df <- skedasticity_df %>% 
   lm(formula = y ~ x) %>% 
   broom::augment()
 
-ggplot(data = skedasticity_fitted_df) +
+ggplot(data = we) +
   geom_linerange(aes(x = x, ymin=  y, ymax = .fitted, color = "Residual")) +
   geom_point(aes(x, y), fill = "grey70", shape = 21) +
   geom_smooth(aes(x, y), method = "lm", se = FALSE, fullrange = TRUE, color = "red2") +
@@ -498,9 +498,9 @@ This gives you the estimated F statistics for the null hypothesis that the sum o
 
 --
 
-```{r}
+```{r echo=TRUE}
 fit <- lm(data = density_df, formula = pop_density ~ dist_from_cent)
-nrow(density_df) / 3
+
 lmtest::gqtest(fit, order.by = ~ pop_density, fraction = 13, data = density_df)
 ```
 

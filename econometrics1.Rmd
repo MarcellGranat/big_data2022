@@ -138,8 +138,10 @@ class: inverse, middle, center
 ### Amsterdam house data
 
 ```{r eval=FALSE, echo=TRUE}
-amsterdam_house_df <- read_csv("https://storage.googleapis.com/kagglesdsdata/datasets/1549462/2554162/HousingPrices-Amsterdam-August-2021.csv?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=gcp-kaggle-com%40kaggle-161607.iam.gserviceaccount.com%2F20221010%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20221010T111010Z&X-Goog-Expires=259200&X-Goog-SignedHeaders=host&X-Goog-Signature=25efe3e6ca089c3f3a8be5653d118fe7a0167157a78a1b3e6cd07bdcd549978300bdbf77bbe1a916684a862a9908a103ac94121de3e5b2a5db7c9cc7ab52763ec477cf4954b77bfff8c341b4487c4c7c23c42237218110be4de7b4ed8f5c5241463dc05eae12ae104cd26e283f0fa2868b5b6456db67180fa6d1776f28334f3e77321cae6bac52c9548dcce531fcf853696253bf15d67305ffb1d75bf021c092e0a2ac6b88bedfe2ca991f2849aa1b679916e3d0d9506aec9bc39b794348380a0e89510de3fce6a22087f724714e575a14e6c5dfe8e6f040c8fd6ee02a1bc0da3032e4b948a34a8f3b144ae71d3b755fd709b29e2e61ef8bf95c83e8f4443f13", col_select = -1)
+amsterdam_house_df <- read_rds("https://raw.githubusercontent.com/MarcellGranat/big_data2022/main/econometrics_files/amsterdam_house.rds")
+# source: https://www.kaggle.com/datasets/thomasnibb/amsterdam-house-price-prediction
 ```
+
 
 ```{r echo=FALSE}
 amsterdam_house_df <- read_rds("econometrics_files/amsterdam_house.rds")
@@ -151,7 +153,7 @@ amsterdam_house_df
 
 ---
 
-### Amsterdam house data
+## Basics of OLS
 
 .blue[What price do we expect, knowing the area of a given house?]
 
@@ -180,7 +182,7 @@ p + geom_smooth(method = "lm", se = FALSE)
 
 ---
 
-### Amsterdam house data
+## Basics of OLS
 
 .blue[What parameters do we have to know to draw the line?]
 
@@ -201,7 +203,7 @@ $$X_i = \text{The area of the given house}$$
 
 ---
 
-### Amsterdam house data
+## Basics of OLS
 
 .blue[What parameters do we have to know to draw the line?]
 
@@ -246,7 +248,7 @@ The result would be a line above the points...
 
 ---
 
-### Amsterdam house data
+## Basics of OLS
 
 .blue[What parameters do we have to know to draw the line?]
 
@@ -288,7 +290,7 @@ Exactly, that is what OLS is about. OLS = Ordinary Least Squares
 
 ---
 
-### Amsterdam house data
+## Basics of OLS
 
 #### Let's calculate the sum of squared errors assuming two random values for the intercept and the slope
 
@@ -309,7 +311,7 @@ amsterdam_house_df %>%
 
 ---
 
-### Amsterdam house data
+## Basics of OLS
 
 #### Let's transform this into a function
 
@@ -331,7 +333,7 @@ sse(1000, 200)
 
 ---
 
-### Amsterdam house data
+## Basics of OLS
 
 #### Let's apply the function on large set of values
 
@@ -350,7 +352,7 @@ sse_df
 
 ---
 
-### Amsterdam house data
+## Basics of OLS
 
 #### Let's apply the function on large set of values
 
@@ -368,7 +370,7 @@ sse_df %>%
 
 ---
 
-### Amsterdam house data
+## Basics of OLS
 
 Now we have run the function on 10,000 combination, but we are still not sure whether our solution is the best possible, or how far is it from that...
 
@@ -384,7 +386,7 @@ $$\sum X_i Y_i =\beta_0 \sum X_i+\beta_1 \sum X_i^2$$
 
 ---
 
-### Amsterdam house data
+## Basics of OLS
 
 In our case:
 
@@ -410,7 +412,7 @@ $$`r xy` =\beta_0 \times `r x`+\beta_1 \times `r x2`$$
 
 ---
 
-### Amsterdam house data
+## Basics of OLS
 
 Of course, there are a simpler solution for fitting a **L**inear **M**odel
 
@@ -430,7 +432,7 @@ Now we see the estimated coefficients (beta values), but what else can we extrac
 
 ---
 
-### Amsterdam house data
+## Basics of OLS
 
 The old-school (and disadvantageous) method
 
@@ -441,7 +443,7 @@ summary(fit)
 
 ---
 
-### Amsterdam house data
+## Basics of OLS
 
 The tidy method: {broom}
 
@@ -452,7 +454,7 @@ augment(fit)
 
 ---
 
-### Amsterdam house data
+## Basics of OLS
 
 The tidy method: {broom}
 
@@ -463,7 +465,7 @@ glance(fit)
 
 ---
 
-### Amsterdam house data
+## Basics of OLS
 
 The tidy method: {broom}
 
@@ -487,7 +489,7 @@ tidy(fit, conf.int = TRUE, conf.level = .95)
 
 ---
 
-### Amsterdam house data
+## Basics of OLS
 
 ```{r echo=TRUE}
 coef_df <- tidy(fit, conf.int = TRUE, conf.level = .95)
@@ -595,7 +597,7 @@ rerun(20, dgp(n = 25)) %>%
 The visualization above shows the simulated data points with the previously created `dgp`. It can be seen that due to the random terms, the intercept and the slope will be slightly different for each trajectory. The standard deviations of the estimated parameters are the standard errors.
 
 ---
-### Amsterdam house data
+## Basics of OLS
 
 In the table containing the coefficients, a test statistic and a p-value are listed next to each term What hypothesis do they belong to?
 
