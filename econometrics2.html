@@ -576,13 +576,157 @@ We can not use OLS!
 
 This is why you have to always create exactly as many coefficients for categorical variables as levels it has minus 1. This is called dummy coding.
 
-If you drop B2, then only one solution is appropriate.
+If you drop B2, there is only one appropriate solution.
 
 | `\(\beta_0\)` | `\(\beta_1\)` |
 |:---------:|:---------:|
 |     800     |     400     |
 
+---
 
+## Multicollinearity
+
+- Imagine that you add an almost fully irrelevant explanatory variable to the model. .blue[In which direction can the explanatory power of the model change?]
+
+--
+
+  - OLS perfectly finds the best "parameter combination" to minimize SSE
+  
+  - SST depends on the variance, thus it does not change.
+  
+--
+  
+  - If the additional variable is fully irrelevant, then its coefficient will be zero, and the model returns the same solution as previously
+  
+  - **R-squared can not reduce, if you add one additional explanatory variable**
+
+--
+
+.blue[So why do not we use all the available variables?]
+
+
+---
+
+
+## Multicollinearity
+
+Again, think about the house data from the last week. If the area is bigger, the expected price is higher, just as the expected number of rooms. .blue[By adding the number of rooms, does the variability of the estimate of the effect related to the size increase or decrease?]
+
+--
+
+&gt; "Explanatory variables are highly intercorrelated is referred to as multicollinearity. When the explanatory
+variables are highly intercorrelated, it becomes difficult to disentangle the separate effects of each
+of the explanatory variables on the explained variable." 
+
+Formally the variance of the estimated coef:
+
+.pull-left[
+`$$V(\hat{\beta_i})=\frac{\sigma^2}{S_{ii}(1-R^2_i)},$$`
+]
+
+.pull-right[
+where
+`$$\sigma^2 = \text{Variance of the residuals}$$`
+
+`$$S_{ii} = \text{Variance of the given covariate}$$`
+]
+
+`$$R^2_{i} = \text{Proportion of the variance of the investigated covariate}$$`
+
+`$$\text{explained by the other covariates}$$`
+
+---
+
+## Multicollinearity
+
+.blue[How to detect multicollinearity?]
+
+--
+
+We saw that higher intercorrelation among the covariates leads to higher variance in the estimated effects.
+
+So lets express the magnitude of this increase caused by the other explanatory variables.
+
+--
+
+#### Variance Inflation Factor
+
+`$$\text{VIF}(\hat{\beta_i})=\frac{1}{1-R^2_i}$$`
+
+We can interpret VIF as the ratio of the actual variance of coefficient to what
+the variance would have been if explanatory variables were uncorrelated.
+
+---
+
+### VIF in R
+
+
+```r
+amsterdam_house_df &lt;- read_rds("https://raw.githubusercontent.com/MarcellGranat/big_data2022/main/econometrics_files/amsterdam_house.rds") %&gt;% 
+  drop_na(Price, Area, Room)
+```
+
+
+
+
+```r
+fit_yxz &lt;- lm(Price ~ Area + Room, amsterdam_house_df)
+fit_yx &lt;- lm(Price ~ Area, amsterdam_house_df)
+fit_xz &lt;- lm(Area ~ Room, amsterdam_house_df)
+```
+
+
+```r
+broom::tidy(fit_yxz)
+```
+
+```
+## # A tibble: 3 × 5
+##   term        estimate std.error statistic   p.value
+##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+## 1 (Intercept)  -62040.    24094.     -2.57 1.02e-  2
+## 2 Area           9057.      289.     31.4  2.81e-147
+## 3 Room         -51009.    10450.     -4.88 1.24e-  6
+```
+
+---
+
+### VIF in R
+
+
+```r
+broom::tidy(fit_yx)
+```
+
+```
+## # A tibble: 2 × 5
+##   term        estimate std.error statistic   p.value
+##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+## 1 (Intercept) -134910.    19145.     -7.05 3.60e- 12
+## 2 Area           7918.      172.     46.0  1.71e-240
+```
+
+```r
+1 / (1 - broom::glance(fit_xz)$r.squared)
+```
+
+```
+## [1] 2.884547
+```
+
+--
+
+The "easier" solution:
+
+
+```r
+car::vif(fit_yxz)
+```
+
+```
+##     Area     Room 
+## 2.884547 2.884547
+```
 
 ---
 
@@ -624,7 +768,7 @@ multicol_dgp()
 
 ---
 
-## Simulation
+### Simulation I
 
 
 ```r
@@ -637,23 +781,28 @@ rerun(1e4, multicol_dgp()) %&gt;%
     x2 = map_df(tidied, slice, 3)
   ) %&gt;% 
   summarise(
-    sd(x1$estimate), mean(x1$std.error),
-    sd(x2$estimate), mean(x2$std.error)
+    x1_est = sd(x1$estimate),  x1_std = mean(x1$std.error), 
+    x2_est = sd(x2$estimate),  x2_std = mean(x2$std.error)
   ) %&gt;% 
   pivot_longer(everything())
 ```
 
+.pull-left[
+
 ```
 ## # A tibble: 4 × 2
-##   name               value
-##   &lt;chr&gt;              &lt;dbl&gt;
-## 1 sd(x1$estimate)    0.719
-## 2 mean(x1$std.error) 0.719
-## 3 sd(x2$estimate)    0.102
-## 4 mean(x2$std.error) 0.102
+##   name   value
+##   &lt;chr&gt;  &lt;dbl&gt;
+## 1 x1_est 0.719
+## 2 x1_std 0.719
+## 3 x2_est 0.102
+## 4 x2_std 0.102
 ```
+]
 
-**Estimations are still consistent and unbiased!**
+.pull-right[
+**Estimations are still consistent!**
+]
 
 ---
 
@@ -692,8 +841,8 @@ rerun(1e2, multicol_dgp(b1 = .1, b2 = .1)) %&gt;%
   mutate(
     fit_bivariate = map(data, lm, formula = y ~ x1),
     fit_trivariate = map(data, lm, formula = y ~ x1 + x2),
-    bi = map_df(fit_bivariate, broom::glance),
-    tr = map_df(fit_trivariate, broom::glance),
+*   bi = map_df(fit_bivariate, broom::glance),
+*   tr = map_df(fit_trivariate, broom::glance),
   ) %&gt;% 
   summarise(
     mean(bi$r.squared &gt; tr$r.squared),
@@ -703,6 +852,7 @@ rerun(1e2, multicol_dgp(b1 = .1, b2 = .1)) %&gt;%
   ) %&gt;% 
   pivot_longer(everything())
 ```
+
 
 ```
 ## # A tibble: 4 × 2
@@ -718,9 +868,9 @@ rerun(1e2, multicol_dgp(b1 = .1, b2 = .1)) %&gt;%
 
 ## Simulation III
 
-.blue[The listed criteria values can be used to select the relevant regressors.]
+.blue[The listed criteria values can be used to chose the appropriate model.]
 
-r.squared = The relative decrease in the squared error compared to a null model (as we saw at the correlation coefficient).
+r.squared = The decrease in the squared error compared to a null model (as we saw at the correlation coefficient).
 
 
 --
@@ -730,6 +880,8 @@ r.squared = The relative decrease in the squared error compared to a null model 
 AIC:
 
 `$$AIC = SSE \times e^{2(k+1)/n}$$`
+
+BIC:
 
 `$$BIC = n \times ln(SSE/n) + k \times ln(n)$$`
 

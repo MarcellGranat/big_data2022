@@ -1,0 +1,116 @@
+---
+title: "Econometrics III"
+subtitle: "![](mnb_intezet.png){ width=30% } \n Big Data and Data Visualisation"
+author: "Marcell Granát"
+institute: "Central Bank of Hungary & .blue[John von Neumann University]"
+date: "2022"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      titleSlideClass: [center, middle]
+  seal: false
+editor_options: 
+  chunk_output_type: console
+---
+
+```{css, echo=FALSE}
+.red { color: red; }
+.blue { color: #378C95; }
+strong { color: red; }
+a { color: #378C95; font-weight: bold; }
+.remark-inline-code { font-weight: 900; background-color: #a7d5e7; }
+.caption { color: #378C95; font-style: italic; text-align: center; }
+
+.content-box { 
+box-sizing: content-box;
+background-color: #378C95;
+/* Total width: 160px + (2 * 20px) + (2 * 8px) = 216px
+Total height: 80px + (2 * 20px) + (2 * 8px) = 136px
+Content box width: 160px
+Content box height: 80px */
+}
+
+.content-box-green {
+background-color: #d9edc2;
+}
+
+.content-box-red {
+background-color: #f9dbdb;
+}
+
+.fullprice {
+text-decoration: line-through;
+}
+```
+
+```{r xaringan-themer, include=FALSE, warning=FALSE}
+library(xaringanthemer)
+library(knitr)
+library(granatlib)
+library(emo)
+library(magrittr)
+library(tidyverse)
+library(patchwork)
+style_mono_accent(
+  base_color = "#DC322F",               # bright red
+  inverse_background_color = "#002B36", # dark dark blue
+  inverse_header_color = "#378C95",     # light aqua green
+  inverse_text_color = "#FFFFFF",       # white
+  title_slide_background_color = "var(--base)",
+  text_font_google = google_font("Kelly Slab"),
+  header_font_google = google_font("Oleo Script")
+)
+
+xaringanExtra::use_panelset()
+xaringanExtra::html_dependency_clipboard()
+xaringanExtra::html_dependency_scribble(pen_color = "#378C95", 3, 4)
+xaringanExtra::use_tile_view()
+
+xaringanExtra::style_panelset_tabs(
+  active_foreground = "#378C95"
+)
+```
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+options(htmltools.dir.version = FALSE)
+knitr::opts_chunk$set(echo = FALSE,
+                      fig.align = "center", 
+                      error = TRUE,
+                      message = F,
+                      out.width = "700px",
+                      fig.width = 7,
+                      fig.height = 4.5, 
+                      out.height = "450px",
+                      dpi = 400,
+                      warning = FALSE)
+```
+
+# Today's .blue[Agenda]
+
+### Logit
+
+---
+
+class: inverse, middle, center
+
+# Logit
+
+---
+
+## Motivation
+
+- It has already been discussed how to incorporate categorical variables as regressors into the model
+
+- Today we will talk about what to do if the outcome variable is categorical (For simplicity, we only look at cases where **two outcomes** are possible)
+
+- An illustrative example (Hungarian): [Empirical investigation of yield curves' ability to predict recession](https://marcellgranat.github.io/yieldcurve/)
+
+---
+
+
+
