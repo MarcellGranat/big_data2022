@@ -93,6 +93,87 @@ class: inverse, middle, center
 
 ---
 
+## Introduction
+
+&gt; "For a number of reasons, the government bond yield curve is proving to be an accurate predictor of recessions in the US"
+
+&lt;p align="center"&gt;&lt;iframe width="720" height="405" src="https://www.youtube.com/embed/oW4hfaiXKG8" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen&gt;&lt;/iframe&gt;&lt;/p&gt;
+
+---
+
+## Setup - Recession data
+
+&lt;iframe src="https://www.nber.org/research/data/us-business-cycle-expansions-and-contractions" width="700px" height="400px" data-external="1"&gt;&lt;/iframe&gt;
+
+Let's take that table!
+
+---
+
+## Setup - Recession data
+
+
+```r
+library(rvest)
+
+recession_usa_df &lt;- read_html("https://www.nber.org/research/data/us-business-cycle-expansions-and-contractions") %&gt;%
+  html_table() %&gt;%
+  first() %&gt;% 
+  janitor::row_to_names(1) %&gt;% 
+  janitor::clean_names() %&gt;% 
+  transmute(
+    start_date = str_c(peak_year, "-", peak_quarter),
+    end_date = str_c(trough_year, "-", trough_quarter),
+    start_date = ifelse(str_detect(start_date, "occurred"), str_extract(start_date, "\\d\\d\\d\\dQ\\d"), start_date),
+    end_date = ifelse(str_detect(end_date, "occurred"), str_extract(end_date, "\\d\\d\\d\\dQ\\d"), end_date),
+    start_date = str_replace(start_date, "-", "Q"),
+    end_date = str_replace(end_date, "-", "Q"),
+    start_date = lubridate::yq(start_date),
+    end_date = lubridate::yq(end_date)
+  ) %&gt;% 
+    drop_na() %$% 
+    map2(start_date, end_date, ~ seq.Date(.x, .y, by = "quarter")) %&gt;% 
+    reduce(c) %&gt;% 
+    tibble(date = ., recession = TRUE)
+```
+
+---
+
+## Setup - Recession data
+
+
+```r
+recession_usa_df &lt;- recession_usa_df %&gt;% 
+  full_join(tibble(date = seq.Date(as.Date("1857-01-01"), as.Date("2021-01-01"), by = "quarter"))) %&gt;% 
+  arrange(date) %&gt;% 
+  mutate(recession = ifelse(is.na(recession), FALSE, TRUE))
+
+recession_usa_df
+```
+
+```
+## # A tibble: 657 × 2
+##    date       recession
+##    &lt;date&gt;     &lt;lgl&gt;    
+##  1 1857-01-01 FALSE    
+##  2 1857-04-01 TRUE     
+##  3 1857-07-01 TRUE     
+##  4 1857-10-01 TRUE     
+##  5 1858-01-01 TRUE     
+##  6 1858-04-01 TRUE     
+##  7 1858-07-01 TRUE     
+##  8 1858-10-01 TRUE     
+##  9 1859-01-01 FALSE    
+## 10 1859-04-01 FALSE    
+## # … with 647 more rows
+```
+
+## Setup - Yield data
+
+
+
+
+
+
 
 
     </textarea>

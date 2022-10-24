@@ -112,5 +112,69 @@ class: inverse, middle, center
 
 ---
 
+## Introduction
+
+> "For a number of reasons, the government bond yield curve is proving to be an accurate predictor of recessions in the US"
+
+<p align="center"><iframe width="720" height="405" src="https://www.youtube.com/embed/oW4hfaiXKG8" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></p>
+
+---
+
+## Setup - Recession data
+
+```{r}
+include_url('https://www.nber.org/research/data/us-business-cycle-expansions-and-contractions')
+```
+
+Let's take that table!
+
+---
+
+## Setup - Recession data
+
+```{r echo=TRUE}
+library(rvest)
+
+recession_usa_df <- read_html("https://www.nber.org/research/data/us-business-cycle-expansions-and-contractions") %>%
+  html_table() %>%
+  first() %>% 
+  janitor::row_to_names(1) %>% 
+  janitor::clean_names() %>% 
+  transmute(
+    start_date = str_c(peak_year, "-", peak_quarter),
+    end_date = str_c(trough_year, "-", trough_quarter),
+    start_date = ifelse(str_detect(start_date, "occurred"), str_extract(start_date, "\\d\\d\\d\\dQ\\d"), start_date),
+    end_date = ifelse(str_detect(end_date, "occurred"), str_extract(end_date, "\\d\\d\\d\\dQ\\d"), end_date),
+    start_date = str_replace(start_date, "-", "Q"),
+    end_date = str_replace(end_date, "-", "Q"),
+    start_date = lubridate::yq(start_date),
+    end_date = lubridate::yq(end_date)
+  ) %>% 
+    drop_na() %$% 
+    map2(start_date, end_date, ~ seq.Date(.x, .y, by = "quarter")) %>% 
+    reduce(c) %>% 
+    tibble(date = ., recession = TRUE)
+```
+
+---
+
+## Setup - Recession data
+
+```{r echo=TRUE}
+recession_usa_df <- recession_usa_df %>% 
+  full_join(tibble(date = seq.Date(as.Date("1857-01-01"), as.Date("2021-01-01"), by = "quarter"))) %>% 
+  arrange(date) %>% 
+  mutate(recession = ifelse(is.na(recession), FALSE, TRUE))
+
+recession_usa_df
+```
+
+## Setup - Yield data
+
+
+
+
+
+
 
 
