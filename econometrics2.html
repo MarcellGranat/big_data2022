@@ -159,10 +159,7 @@ skedasticity_dgp() %&gt;%
 
 ]
 .panel[.panel-name[Scatter plot]
-
-```
-## Error in ggplot(data = we): object 'we' not found
-```
+&lt;img src="econometrics2_files/figure-html/unnamed-chunk-4-1.png" width="600px" height="450px" style="display: block; margin: auto;" /&gt;
 
 ]
 
@@ -193,8 +190,8 @@ skedasticity_dgp &lt;- function(b0 = 100, b1 = 5,
                              n = 100) {
   tibble(x = runif(n = n)) %&gt;% 
     mutate(
-      *     x_rank = rank(x) / n(),
-      *     e = rnorm(n = n, sd = (1 + x_rank * bs)),
+*     x_rank = rank(x) / n(),
+*     e = rnorm(n = n, sd = (1 + x_rank * bs)),
       y = b0 + b1 * x + e
     )
 }
@@ -885,7 +882,40 @@ BIC:
 
 `$$BIC = n \times ln(SSE/n) + k \times ln(n)$$`
 
+---
 
+class: inverse, middle, center
+
+## "All models are wrong, but some are useful"
+
+#### Model selection
+
+---
+
+## Motivation - Why we need to choose?
+
+--
+
+1. Number of explanatory variables
+
+--
+
+2. **Functional forms**
+
+---
+
+## Functional forms
+
+|  Model  |   Function   | interpretation of the m. effect                |
+|:-------:|:------------:|------------------------------------------------|
+| linear  |   `\(Y=\beta0+\beta_1x\)`   | 1 unit increase in X causes `\(\beta_1\)` unit change in Y |
+| lin-log |  `\(Y=\beta_0+\beta_1lnX\)`  | 1 % increase in X causes `\(\beta_1\)`/100 unit change in Y |
+| log-lin |  `\(lnY=\beta_0+\beta_1X\)`  | 1 unit increase in X causes 100 `\(\beta_1\)` % change in Y |
+| log-log | `\(lnY=\beta_0+\beta_1lnX\)` | 1 % increase in X causes `\(\beta_1\)` % change in Y |
+
+???
+
+Source: Ramanathan
 
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>

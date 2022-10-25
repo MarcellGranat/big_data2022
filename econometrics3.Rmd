@@ -122,9 +122,14 @@ class: inverse, middle, center
 
 ## Setup - Recession data
 
-```{r}
-include_url('https://www.nber.org/research/data/us-business-cycle-expansions-and-contractions')
+NBER publishes officially the quarters of recessions
+
+[https://www.nber.org/research/data/us-business-cycle-expansions-and-contractions](https://www.nber.org/research/data/us-business-cycle-expansions-and-contractions)
+
+```{r out.height="350px", out.width="500px"}
+include_graphics("econometrics3/nber.png")
 ```
+
 
 Let's take that table!
 
@@ -132,7 +137,7 @@ Let's take that table!
 
 ## Setup - Recession data
 
-```{r echo=TRUE}
+```{r echo=TRUE, eval=FALSE}
 library(rvest)
 
 recession_usa_df <- read_html("https://www.nber.org/research/data/us-business-cycle-expansions-and-contractions") %>%
@@ -150,10 +155,15 @@ recession_usa_df <- read_html("https://www.nber.org/research/data/us-business-cy
     start_date = lubridate::yq(start_date),
     end_date = lubridate::yq(end_date)
   ) %>% 
-    drop_na() %$% 
-    map2(start_date, end_date, ~ seq.Date(.x, .y, by = "quarter")) %>% 
-    reduce(c) %>% 
-    tibble(date = ., recession = TRUE)
+  drop_na() %$% 
+  map2(start_date, end_date, ~ seq.Date(.x, .y, by = "quarter")) %>% 
+  reduce(c) %>% 
+  tibble(date = ., recession = TRUE) %>% 
+  write_csv("recession_usa.csv")
+```
+
+```{r}
+recession_usa_df <- read_csv("econometrics3/recession_usa.csv")
 ```
 
 ---
@@ -169,12 +179,281 @@ recession_usa_df <- recession_usa_df %>%
 recession_usa_df
 ```
 
+---
+
 ## Setup - Yield data
 
+- Yield data from the FRED website
+
+--
+
+Yes, it is prepared for now `r ji("laugh")`
+
+```{r echo=TRUE, eval=FALSE}
+yield_usa_df <- read_csv("https://raw.githubusercontent.com/MarcellGranat/big_data2022/main/econometrics3/yield_usa.csv", col_select = -1)
+```
+
+```{r echo=FALSE}
+yield_usa_df <- read_csv("econometrics3/yield_usa.csv", col_select = -1)
+```
+
+--
+
+But, the recession data is quarterly...
+
+```{r}
+yield_usa_df <- yield_usa_df %>% 
+  mutate(
+    date = str_c(
+      lubridate::year(date),
+      "Q",
+      lubridate::quarter(date)
+    ) %>% 
+      lubridate::yq()
+  ) %>% 
+  group_by(date) %>% 
+  summarise_at(-1, mean, na.rm = T)
+```
+
+---
+
+## Setup - Join the two sets
+
+```{r echo=TRUE}
+inner_join(
+  x = yield_usa_df,
+  y = recession_usa_df
+) %>% 
+  transmute(
+    date,
+    recession,
+    spread = GS10 - GS1,
+    spread = lag(spread, n = 4)
+  ) %>% 
+  drop_na()
+```
 
 
+## Final setup
+
+```{r echo=TRUE, results='hide'}
+recession_to_spread <- function(short = "GS1", long = "GS10", n_lag = 4) {
+  inner_join(
+    x = yield_usa_df,
+    y = recession_usa_df
+  ) %>% 
+    select(date, recession, short, long) %>% 
+    set_names("date", "recession", "short", "long") %>% 
+    transmute(
+      date,
+      recession,
+      spread = long - short,
+      spread = lag(spread, n = n_lag)
+    ) %>% 
+    drop_na()
+}
+```
 
 
+--
 
+.blue[Now, let's see the model]
+
+---
+
+## The logit
+
+Let P_i denote the probability of being `TRUE`. The estimated function is the following:
+
+$$\text{log}\frac{P_i}{1+P_i}=\beta_0+\sum_{j=1}^{k}\beta_jx_{i,j}$$
+
+- The left side of the equation is called **log odds-ratio**
+
+- This model is not estimated by OLS!
+
+--
+
+- We must introduce the likelihood-function:
+
+$$L=\prod_{y_i=1}P_i\prod_{y_i=0}(1-P_i)$$
+
+.blue[How would you interpret it?]
+
+--
+
+> Maximization of the likelihood function for either the probit or the logit model is accomplished by [iterative] nonlinear estimation methods. There are now several computer programs available for probit and logit analysis, and these programs are very inexpensive to run.
+
+
+### The Logit in R
+
+```{r echo=TRUE}
+fit <- glm(recession ~ spread, binomial(link = "logit"), recession_to_spread())
+```
+
+```{r}
+broom::tidy(fit)
+```
+
+```{r}
+broom::augment(fit, type.predict = "response")
+```
+
+---
+
+### Reproduce the table from Estrella és Fishkin [1996b] 
+
+```{r}
+recession_to_spread() %>% 
+  filter(date < "1995-01-01") %>% 
+  glm(recession ~ spread, binomial(link = "probit"), data = .) %>% 
+  broom::augment(fit, type.predict = "response", newdata=tibble(spread = seq(from = -2.5, to = 1.4, by = .40)))
+```
+
+
+---
+
+### ROC-curve
+
+#### When do we say that "the winter is coming"?
+
+**If it exceeds a certain probability... = Cut-off value**
+
+```{r echo=TRUE}
+cut_off = .5
+
+broom::augment(fit, type.predict = "response") %>% 
+  mutate(
+    estimation = .fitted > cut_off,
+    correct = recession == estimation
+         ) %>% 
+  count(correct, estimation) %>% 
+  mutate(estimation = ifelse(estimation == TRUE, "positive", "negative"))
+```
+
+---
+
+### ROC-curve
+
+#### When do we say that "the winter is coming"?
+
+**If it exceeds a certain probability... = Cut-off value**
+
+```{r echo=TRUE}
+confusion_matrix <- function(.fit, cut_off = .5) {
+  
+broom::augment(fit, type.predict = "response") %>% 
+  mutate(
+    estimation = .fitted > cut_off,
+    correct = recession == estimation
+         ) %>% 
+  count(correct, estimation) %>% 
+  mutate(estimation = ifelse(estimation == TRUE, "positive", "negative"))
+}
+
+confusion_matrix(fit, .7)
+```
+
+---
+
+### ROC curve
+
+#### When do we say that "the winter is coming"?
+
+**If it exceeds a certain probability... = Cut-off value**
+
+Some possible cut-off values:
+
+- .5
+
+- return the same number of `TRUE` predictions as `TRUE` observations
+
+- maximizing the accuracy
+
+- minimizing cost (if you know that)
+
+---
+
+### ROC-curve
+
+Let's construct the confusion matrix to a given a cut-off value
+
+Now, the following indicators can be derived:
+
+$$\text{Sensitivity}=\frac{TP}{TP+FN}$$
+
+$$\text{Specificity}=\frac{TN}{TN+FP}$$
+
+This two values can be calculated to any cut-off values... This is the ROC curve
+
+---
+
+### ROC curve in R
+
+```{r echo=TRUE}
+roc_curve <- broom::augment(fit, type.predict = "response") %$% 
+  pROC::roc(recession, .fitted)
+```
+
+Area under the curve:
+
+```{r echo=TRUE}
+roc_curve$auc
+```
+
+.content-box-greeen[
+ AUC is the suggested indicator to evaluate your model!
+]
+
+```{r echo=TRUE}
+roc_curve_df <- roc_curve %$%
+  tibble(thresholds, sensitivities, specificities)
+```
+
+---
+
+### Visualization of the ROC curve
+
+```{r}
+roc_curve_df %>% 
+  ggplot(aes(1- specificities, sensitivities)) +
+  geom_abline(lty = 2) +
+  geom_path(color = "red2", size = 1.3)
+```
+
+
+---
+
+# References
+
+```{r, print_refs, results='asis', echo=FALSE, warning=FALSE, message=FALSE}
+library(RefManageR)
+bib <- ReadBib("./econometrics.bib", check = FALSE)
+
+ref_page <- 2
+for (bib_item in seq_along(bib)) {
+  
+  if (bib_item %% 5 == 0) {
+    cat("\n")
+    cat("---")
+    cat("\n")
+    cat("# References ", ref_page)
+    ref_page <- ref_page + 1
+    cat("\n")
+  }
+
+print(bib[bib_item], 
+  .opts = list(check.entries = FALSE, 
+               style = "html", 
+               bib.style = "authoryear"))
+}
+```
+
+---
+
+class: center, middle
+
+# Thank you for your attention!
+
+Slides are available at [www.marcellgranat.com](https://www.marcellgranat.com)
 
 

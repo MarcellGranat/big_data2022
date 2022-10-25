@@ -103,7 +103,12 @@ class: inverse, middle, center
 
 ## Setup - Recession data
 
-&lt;iframe src="https://www.nber.org/research/data/us-business-cycle-expansions-and-contractions" width="700px" height="400px" data-external="1"&gt;&lt;/iframe&gt;
+NBER publishes officially the quarters of recessions
+
+[https://www.nber.org/research/data/us-business-cycle-expansions-and-contractions](https://www.nber.org/research/data/us-business-cycle-expansions-and-contractions)
+
+&lt;img src="econometrics3/nber.png" width="500px" height="350px" style="display: block; margin: auto;" /&gt;
+
 
 Let's take that table!
 
@@ -130,11 +135,14 @@ recession_usa_df &lt;- read_html("https://www.nber.org/research/data/us-business
     start_date = lubridate::yq(start_date),
     end_date = lubridate::yq(end_date)
   ) %&gt;% 
-    drop_na() %$% 
-    map2(start_date, end_date, ~ seq.Date(.x, .y, by = "quarter")) %&gt;% 
-    reduce(c) %&gt;% 
-    tibble(date = ., recession = TRUE)
+  drop_na() %$% 
+  map2(start_date, end_date, ~ seq.Date(.x, .y, by = "quarter")) %&gt;% 
+  reduce(c) %&gt;% 
+  tibble(date = ., recession = TRUE) %&gt;% 
+  write_csv("recession_usa.csv")
 ```
+
+
 
 ---
 
@@ -167,13 +175,332 @@ recession_usa_df
 ## # … with 647 more rows
 ```
 
+---
+
 ## Setup - Yield data
 
+- Yield data from the FRED website
+
+--
+
+Yes, it is prepared for now 😂
+
+
+```r
+yield_usa_df &lt;- read_csv("https://raw.githubusercontent.com/MarcellGranat/big_data2022/main/econometrics3/yield_usa.csv", col_select = -1)
+```
 
 
 
+--
+
+But, the recession data is quarterly...
 
 
+
+---
+
+## Setup - Join the two sets
+
+
+```r
+inner_join(
+  x = yield_usa_df,
+  y = recession_usa_df
+) %&gt;% 
+  transmute(
+    date,
+    recession,
+    spread = GS10 - GS1,
+    spread = lag(spread, n = 4)
+  ) %&gt;% 
+  drop_na()
+```
+
+```
+## # A tibble: 268 × 3
+##    date       recession spread
+##    &lt;date&gt;     &lt;lgl&gt;      &lt;dbl&gt;
+##  1 1954-04-01 TRUE       0.567
+##  2 1954-07-01 FALSE      0.630
+##  3 1954-10-01 FALSE      0.937
+##  4 1955-01-01 FALSE      1.21 
+##  5 1955-04-01 FALSE      1.47 
+##  6 1955-07-01 FALSE      1.43 
+##  7 1955-10-01 FALSE      1.3  
+##  8 1956-01-01 FALSE      1.13 
+##  9 1956-04-01 FALSE      0.91 
+## 10 1956-07-01 FALSE      0.697
+## # … with 258 more rows
+```
+
+
+## Final setup
+
+
+```r
+recession_to_spread &lt;- function(short = "GS1", long = "GS10", n_lag = 4) {
+  inner_join(
+    x = yield_usa_df,
+    y = recession_usa_df
+  ) %&gt;% 
+    select(date, recession, short, long) %&gt;% 
+    set_names("date", "recession", "short", "long") %&gt;% 
+    transmute(
+      date,
+      recession,
+      spread = long - short,
+      spread = lag(spread, n = n_lag)
+    ) %&gt;% 
+    drop_na()
+}
+```
+
+
+--
+
+.blue[Now, let's see the model]
+
+---
+
+## The logit
+
+Let P_i denote the probability of being `TRUE`. The estimated function is the following:
+
+`$$\text{log}\frac{P_i}{1+P_i}=\beta_0+\sum_{j=1}^{k}\beta_jx_{i,j}$$`
+
+- The left side of the equation is called **log odds-ratio**
+
+- This model is not estimated by OLS!
+
+--
+
+- We must introduce the likelihood-function:
+
+`$$L=\prod_{y_i=1}P_i\prod_{y_i=0}(1-P_i)$$`
+
+.blue[How would you interpret it?]
+
+--
+
+&gt; Maximization of the likelihood function for either the probit or the logit model is accomplished by [iterative] nonlinear estimation methods. There are now several computer programs available for probit and logit analysis, and these programs are very inexpensive to run.
+
+
+### The Logit in R
+
+
+```r
+fit &lt;- glm(recession ~ spread, binomial(link = "logit"), recession_to_spread())
+```
+
+
+```
+## # A tibble: 2 × 5
+##   term        estimate std.error statistic  p.value
+##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 (Intercept)   -0.719     0.201     -3.57 3.60e- 4
+## 2 spread        -1.72      0.278     -6.20 5.61e-10
+```
+
+
+```
+## # A tibble: 268 × 8
+##    recession spread .fitted .resid .std.resid    .hat .sigma  .cooksd
+##    &lt;lgl&gt;      &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;      &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;    &lt;dbl&gt;
+##  1 TRUE       0.567  0.155   1.93       1.94  0.00590  0.808 0.0163  
+##  2 FALSE      0.630  0.141  -0.552     -0.554 0.00590  0.816 0.000491
+##  3 FALSE      0.937  0.0884 -0.430     -0.432 0.00602  0.816 0.000296
+##  4 FALSE      1.21   0.0568 -0.342     -0.343 0.00593  0.816 0.000181
+##  5 FALSE      1.47   0.0372 -0.275     -0.276 0.00555  0.816 0.000108
+##  6 FALSE      1.43   0.0398 -0.285     -0.286 0.00562  0.816 0.000118
+##  7 FALSE      1.3    0.0493 -0.318     -0.319 0.00583  0.816 0.000153
+##  8 FALSE      1.13   0.0650 -0.367     -0.368 0.00599  0.816 0.000211
+##  9 FALSE      0.91   0.0922 -0.440     -0.441 0.00601  0.816 0.000309
+## 10 FALSE      0.697  0.128  -0.523     -0.525 0.00592  0.816 0.000439
+## # … with 258 more rows
+```
+
+---
+
+### Reproduce the table from Estrella és Fishkin [1996b] 
+
+
+```
+## # A tibble: 10 × 2
+##    spread .fitted
+##     &lt;dbl&gt;   &lt;dbl&gt;
+##  1 -2.5    0.968 
+##  2 -2.1    0.929 
+##  3 -1.7    0.862 
+##  4 -1.3    0.760 
+##  5 -0.9    0.627 
+##  6 -0.5    0.477 
+##  7 -0.100  0.330 
+##  8  0.300  0.206 
+##  9  0.7    0.115 
+## 10  1.1    0.0566
+```
+
+
+---
+
+### ROC-curve
+
+#### When do we say that "the winter is coming"?
+
+**If it exceeds a certain probability... = Cut-off value**
+
+
+```r
+cut_off = .5
+
+broom::augment(fit, type.predict = "response") %&gt;% 
+  mutate(
+    estimation = .fitted &gt; cut_off,
+    correct = recession == estimation
+         ) %&gt;% 
+  count(correct, estimation) %&gt;% 
+  mutate(estimation = ifelse(estimation == TRUE, "positive", "negative"))
+```
+
+```
+## # A tibble: 4 × 3
+##   correct estimation     n
+##   &lt;lgl&gt;   &lt;chr&gt;      &lt;int&gt;
+## 1 FALSE   negative      35
+## 2 FALSE   positive       6
+## 3 TRUE    negative     216
+## 4 TRUE    positive      11
+```
+
+---
+
+### ROC-curve
+
+#### When do we say that "the winter is coming"?
+
+**If it exceeds a certain probability... = Cut-off value**
+
+
+```r
+confusion_matrix &lt;- function(.fit, cut_off = .5) {
+  
+broom::augment(fit, type.predict = "response") %&gt;% 
+  mutate(
+    estimation = .fitted &gt; cut_off,
+    correct = recession == estimation
+         ) %&gt;% 
+  count(correct, estimation) %&gt;% 
+  mutate(estimation = ifelse(estimation == TRUE, "positive", "negative"))
+}
+
+confusion_matrix(fit, .7)
+```
+
+```
+## # A tibble: 4 × 3
+##   correct estimation     n
+##   &lt;lgl&gt;   &lt;chr&gt;      &lt;int&gt;
+## 1 FALSE   negative      39
+## 2 FALSE   positive       5
+## 3 TRUE    negative     217
+## 4 TRUE    positive       7
+```
+
+---
+
+### ROC curve
+
+#### When do we say that "the winter is coming"?
+
+**If it exceeds a certain probability... = Cut-off value**
+
+Some possible cut-off values:
+
+- .5
+
+- return the same number of `TRUE` predictions as `TRUE` observations
+
+- maximizing the accuracy
+
+- minimizing cost (if you know that)
+
+---
+
+### ROC-curve
+
+Let's construct the confusion matrix to a given a cut-off value
+
+Now, the following indicators can be derived:
+
+`$$\text{Sensitivity}=\frac{TP}{TP+FN}$$`
+
+`$$\text{Specificity}=\frac{TN}{TN+FP}$$`
+
+This two values can be calculated to any cut-off values... This is the ROC curve
+
+---
+
+### ROC curve in R
+
+
+```r
+roc_curve &lt;- broom::augment(fit, type.predict = "response") %$% 
+  pROC::roc(recession, .fitted)
+```
+
+Area under the curve:
+
+
+```r
+roc_curve$auc
+```
+
+```
+## Area under the curve: 0.8713
+```
+
+.content-box-greeen[
+ AUC is the suggested indicator to evaluate your model!
+]
+
+
+```r
+roc_curve_df &lt;- roc_curve %$%
+  tibble(thresholds, sensitivities, specificities)
+```
+
+---
+
+### Visualization of the ROC curve
+
+&lt;img src="econometrics3_files/figure-html/unnamed-chunk-20-1.png" width="700px" height="450px" style="display: block; margin: auto;" /&gt;
+
+
+---
+
+# References
+
+&lt;p&gt;&lt;cite&gt;Maddala, G. S.
+(1992).
+&lt;em&gt;Introduction to economics&lt;/em&gt;.
+Macmillan.&lt;/cite&gt;&lt;/p&gt;
+&lt;p&gt;&lt;cite&gt;Kahneman, D.
+(2011).
+&lt;em&gt;Thinking, fast and slow&lt;/em&gt;.
+Macmillan.&lt;/cite&gt;&lt;/p&gt;
+&lt;p&gt;&lt;cite&gt;Ramanathan, R.
+(1992).
+&lt;em&gt;Introductory econometrics with applications&lt;/em&gt;.
+Dryden Press.&lt;/cite&gt;&lt;/p&gt;
+
+---
+
+class: center, middle
+
+# Thank you for your attention!
+
+Slides are available at [www.marcellgranat.com](https://www.marcellgranat.com)
 
 
     </textarea>

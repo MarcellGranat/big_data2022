@@ -168,7 +168,7 @@ skedasticity_dgp <- function(b0 = 100, b1 = 5,
 ```
 
 
-```{r results='hide', echo=TRUE, eval=FALSE}
+```{r echo=TRUE, eval=FALSE}
 skedasticity_dgp <- function(b0 = 100, b1 = 5,
                              bs = 0, # new
                              n = 100) {
@@ -197,7 +197,7 @@ skedasticity_fitted_df <- skedasticity_df %>%
   lm(formula = y ~ x) %>% 
   broom::augment()
 
-ggplot(data = we) +
+ggplot(data = skedasticity_fitted_df) +
   geom_linerange(aes(x = x, ymin=  y, ymax = .fitted, color = "Residual")) +
   geom_point(aes(x, y), fill = "grey70", shape = 21) +
   geom_smooth(aes(x, y), method = "lm", se = FALSE, fullrange = TRUE, color = "red2") +
@@ -252,8 +252,8 @@ skedasticity_dgp <- function(b0 = 100, b1 = 5,
                              n = 100) {
   tibble(x = runif(n = n)) %>% 
     mutate(
-      *     x_rank = rank(x) / n(),
-      *     e = rnorm(n = n, sd = (1 + x_rank * bs)),
+*     x_rank = rank(x) / n(),
+*     e = rnorm(n = n, sd = (1 + x_rank * bs)),
       y = b0 + b1 * x + e
     )
 }
@@ -910,5 +910,82 @@ BIC:
 
 $$BIC = n \times ln(SSE/n) + k \times ln(n)$$
 
+---
 
+class: inverse, middle, center
+
+## "All models are wrong, but some are useful"
+
+#### Model selection
+
+---
+
+## Motivation - Why we need to choose?
+
+--
+
+1. Number of explanatory variables
+
+--
+
+2. **Functional forms**
+
+---
+
+## Functional forms
+
+|  Model  |   Function   | interpretation of the m. effect                |
+|:-------:|:------------:|------------------------------------------------|
+| linear  |   $Y=\beta0+\beta_1x$   | 1 unit increase in X causes $\beta_1$ unit change in Y |
+| lin-log |  $Y=\beta_0+\beta_1lnX$  | 1 % increase in X causes $\beta_1$/100 unit change in Y |
+| log-lin |  $lnY=\beta_0+\beta_1X$  | 1 unit increase in X causes 100 $\beta_1$ % change in Y |
+| log-log | $lnY=\beta_0+\beta_1lnX$ | 1 % increase in X causes $\beta_1$ % change in Y |
+
+#### How to choose?
+
+1. The interpretation is different!
+
+2. Logarithm often useful for financial/consumption data
+
+3. Does it increase the R-squared? (never compare the R-squared from the model, if the depedent variable is different)
+
+???
+
+Source: Ramanathan
+
+
+---
+
+# References
+
+```{r, print_refs, results='asis', echo=FALSE, warning=FALSE, message=FALSE}
+library(RefManageR)
+bib <- ReadBib("./econometrics.bib", check = FALSE)
+
+ref_page <- 2
+for (bib_item in seq_along(bib)) {
+  
+  if (bib_item %% 5 == 0) {
+    cat("\n")
+    cat("---")
+    cat("\n")
+    cat("# References ", ref_page)
+    ref_page <- ref_page + 1
+    cat("\n")
+  }
+
+print(bib[bib_item], 
+  .opts = list(check.entries = FALSE, 
+               style = "html", 
+               bib.style = "authoryear"))
+}
+```
+
+---
+
+class: center, middle
+
+# Thank you for your attention!
+
+Slides are available at [www.marcellgranat.com](https://www.marcellgranat.com)
 
