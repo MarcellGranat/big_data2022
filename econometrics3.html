@@ -198,6 +198,8 @@ But, the recession data is quarterly...
 
 
 
+
+
 ---
 
 ## Setup - Join the two sets
@@ -234,7 +236,6 @@ inner_join(
 ## # … with 258 more rows
 ```
 
-
 ## Final setup
 
 
@@ -267,7 +268,7 @@ recession_to_spread &lt;- function(short = "GS1", long = "GS10", n_lag = 4) {
 
 Let P_i denote the probability of being `TRUE`. The estimated function is the following:
 
-`$$\text{log}\frac{P_i}{1+P_i}=\beta_0+\sum_{j=1}^{k}\beta_jx_{i,j}$$`
+`$$\text{log}\frac{P_i}{1-P_i}=\beta_0+\sum_{j=1}^{k}\beta_jx_{i,j}$$`
 
 - The left side of the equation is called **log odds-ratio**
 
@@ -283,8 +284,9 @@ Let P_i denote the probability of being `TRUE`. The estimated function is the fo
 
 --
 
-&gt; Maximization of the likelihood function for either the probit or the logit model is accomplished by [iterative] nonlinear estimation methods. There are now several computer programs available for probit and logit analysis, and these programs are very inexpensive to run.
+&gt; Maximization of the likelihood function for either the probit or the logit model is accomplished by .blue[iterative] nonlinear estimation methods. There are now several computer programs available for probit and logit analysis, and these programs are very inexpensive to run.
 
+---
 
 ### The Logit in R
 
@@ -293,6 +295,16 @@ Let P_i denote the probability of being `TRUE`. The estimated function is the fo
 fit &lt;- glm(recession ~ spread, binomial(link = "logit"), recession_to_spread())
 ```
 
+--
+
+The broom functions also work here!
+
+Extract the coeffitients:
+
+
+```r
+broom::tidy(fit)
+```
 
 ```
 ## # A tibble: 2 × 5
@@ -302,6 +314,16 @@ fit &lt;- glm(recession ~ spread, binomial(link = "logit"), recession_to_spread(
 ## 2 spread        -1.72      0.278     -6.20 5.61e-10
 ```
 
+---
+
+### The Logit in R
+
+Predictions &amp; errors for the observations:
+
+
+```r
+broom::augment(fit, type.predict = "response")
+```
 
 ```
 ## # A tibble: 268 × 8
@@ -322,8 +344,34 @@ fit &lt;- glm(recession ~ spread, binomial(link = "logit"), recession_to_spread(
 
 ---
 
-### Reproduce the table from Estrella és Fishkin [1996b] 
+### Reproduce the table from Estrella és Fishkin [1996b]
 
+Estrella és Fishkin [1996b] reports a table that contains the probability of recession to certain values of spread.
+
+--
+
+To reproduce this table we use our own model to estimate the probability of recession.footnote[The results will differ a bit. This is because the time-series of spread is longer in the article &amp; they use probit model (the link function is different, but does not cause a huge difference)]. 
+
+--
+
+The `augment` function has a `newdata` input parameter, so we generate the predictions so easily with that. (This works also in the case of other linear models).
+
+---
+
+### Reproduce the table from Estrella és Fishkin [1996b]
+
+
+```r
+recession_to_spread() %&gt;% 
+  filter(date &lt; "1995-01-01") %&gt;% 
+  glm(recession ~ spread, binomial(link = "probit"), data = .) %&gt;% 
+  broom::augment(fit, type.predict = "response", 
+                 newdata=tibble(spread = seq(
+                   from = -2.5, 
+                   to = 1.4, 
+                   by = .40)
+                   ))
+```
 
 ```
 ## # A tibble: 10 × 2
@@ -344,21 +392,58 @@ fit &lt;- glm(recession ~ spread, binomial(link = "logit"), recession_to_spread(
 
 ---
 
-### ROC-curve
+### ROC curve
 
 #### When do we say that "the winter is coming"?
 
-**If it exceeds a certain probability... = Cut-off value**
+If it exceeds a certain probability... = **Cut-off value**
 
 
 ```r
-cut_off = .5
+cut_off = 0.5
+
+broom::augment(fit, type.predict = "response") %&gt;% 
+  mutate(
+    estimation = .fitted &gt; cut_off,
+  ) %&gt;% 
+  select(recession, spread, .fitted, estimation)
+```
+
+```
+## # A tibble: 268 × 4
+##    recession spread .fitted estimation
+##    &lt;lgl&gt;      &lt;dbl&gt;   &lt;dbl&gt; &lt;lgl&gt;     
+##  1 TRUE       0.567  0.155  FALSE     
+##  2 FALSE      0.630  0.141  FALSE     
+##  3 FALSE      0.937  0.0884 FALSE     
+##  4 FALSE      1.21   0.0568 FALSE     
+##  5 FALSE      1.47   0.0372 FALSE     
+##  6 FALSE      1.43   0.0398 FALSE     
+##  7 FALSE      1.3    0.0493 FALSE     
+##  8 FALSE      1.13   0.0650 FALSE     
+##  9 FALSE      0.91   0.0922 FALSE     
+## 10 FALSE      0.697  0.128  FALSE     
+## # … with 258 more rows
+```
+
+
+---
+
+### ROC curve
+
+#### When do we say that "the winter is coming"?
+
+If it exceeds a certain probability... = **Cut-off value**
+
+
+```r
+cut_off = 0.5
 
 broom::augment(fit, type.predict = "response") %&gt;% 
   mutate(
     estimation = .fitted &gt; cut_off,
     correct = recession == estimation
-         ) %&gt;% 
+  ) %&gt;% 
   count(correct, estimation) %&gt;% 
   mutate(estimation = ifelse(estimation == TRUE, "positive", "negative"))
 ```
@@ -375,23 +460,23 @@ broom::augment(fit, type.predict = "response") %&gt;%
 
 ---
 
-### ROC-curve
+### ROC curve
 
 #### When do we say that "the winter is coming"?
 
-**If it exceeds a certain probability... = Cut-off value**
+If it exceeds a certain probability... = **Cut-off value**
 
 
 ```r
 confusion_matrix &lt;- function(.fit, cut_off = .5) {
   
-broom::augment(fit, type.predict = "response") %&gt;% 
-  mutate(
-    estimation = .fitted &gt; cut_off,
-    correct = recession == estimation
-         ) %&gt;% 
-  count(correct, estimation) %&gt;% 
-  mutate(estimation = ifelse(estimation == TRUE, "positive", "negative"))
+  broom::augment(fit, type.predict = "response") %&gt;% 
+    mutate(
+      estimation = .fitted &gt; cut_off,
+      correct = recession == estimation
+    ) %&gt;% 
+    count(correct, estimation) %&gt;% 
+    mutate(estimation = ifelse(estimation == TRUE, "positive", "negative"))
 }
 
 confusion_matrix(fit, .7)
@@ -427,7 +512,7 @@ Some possible cut-off values:
 
 ---
 
-### ROC-curve
+### ROC curve
 
 Let's construct the confusion matrix to a given a cut-off value
 
@@ -461,7 +546,7 @@ roc_curve$auc
 ```
 
 .content-box-greeen[
- AUC is the suggested indicator to evaluate your model!
+AUC is the suggested indicator to evaluate your model!
 ]
 
 
@@ -474,7 +559,7 @@ roc_curve_df &lt;- roc_curve %$%
 
 ### Visualization of the ROC curve
 
-&lt;img src="econometrics3_files/figure-html/unnamed-chunk-20-1.png" width="700px" height="450px" style="display: block; margin: auto;" /&gt;
+&lt;img src="econometrics3_files/figure-html/unnamed-chunk-21-1.png" width="700px" height="450px" style="display: block; margin: auto;" /&gt;
 
 
 ---

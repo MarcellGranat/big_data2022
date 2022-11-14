@@ -204,16 +204,13 @@ But, the recession data is quarterly...
 ```{r}
 yield_usa_df <- yield_usa_df %>% 
   mutate(
-    date = str_c(
-      lubridate::year(date),
-      "Q",
-      lubridate::quarter(date)
-    ) %>% 
-      lubridate::yq()
+    date = lubridate::floor_date(date, "quarter")
   ) %>% 
   group_by(date) %>% 
   summarise_at(-1, mean, na.rm = T)
 ```
+
+
 
 ---
 
@@ -232,7 +229,6 @@ inner_join(
   ) %>% 
   drop_na()
 ```
-
 
 ## Final setup
 
@@ -265,7 +261,7 @@ recession_to_spread <- function(short = "GS1", long = "GS10", n_lag = 4) {
 
 Let P_i denote the probability of being `TRUE`. The estimated function is the following:
 
-$$\text{log}\frac{P_i}{1+P_i}=\beta_0+\sum_{j=1}^{k}\beta_jx_{i,j}$$
+$$\text{log}\frac{P_i}{1-P_i}=\beta_0+\sum_{j=1}^{k}\beta_jx_{i,j}$$
 
 - The left side of the equation is called **log odds-ratio**
 
@@ -281,8 +277,9 @@ $$L=\prod_{y_i=1}P_i\prod_{y_i=0}(1-P_i)$$
 
 --
 
-> Maximization of the likelihood function for either the probit or the logit model is accomplished by [iterative] nonlinear estimation methods. There are now several computer programs available for probit and logit analysis, and these programs are very inexpensive to run.
+> Maximization of the likelihood function for either the probit or the logit model is accomplished by .blue[iterative] nonlinear estimation methods. There are now several computer programs available for probit and logit analysis, and these programs are very inexpensive to run.
 
+---
 
 ### The Logit in R
 
@@ -290,66 +287,114 @@ $$L=\prod_{y_i=1}P_i\prod_{y_i=0}(1-P_i)$$
 fit <- glm(recession ~ spread, binomial(link = "logit"), recession_to_spread())
 ```
 
-```{r}
+--
+
+The broom functions also work here!
+
+Extract the coeffitients:
+
+```{r echo=TRUE}
 broom::tidy(fit)
 ```
 
-```{r}
+---
+
+### The Logit in R
+
+Predictions & errors for the observations:
+
+```{r echo=TRUE}
 broom::augment(fit, type.predict = "response")
 ```
 
 ---
 
-### Reproduce the table from Estrella és Fishkin [1996b] 
+### Reproduce the table from Estrella és Fishkin [1996b]
 
-```{r}
+Estrella és Fishkin [1996b] reports a table that contains the probability of recession to certain values of spread.
+
+--
+
+To reproduce this table we use our own model to estimate the probability of recession.footnote[The results will differ a bit. This is because the time-series of spread is longer in the article & they use probit model (the link function is different, but does not cause a huge difference)]. 
+
+--
+
+The `augment` function has a `newdata` input parameter, so we generate the predictions so easily with that. (This works also in the case of other linear models).
+
+---
+
+### Reproduce the table from Estrella és Fishkin [1996b]
+
+```{r echo=TRUE}
 recession_to_spread() %>% 
   filter(date < "1995-01-01") %>% 
   glm(recession ~ spread, binomial(link = "probit"), data = .) %>% 
-  broom::augment(fit, type.predict = "response", newdata=tibble(spread = seq(from = -2.5, to = 1.4, by = .40)))
+  broom::augment(fit, type.predict = "response", 
+                 newdata=tibble(spread = seq(
+                   from = -2.5, 
+                   to = 1.4, 
+                   by = .40)
+                   ))
 ```
 
 
 ---
 
-### ROC-curve
+### ROC curve
 
 #### When do we say that "the winter is coming"?
 
-**If it exceeds a certain probability... = Cut-off value**
+If it exceeds a certain probability... = **Cut-off value**
 
 ```{r echo=TRUE}
-cut_off = .5
+cut_off = 0.5
+
+broom::augment(fit, type.predict = "response") %>% 
+  mutate(
+    estimation = .fitted > cut_off,
+  ) %>% 
+  select(recession, spread, .fitted, estimation)
+```
+
+
+---
+
+### ROC curve
+
+#### When do we say that "the winter is coming"?
+
+If it exceeds a certain probability... = **Cut-off value**
+
+```{r echo=TRUE}
+cut_off = 0.5
 
 broom::augment(fit, type.predict = "response") %>% 
   mutate(
     estimation = .fitted > cut_off,
     correct = recession == estimation
-         ) %>% 
+  ) %>% 
   count(correct, estimation) %>% 
   mutate(estimation = ifelse(estimation == TRUE, "positive", "negative"))
 ```
 
 ---
 
-### ROC-curve
+### ROC curve
 
 #### When do we say that "the winter is coming"?
 
-**If it exceeds a certain probability... = Cut-off value**
+If it exceeds a certain probability... = **Cut-off value**
 
 ```{r echo=TRUE}
 confusion_matrix <- function(.fit, cut_off = .5) {
-  
-broom::augment(fit, type.predict = "response") %>% 
-  mutate(
-    estimation = .fitted > cut_off,
-    correct = recession == estimation
-         ) %>% 
-  count(correct, estimation) %>% 
-  mutate(estimation = ifelse(estimation == TRUE, "positive", "negative"))
+  broom::augment(fit, type.predict = "response") %>% 
+    mutate(
+      estimation = .fitted > cut_off,
+      correct = recession == estimation
+    ) %>% 
+    count(correct, estimation) %>% 
+    mutate(estimation = ifelse(estimation == TRUE, "positive", "negative"))
 }
-
 confusion_matrix(fit, .7)
 ```
 
@@ -373,7 +418,7 @@ Some possible cut-off values:
 
 ---
 
-### ROC-curve
+### ROC curve
 
 Let's construct the confusion matrix to a given a cut-off value
 
@@ -401,7 +446,7 @@ roc_curve$auc
 ```
 
 .content-box-greeen[
- AUC is the suggested indicator to evaluate your model!
+AUC is the suggested indicator to evaluate your model and compare it to another one!
 ]
 
 ```{r echo=TRUE}
@@ -419,7 +464,6 @@ roc_curve_df %>%
   geom_abline(lty = 2) +
   geom_path(color = "red2", size = 1.3)
 ```
-
 
 ---
 
@@ -440,11 +484,11 @@ for (bib_item in seq_along(bib)) {
     ref_page <- ref_page + 1
     cat("\n")
   }
-
-print(bib[bib_item], 
-  .opts = list(check.entries = FALSE, 
-               style = "html", 
-               bib.style = "authoryear"))
+  
+  print(bib[bib_item], 
+        .opts = list(check.entries = FALSE, 
+                     style = "html", 
+                     bib.style = "authoryear"))
 }
 ```
 
