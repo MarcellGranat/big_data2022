@@ -183,7 +183,7 @@ recession_usa_df
 
 --
 
-Yes, it is prepared for now 😂
+Yes, it is prepared for now 😆
 
 
 ```r
@@ -469,7 +469,6 @@ If it exceeds a certain probability... = **Cut-off value**
 
 ```r
 confusion_matrix &lt;- function(.fit, cut_off = .5) {
-  
   broom::augment(fit, type.predict = "response") %&gt;% 
     mutate(
       estimation = .fitted &gt; cut_off,
@@ -478,7 +477,6 @@ confusion_matrix &lt;- function(.fit, cut_off = .5) {
     count(correct, estimation) %&gt;% 
     mutate(estimation = ifelse(estimation == TRUE, "positive", "negative"))
 }
-
 confusion_matrix(fit, .7)
 ```
 
@@ -546,7 +544,7 @@ roc_curve$auc
 ```
 
 .content-box-greeen[
-AUC is the suggested indicator to evaluate your model!
+AUC is the suggested indicator to evaluate your model and compare it to another one!
 ]
 
 
@@ -560,7 +558,6 @@ roc_curve_df &lt;- roc_curve %$%
 ### Visualization of the ROC curve
 
 &lt;img src="econometrics3_files/figure-html/unnamed-chunk-21-1.png" width="700px" height="450px" style="display: block; margin: auto;" /&gt;
-
 
 ---
 
@@ -578,6 +575,10 @@ Macmillan.&lt;/cite&gt;&lt;/p&gt;
 (1992).
 &lt;em&gt;Introductory econometrics with applications&lt;/em&gt;.
 Dryden Press.&lt;/cite&gt;&lt;/p&gt;
+&lt;p&gt;&lt;cite&gt;Estrella, A. and F. S. Mishkin
+(1996).
+&amp;ldquo;The yield curve as a predictor of US recessions&amp;rdquo;.
+In: &lt;em&gt;Current issues in economics and finance&lt;/em&gt; 2.7.&lt;/cite&gt;&lt;/p&gt;
 
 ---
 

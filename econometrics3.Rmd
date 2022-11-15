@@ -478,7 +478,7 @@ for (bib_item in seq_along(bib)) {
   
   if (bib_item %% 5 == 0) {
     cat("\n")
-    cat("---")
+    cat("---") 
     cat("\n")
     cat("# References ", ref_page)
     ref_page <- ref_page + 1

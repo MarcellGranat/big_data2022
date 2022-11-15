@@ -1,5 +1,5 @@
 ---
-title: "Grammar of Graphics"
+title: "Grammar of Graphics II"
 subtitle: "![](mnb_intezet.png){ width=30% } \n Big Data and Data Visualisation"
 author: "Marcell Granát"
 institute: "Central Bank of Hungary & .blue[John von Neumann University]"
@@ -13,8 +13,6 @@ output:
       countIncrementalSlides: false
       titleSlideClass: [center, middle]
   seal: false
-editor_options: 
-  chunk_output_type: console
 ---
 
 ```{css, echo=FALSE}
@@ -119,17 +117,42 @@ tickers
 
 #  Download the companies of S&P 500
 
+--
+
+## What is in S&P 500?
+
+One shortcut
+
+```{r}
+library(tidyquant)
+
+tq_index("SP500")
+```
+
+
+#  Download the companies of S&P 500
+
 Let's use the `{tidyquant}` package to download the data.
 
 ```{r warning=TRUE}
-library(tidyquant)
-
-getSymbols(tickers[1:6], from = '2021-11-14',
+getSymbols(tq_index("SP500")$symbol[1:6], from = '2021-11-14',
            to = "2022-11-14", warnings = FALSE,
            auto.assign = TRUE)
 ```
 
+```{r}
+getSymbols("SP500", from = '2021-11-14',
+           to = "2022-11-14", warnings = FALSE,
+           auto.assign = TRUE)
+```
+
+```{r}
+tq_index("SP500")
+```
+
+
 --
+
 
 - This function creates a separate table for each of the stocks.
 
@@ -222,11 +245,157 @@ For the total dataset, remove the `[1:6]` term in the `getSymbols()` function an
 Now, just load the prepared data:
 
 ```{r}
-
+snp_df <- read_csv("https://raw.githubusercontent.com/MarcellGranat/big_data2022/main/visualisation2_files/snp.csv")
 ```
 
+---
 
+# Time-series
 
+```{r}
+snp_df %>% 
+  ggplot(aes(time, close, color = symbol)) +
+  geom_line()
+```
 
+---
 
+# Time-series
+
+```{r eval=FALSE}
+snp_df %>% 
+  ggplot(aes(time, close, color = symbol)) +
+  geom_line()
+```
+
+Yes, we see nothing because of the 500 labels in the legend...
+---
+
+# Time-series
+
+```{r}
+snp_df %>% 
+  ggplot(aes(time, close, color = symbol)) +
+  geom_line(show.legend = FALSE)
+```
+
+---
+
+# Correlation matrix
+
+---
+
+# CAPM
+
+$$r_{i, t} - r_{f, t} = \alpha_i + \beta_i(r_{m, t}-r_{f,t})+\varepsilon_{i, t}$$
+
+--
+
+What is the market return?
+
+Weighted index of the stocks. We worked with this data previously.
+
+```{r}
+snp_index <- read_csv("https://raw.githubusercontent.com/MarcellGranat/big_data2022/main/visualisation2_files/snp_index.csv")
+```
+
+---
+
+# CAPM
+
+RF rate
+
+[https://home.treasury.gov/resource-center/data-chart-center/interest-rates/TextView?type=daily_treasury_bill_rates&field_tdr_date_value=2022](https://home.treasury.gov/resource-center/data-chart-center/interest-rates/TextView?type=daily_treasury_bill_rates&field_tdr_date_value=2022)
+
+---
+
+# CAPM
+
+RF rate
+
+```{r}
+rf_df <- bind_rows(
+  read_csv("visualisation2_files/daily-treasury-rates.csv") %>% 
+    select(1, 6) %>% 
+    set_names("time", "rf") %>% 
+    mutate(
+      time = lubridate::mdy(time)
+    ),
+  read_csv("visualisation2_files/daily-treasury-rates-2.csv") %>% 
+    select(1, 6) %>% 
+    set_names("time", "rf") %>% 
+    mutate(
+      time = lubridate::mdy(time)
+    )
+) %>% 
+  arrange(time)
+```
+
+---
+
+# CAPM
+
+```{r}
+snp_ret_df <-   snp_df %>%
+  mutate(ret = close / lag(close) - 1) %>% 
+  select(symbol, time, ret)
+```
+
+```{r}
+sp_index_ret <- snp_index %>% 
+  mutate(m_ret = value / lag(value) - 1)
+```
+
+---
+
+# CAPM
+
+```{r}
+beta_df <- snp_ret_df %>% 
+  left_join(sp_index_ret) %>% 
+  left_join(rf_df) %>% 
+  mutate(rf = rf / 13 / 7) %>% 
+  mutate(
+    excess_ret = ret - rf,
+    mar_excess = m_ret - rf
+  ) %>% 
+  drop_na() %>% 
+  group_by(symbol) %>% 
+  nest() %>% 
+  mutate(
+    fit = map(data, lm, formula = excess_ret ~ m_ret),
+    beta = map(fit, coef),
+    beta = map_dbl(beta, 2)
+  ) %>% 
+  select(symbol, beta)
+```
+
+---
+
+# CAPM
+
+```{r}
+beta_df %>% 
+  left_join(tq_index("sp500")) %>% 
+  ungroup() %>% 
+  mutate(sector = fct_reorder(sector, beta)) %>% 
+  ggplot(aes(beta, sector)) +
+  geom_boxplot()
+```
+
+---
+
+# CAPM
+
+```{r}
+snp_ret_df %>% 
+  group_by(symbol) %>% 
+  summarise(
+    m = mean(ret)
+  ) %>% 
+  left_join(beta_df) %>% 
+  ggplot(aes(beta, m)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
 

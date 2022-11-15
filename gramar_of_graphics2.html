@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="" xml:lang="">
   <head>
-    <title>Grammar of Graphics</title>
+    <title>Grammar of Graphics II</title>
     <meta charset="utf-8" />
     <meta name="author" content="Marcell Granát" />
     <meta name="date" content="2022-01-01" />
@@ -18,7 +18,7 @@
 class: center, middle, title-slide
 
 .title[
-# Grammar of Graphics
+# Grammar of Graphics II
 ]
 .subtitle[
 ## <img src="mnb_intezet.png" style="width:30.0%" />
@@ -160,32 +160,90 @@ tickers
 
 #  Download the companies of S&amp;P 500
 
-Let's use the `{tidyquant}` package to download the data.
+--
+
+## What is in S&amp;P 500?
+
+One shortcut
 
 
 ```r
 library(tidyquant)
 
-getSymbols(tickers[1:6], from = '2021-11-14',
+tq_index("SP500")
+```
+
+```
+## # A tibble: 503 × 8
+##    symbol company      identifier sedol weight sector shares_held local_currency
+##    &lt;chr&gt;  &lt;chr&gt;        &lt;chr&gt;      &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;        &lt;dbl&gt; &lt;chr&gt;         
+##  1 AAPL   Apple Inc.   03783310   2046… 0.0674 Infor…   169742220 USD           
+##  2 MSFT   Microsoft C… 59491810   2588… 0.0549 Infor…    83799320 USD           
+##  3 AMZN   Amazon.com … 02313510   2000… 0.0266 Consu…    99611430 USD           
+##  4 GOOGL  Alphabet In… 02079K30   BYVY… 0.0172 Commu…    67388056 USD           
+##  5 BRK-B  Berkshire H… 08467070   2073… 0.0167 Finan…    20279520 USD           
+##  6 TSLA   Tesla Inc    88160R10   B616… 0.0156 Consu…    29934360 USD           
+##  7 GOOG   Alphabet In… 02079K10   BYY8… 0.0155 Commu…    60260212 USD           
+##  8 UNH    UnitedHealt… 91324P10   2917… 0.0146 Healt…    10512570 USD           
+##  9 XOM    Exxon Mobil… 30231G10   2326… 0.0142 Energy    46839410 USD           
+## 10 JNJ    Johnson &amp; J… 47816010   2475… 0.0133 Healt…    29548444 USD           
+## # … with 493 more rows
+```
+
+
+#  Download the companies of S&amp;P 500
+
+Let's use the `{tidyquant}` package to download the data.
+
+
+```r
+getSymbols(tq_index("SP500")$symbol[1:6], from = '2021-11-14',
            to = "2022-11-14", warnings = FALSE,
            auto.assign = TRUE)
 ```
 
 ```
-## Warning: BRK.B download failed; trying again.
+## [1] "AAPL"  "MSFT"  "AMZN"  "GOOGL" "BRK-B" "TSLA"
+```
+
+
+```r
+getSymbols("SP500", from = '2021-11-14',
+           to = "2022-11-14", warnings = FALSE,
+           auto.assign = TRUE)
 ```
 
 ```
-## Warning: Unable to import "BRK.B".
-## BRK.B download failed after two attempts. Error message:
+## Error in getSymbols.yahoo(Symbols = "SP500", env = &lt;environment&gt;, verbose = FALSE, : Unable to import "SP500".
+## SP500 download failed after two attempts. Error message:
 ## HTTP error 404.
 ```
 
-```
-## [1] "AAPL"  "MSFT"  "AMZN"  "GOOGL" "TSLA"
+
+```r
+tq_index("SP500")
 ```
 
+```
+## # A tibble: 503 × 8
+##    symbol company      identifier sedol weight sector shares_held local_currency
+##    &lt;chr&gt;  &lt;chr&gt;        &lt;chr&gt;      &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;        &lt;dbl&gt; &lt;chr&gt;         
+##  1 AAPL   Apple Inc.   03783310   2046… 0.0674 Infor…   169742220 USD           
+##  2 MSFT   Microsoft C… 59491810   2588… 0.0549 Infor…    83799320 USD           
+##  3 AMZN   Amazon.com … 02313510   2000… 0.0266 Consu…    99611430 USD           
+##  4 GOOGL  Alphabet In… 02079K30   BYVY… 0.0172 Commu…    67388056 USD           
+##  5 BRK-B  Berkshire H… 08467070   2073… 0.0167 Finan…    20279520 USD           
+##  6 TSLA   Tesla Inc    88160R10   B616… 0.0156 Consu…    29934360 USD           
+##  7 GOOG   Alphabet In… 02079K10   BYY8… 0.0155 Commu…    60260212 USD           
+##  8 UNH    UnitedHealt… 91324P10   2917… 0.0146 Healt…    10512570 USD           
+##  9 XOM    Exxon Mobil… 30231G10   2326… 0.0142 Energy    46839410 USD           
+## 10 JNJ    Johnson &amp; J… 47816010   2475… 0.0133 Healt…    29548444 USD           
+## # … with 493 more rows
+```
+
+
 --
+
 
 - This function creates a separate table for each of the stocks.
 
@@ -301,11 +359,220 @@ intersect(tickers, ls()) %&gt;%
 ## # … with 1,245 more rows
 ```
 
+---
+
+#  Download the companies of S&amp;P 500
 
 
+```r
+intersect(tickers, ls()) %&gt;% 
+  tibble(tickers = .) %&gt;% 
+  mutate(
+    data = map(tickers, get)
+  ) %&gt;% 
+  mutate(
+    data = map(data, data.frame),
+    data = map(data, function(x) rename_all(x, ~ gsub(".*[.]", "", .))),
+    data = map(data, rownames_to_column, var = "time")
+  ) %&gt;% 
+  unnest(data) %&gt;% 
+  mutate(time = as.Date(time))
+```
+
+```
+## # A tibble: 1,255 × 8
+##    tickers time        Open  High   Low Close    Volume Adjusted
+##    &lt;chr&gt;   &lt;date&gt;     &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+##  1 AAPL    2021-11-15  150.  152.  149.  150   59222800     149.
+##  2 AAPL    2021-11-16  150.  151.  149.  151   59256200     150.
+##  3 AAPL    2021-11-17  151   155   151.  153.  88807000     153.
+##  4 AAPL    2021-11-18  154.  159.  153.  158. 137827700     157.
+##  5 AAPL    2021-11-19  158.  161.  157.  161. 117305600     160.
+##  6 AAPL    2021-11-22  162.  166.  161   161. 117467900     160.
+##  7 AAPL    2021-11-23  161.  162.  159.  161.  96041900     160.
+##  8 AAPL    2021-11-24  161.  162.  160.  162.  69463600     161.
+##  9 AAPL    2021-11-26  160.  160.  156.  157.  76959800     156.
+## 10 AAPL    2021-11-29  159.  161.  159.  160.  88748200     159.
+## # … with 1,245 more rows
+```
+
+For the total dataset, remove the `[1:6]` term in the `getSymbols()` function and repeat.
+
+Now, just load the prepared data:
 
 
+```r
+snp_df &lt;- read_csv("https://raw.githubusercontent.com/MarcellGranat/big_data2022/main/visualisation2_files/snp.csv")
+```
 
+---
+
+# Time-series
+
+
+```r
+snp_df %&gt;% 
+  ggplot(aes(time, close, color = symbol)) +
+  geom_line()
+```
+
+&lt;img src="gramar_of_graphics2_files/figure-html/unnamed-chunk-13-1.png" width="700px" height="450px" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Time-series
+
+
+```r
+snp_df %&gt;% 
+  ggplot(aes(time, close, color = symbol)) +
+  geom_line()
+```
+
+Yes, we see nothing because of the 500 labels in the legend...
+---
+
+# Time-series
+
+
+```r
+snp_df %&gt;% 
+  ggplot(aes(time, close, color = symbol)) +
+  geom_line(show.legend = FALSE)
+```
+
+&lt;img src="gramar_of_graphics2_files/figure-html/unnamed-chunk-15-1.png" width="700px" height="450px" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Correlation matrix
+
+---
+
+# CAPM
+
+`$$r_{i, t} - r_{f, t} = \alpha_i + \beta_i(r_{m, t}-r_{f,t})+\varepsilon_{i, t}$$`
+
+--
+
+What is the market return?
+
+Weighted index of the stocks. We worked with this data previously.
+
+
+```r
+snp_index &lt;- read_csv("https://raw.githubusercontent.com/MarcellGranat/big_data2022/main/visualisation2_files/snp_index.csv")
+```
+
+---
+
+# CAPM
+
+RF rate
+
+[https://home.treasury.gov/resource-center/data-chart-center/interest-rates/TextView?type=daily_treasury_bill_rates&amp;field_tdr_date_value=2022](https://home.treasury.gov/resource-center/data-chart-center/interest-rates/TextView?type=daily_treasury_bill_rates&amp;field_tdr_date_value=2022)
+
+---
+
+# CAPM
+
+RF rate
+
+
+```r
+rf_df &lt;- bind_rows(
+  read_csv("visualisation2_files/daily-treasury-rates.csv") %&gt;% 
+    select(1, 6) %&gt;% 
+    set_names("time", "rf") %&gt;% 
+    mutate(
+      time = lubridate::mdy(time)
+    ),
+  read_csv("visualisation2_files/daily-treasury-rates-2.csv") %&gt;% 
+    select(1, 6) %&gt;% 
+    set_names("time", "rf") %&gt;% 
+    mutate(
+      time = lubridate::mdy(time)
+    )
+) %&gt;% 
+  arrange(time)
+```
+
+---
+
+# CAPM
+
+
+```r
+snp_ret_df &lt;-   snp_df %&gt;%
+  mutate(ret = close / lag(close) - 1) %&gt;% 
+  select(symbol, time, ret)
+```
+
+
+```r
+sp_index_ret &lt;- snp_index %&gt;% 
+  mutate(m_ret = value / lag(value) - 1)
+```
+
+---
+
+# CAPM
+
+
+```r
+beta_df &lt;- snp_ret_df %&gt;% 
+  left_join(sp_index_ret) %&gt;% 
+  left_join(rf_df) %&gt;% 
+  mutate(rf = rf / 13 / 7) %&gt;% 
+  mutate(
+    excess_ret = ret - rf,
+    mar_excess = m_ret - rf
+  ) %&gt;% 
+  drop_na() %&gt;% 
+  group_by(symbol) %&gt;% 
+  nest() %&gt;% 
+  mutate(
+    fit = map(data, lm, formula = excess_ret ~ m_ret),
+    beta = map(fit, coef),
+    beta = map_dbl(beta, 2)
+  ) %&gt;% 
+  select(symbol, beta)
+```
+
+---
+
+# CAPM
+
+
+```r
+beta_df %&gt;% 
+  left_join(tq_index("sp500")) %&gt;% 
+  ungroup() %&gt;% 
+  mutate(sector = fct_reorder(sector, beta)) %&gt;% 
+  ggplot(aes(beta, sector)) +
+  geom_boxplot()
+```
+
+&lt;img src="gramar_of_graphics2_files/figure-html/unnamed-chunk-21-1.png" width="700px" height="450px" style="display: block; margin: auto;" /&gt;
+
+---
+
+# CAPM
+
+
+```r
+snp_ret_df %&gt;% 
+  group_by(symbol) %&gt;% 
+  summarise(
+    m = mean(ret)
+  ) %&gt;% 
+  left_join(beta_df) %&gt;% 
+  ggplot(aes(beta, m)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+&lt;img src="gramar_of_graphics2_files/figure-html/unnamed-chunk-22-1.png" width="700px" height="450px" style="display: block; margin: auto;" /&gt;
 
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
