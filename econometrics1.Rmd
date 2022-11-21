@@ -796,6 +796,8 @@ $$\text{Total effect} = \text{direct effect} + \text{indirect effect}$$
 $$213895 = 29.2 \times 9057 - 51009$$
 ]
 
+#### Path analysis
+
 1. .blue[Total effect: ]If we want to buy a house with one additional room, it is expected to cost 213,895 euros more.
 
 2. .blue[Indirect effect: ]A house with 1 additional room would be expected to be 29.2 square meters larger, and the average price per square meter is 9,057 euros.

@@ -275,9 +275,9 @@ include_graphics("introduction-to-r_files/meme-help.jpg")
 
 ##  Files
 
-You can see the list of your files which are in the current working directory. Working directory is the folder, from where R want currently read the files. If you want to import a dataset, just click on a file on this pane.
+You can see the list of your files which are in the current working directory. Working directory is the folder, from where R reads the files currently. If you want to import a dataset, just click on a file on this pane.
 
-I highly recommend you to set a project folder for the class and any later job. This means that, R creates a folder and puts an `.Rproj` file into it. You can always click on this  `.Rproj` file to return your unfinished work. You can customise if R should put the variables into your environtent as you left them last time, you have a history about the used codes, and you see all the data you copy + paste into this folder.
+I highly recommend you to set a project folder for the class and any later job. This means that, R creates a folder and puts an `.Rproj` file into it. You can always click on this  `.Rproj` file to return your unfinished work. You can customise if R should put the variables into your environment as you left them last time, you have a history about the used codes, and you see all the data you copy + paste into this folder.
 
 ---
 
@@ -316,7 +316,7 @@ So, what is the type of `x`? We can use the `class` command to answer this.
 class(x)
 ```
 
-Its numeric. This means that you can use `+`, `-`, `*` operators on it. (Integer and double also exist in R, but these are not the default, and variables will be always coerced automatically.)
+It's numeric. This means that you can use `+`, `-`, `*` operators on it. (Integer and double also exist in R, but these are not the default, and variables will be always coerced automatically.)
 
 ---
 
@@ -327,7 +327,7 @@ y <- "blue"
 class(y)
 ```
 
-Its a character, basically can contain any kind of letter, digits, or white space.
+It's a character, basically can contain any kind of letter, digits, or white space.
 
 ## Logical
 
@@ -336,7 +336,7 @@ does_it_rain <- TRUE
 class(does_it_rain)
 ```
 
-Its a logical value. It can be `TRUE` or `FALSE`
+It's a logical value. It can be `TRUE` or `FALSE`
 
 ---
 
@@ -448,7 +448,7 @@ avengers_df
 
 # List
 
-Storing more complex data, you can use the `list`. To use `data.frame` you need vectors with equal length. If this does not hold, or a more frequent case, you want to store a collection of data.frames, then `list` is a perfect solution! It is not a rare issue*, big panel dataset are usually stored in separated files (a different file to each year, like: `cis_survey2016.csv`, `cis_survey2017.csv`). In this situations its suggested to store your data in a list.
+Storing more complex data, you can use the `list`. To use `data.frame` you need vectors with equal length. If this does not hold, or a more frequent case, you want to store a collection of data.frames, then `list` is a perfect solution! It is not a rare issue*, big panel dataset are usually stored in separated files (a different file to each year, like: `cis_survey2016.csv`, `cis_survey2017.csv`). In this situations I suggest to store your data in a list.
 
 ```{r echo = TRUE}
 mylist <- list(avengers_df, my_vector, x)

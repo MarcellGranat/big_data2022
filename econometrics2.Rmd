@@ -504,6 +504,8 @@ fit <- lm(data = density_df, formula = pop_density ~ dist_from_cent)
 lmtest::gqtest(fit, order.by = ~ pop_density, fraction = 13, data = density_df)
 ```
 
+.content-box-red[The disadvantage of this procedure is that by omitting the middle section, we lose information and we test the existence of heteroskedasticity against only one variable at a time.]
+
 ---
 
 ## How to detect it? - Breusch-Pagan Test
@@ -530,6 +532,18 @@ lmtest::bptest(fit) # default: the same covariates
 
 ---
 
+## How to detect it? - Breusch-Pagan Test
+
+#### Take the residuals from the estimated model and build an auxiliary regression on the squared errors.
+
+$$\epsilon_i^2=\alpha_1+\alpha_2 Z_{i 2}+\alpha_3 Z_{i 3}+\cdots+\alpha_p Z_{i p}$$
+
+.content-box-red[This test require large sample and it is proved that its result is sensitive to the normality of the residual.]
+
+.footnote[Ramanathan, 1992]
+
+---
+
 ## How to detect it? - White Test
 
 #### Take the residuals from the estimated models and build an auxiliary regression on the squared errors.
@@ -551,6 +565,16 @@ $$\text{p-value}=P(\chi^2_{p-1}>\text{LM})$$
 ```{r echo=TRUE}
 whitestrap::white_test(fit)
 ```
+
+---
+
+## How to detect it? - White Test
+
+#### Take the residuals from the estimated models and build an auxiliary regression on the squared errors.
+
+$$\epsilon_i^2=\alpha_1+\alpha_2 X_{i 2}+\alpha_3 X_{i 3}+\alpha_4 X_{i 2}^2+\alpha_5 X_{i 3}^2+\alpha_6 X_{i 2} X_{i 3}$$
+
+.content-box-green[This test also requires large sample, but it is not sensitive to normality. Also, you do not need prior expectation for the test (test against all the covariates).]
 
 ---
 

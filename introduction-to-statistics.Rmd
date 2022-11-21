@@ -331,7 +331,7 @@ What was the total growth in the 3 years?
 $$1.05 \times 1.05 \times 1.10 = 1.21$$
 However, the arithmetic mean equals 20/3.
 
-**Use geometric mean if you are working with indexes!**
+**Use geometric mean if you are working with growth indeces!**
 
 ---
 

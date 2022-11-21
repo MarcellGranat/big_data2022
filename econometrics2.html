@@ -386,6 +386,8 @@ lmtest::gqtest(fit, order.by = ~ pop_density, fraction = 13, data = density_df)
 ## alternative hypothesis: variance increases from segment 1 to 2
 ```
 
+.content-box-red[The disadvantage of this procedure is that by omitting the middle section, we lose information and we test the existence of heteroskedasticity against only one variable at a time.]
+
 ---
 
 ## How to detect it? - Breusch-Pagan Test
@@ -421,6 +423,18 @@ lmtest::bptest(fit) # default: the same covariates
 
 ---
 
+## How to detect it? - Breusch-Pagan Test
+
+#### Take the residuals from the estimated model and build an auxiliary regression on the squared errors.
+
+`$$\epsilon_i^2=\alpha_1+\alpha_2 Z_{i 2}+\alpha_3 Z_{i 3}+\cdots+\alpha_p Z_{i p}$$`
+
+.content-box-red[This test require large sample and it is proved that its result is sensitive to the normality of the residual.]
+
+.footnote[Ramanathan, 1992]
+
+---
+
 ## How to detect it? - White Test
 
 #### Take the residuals from the estimated models and build an auxiliary regression on the squared errors.
@@ -452,6 +466,16 @@ whitestrap::white_test(fit)
 ## Test Statistic: 6.07
 ## P-value: 0.048159
 ```
+
+---
+
+## How to detect it? - White Test
+
+#### Take the residuals from the estimated models and build an auxiliary regression on the squared errors.
+
+`$$\epsilon_i^2=\alpha_1+\alpha_2 X_{i 2}+\alpha_3 X_{i 3}+\alpha_4 X_{i 2}^2+\alpha_5 X_{i 3}^2+\alpha_6 X_{i 2} X_{i 3}$$`
+
+.content-box-green[This test also requires large sample, but it is not sensitive to normality. Also, you do not need prior expectation for the test (test against all the covariates).]
 
 ---
 
@@ -913,9 +937,47 @@ class: inverse, middle, center
 | log-lin |  `\(lnY=\beta_0+\beta_1X\)`  | 1 unit increase in X causes 100 `\(\beta_1\)` % change in Y |
 | log-log | `\(lnY=\beta_0+\beta_1lnX\)` | 1 % increase in X causes `\(\beta_1\)` % change in Y |
 
+#### How to choose?
+
+1. The interpretation is different!
+
+2. Logarithm often useful for financial/consumption data
+
+3. Does it increase the R-squared? (never compare the R-squared from the model, if the depedent variable is different)
+
 ???
 
 Source: Ramanathan
+
+
+---
+
+# References
+
+&lt;p&gt;&lt;cite&gt;Maddala, G. S.
+(1992).
+&lt;em&gt;Introduction to economics&lt;/em&gt;.
+Macmillan.&lt;/cite&gt;&lt;/p&gt;
+&lt;p&gt;&lt;cite&gt;Kahneman, D.
+(2011).
+&lt;em&gt;Thinking, fast and slow&lt;/em&gt;.
+Macmillan.&lt;/cite&gt;&lt;/p&gt;
+&lt;p&gt;&lt;cite&gt;Ramanathan, R.
+(1992).
+&lt;em&gt;Introductory econometrics with applications&lt;/em&gt;.
+Dryden Press.&lt;/cite&gt;&lt;/p&gt;
+&lt;p&gt;&lt;cite&gt;Estrella, A. and F. S. Mishkin
+(1996).
+&amp;ldquo;The yield curve as a predictor of US recessions&amp;rdquo;.
+In: &lt;em&gt;Current issues in economics and finance&lt;/em&gt; 2.7.&lt;/cite&gt;&lt;/p&gt;
+
+---
+
+class: center, middle
+
+# Thank you for your attention!
+
+Slides are available at [www.marcellgranat.com](https://www.marcellgranat.com)
 
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
